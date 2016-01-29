@@ -1,0 +1,33 @@
+Name:           nethserver-sssd
+Version:        0.0.0
+Release:        1%{?dist}
+Summary:        NethServer SSSD configuration
+
+License:        GPLv3+
+URL: %{url_prefix}/%{name}
+Source0:        %{name}-%{version}.tar.gz
+BuildArch:      noarch
+BuildRequires:  nethserver-devtools
+Requires:       realmd, sssd, adcli, nethserver-lib
+
+%description
+NethServer SSSD configuration
+
+%prep
+%setup
+
+%build
+%{makedocs}
+perl createlinks
+
+%install
+(cd root   ; find . -depth -print | cpio -dump %{buildroot})
+%{genfilelist} %{buildroot} > %{name}-%{version}-filelist
+
+%files -f %{name}-%{version}-filelist
+%doc COPYING
+# %dir %{_nseventsdir}/%{name}-update
+
+%changelog
+* Fri Jan 29 2016 Davide Principi <davide.principi@nethesis.it>
+- Initial version
