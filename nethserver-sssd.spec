@@ -17,6 +17,8 @@ NethServer SSSD configuration
 %setup
 
 %build
+%{__install} -d root%{perl_vendorlib} 
+cp -av lib/perl/NethServer root%{perl_vendorlib}
 %{makedocs}
 perl createlinks
 
