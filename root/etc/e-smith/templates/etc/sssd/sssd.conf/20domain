@@ -1,0 +1,25 @@
+[domain/{{$domain}}]
+enumerate = True
+cache_credentials = True
+default_shell = /bin/bash
+use_fully_qualified_names = True
+{
+    $OUT .= "id_provider = $provider\n";
+
+    if ($provider eq 'ldap') {
+        $OUT .= "auth_provider = ldap\n";
+        $OUT .= "ldap_uri = ".$sssd{'LdapUri'}."\n";
+        $OUT .= "ldap_schema = rfc2307\n";
+        $OUT .= "ldap_search_base = $suffix\n";
+        $OUT .= "ldap_tls_reqcert = never\n";
+        $OUT .= "ldap_id_use_start_tls = true\n";
+    } elsif ($provider eq 'ad') {
+        $OUT .= "access_provider = ad\n";
+        $OUT .= "ad_domain = $domain\n";
+        $OUT .= "krb5_realm = ".uc($domain)."\n";
+        $OUT .= "realmd_tags = manages-system joined-with-samba\n";
+        $OUT .= "krb5_store_password_if_offline = True\n";
+        $OUT .= "ldap_id_mapping = True\n";
+    }
+}
+

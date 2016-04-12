@@ -23,3 +23,16 @@
 use strict;
 use esmith::Build::CreateLinks  qw(:all);
 
+#--------------------------------------------------
+# actions for nethserver-sssd-update event
+#--------------------------------------------------
+
+my $event = "nethserver-sssd-update";
+
+event_actions('nethserver-sssd-update', qw(
+              initialize-default-databases   00
+));
+event_services($event, 'sssd' => 'restart');
+templates2events("/etc/sssd/sssd.conf",  $event);
+
+
