@@ -1,0 +1,46 @@
+# SOME DESCRIPTIVE TITLE.
+# This file is put in the public domain.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: nethserver-directory 2.2.1-2-g7318ea4\n"
+"Report-Msgid-Bugs-To: translations@nethserver.org\n"
+"POT-Creation-Date: 2015-05-19 16:55+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: root/etc/e-smith/templates/password-expired/en/10mail_headers:3
+#, perl-format
+msgid "%s, your password is about to expire"
+msgstr ""
+
+#: root/etc/e-smith/templates/password-expired/en/20body:1
+#, perl-format
+msgid ""
+"You have one day left to change your password before your account will be "
+"blocked."
+msgid_plural ""
+"You have %s days left to change your password before your account will be "
+"blocked."
+msgstr[0] ""
+msgstr[1] ""
+
+#: root/etc/e-smith/templates/password-expired/en/20body:3
+msgid "Available methods to change your password:"
+msgstr ""
+
+#: root/etc/e-smith/templates/password-expired/en/30_accesswebui:1
+msgid "Access the web interface"
+msgstr ""
+
+#: root/etc/e-smith/templates/password-expired/en/template-end:3
+msgid "This message has been generated automatically, do not respond to it."
+msgstr ""
