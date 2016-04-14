@@ -30,7 +30,7 @@ perl createlinks
 
 %files -f %{name}-%{version}-filelist
 %doc COPYING
-# %dir %{_nseventsdir}/%{name}-update
+%dir %{_nseventsdir}/%{name}-update
 
 %changelog
 * Fri Jan 29 2016 Davide Principi <davide.principi@nethesis.it>

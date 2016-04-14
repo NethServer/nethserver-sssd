@@ -31,6 +31,7 @@ my $event = "nethserver-sssd-update";
 
 event_actions('nethserver-sssd-update', qw(
               initialize-default-databases   00
+              nethserver-sssd-conf           20
 ));
 event_services($event, 'sssd' => 'restart');
 templates2events("/etc/sssd/sssd.conf",  $event);
