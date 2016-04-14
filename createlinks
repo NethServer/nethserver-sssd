@@ -36,3 +36,13 @@ event_services($event, 'sssd' => 'restart');
 templates2events("/etc/sssd/sssd.conf",  $event);
 
 
+#--------------------------------------------------
+# password-expired event
+#--------------------------------------------------
+event_actions('password-expired', qw(
+    nethserver-sssd-mail-password-expired 40
+));
+
+# Add warnpassexpire script in cron.daily jobs list -- Refs #1073
+safe_symlink('/sbin/e-smith/warnpassexpire', 'root/etc/cron.daily/warnpassexpire');
+
