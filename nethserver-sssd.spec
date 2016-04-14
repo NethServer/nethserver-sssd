@@ -9,6 +9,8 @@ Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  nethserver-devtools
 Requires:       realmd, sssd, adcli, nethserver-lib
+# send expiring password warnings: 
+Requires: mailx, postfix, anacron
 
 %description
 NethServer SSSD configuration
