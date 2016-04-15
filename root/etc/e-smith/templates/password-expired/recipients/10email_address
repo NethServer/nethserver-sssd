@@ -1,0 +1,6 @@
+{
+    # 
+    # 10email_address
+    #
+    $userRecord->prop('EmailAddress') ? $userRecord->prop('EmailAddress') : '';
+}

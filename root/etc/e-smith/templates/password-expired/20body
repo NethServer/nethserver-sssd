@@ -1,0 +1,4 @@
+{ sprintf(ngettext("You have one day left to change your password before your account will be blocked.",  "You have %s days left to change your password before your account will be blocked.", $daysLeft), $daysLeft); }
+
+{ gettext("Available methods to change your password:"); }
+

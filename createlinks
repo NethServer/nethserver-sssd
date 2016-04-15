@@ -31,8 +31,42 @@ my $event = "nethserver-sssd-update";
 
 event_actions('nethserver-sssd-update', qw(
               initialize-default-databases   00
+              nethserver-sssd-conf           20
 ));
 event_services($event, 'sssd' => 'restart');
 templates2events("/etc/sssd/sssd.conf",  $event);
 
+# actions for user-create validator
+validator_actions('user-create', qw(
+                  uniq-account 20
+                  user-length 30
+                  max-users 90
+));
+
+# actions for user-delete validator
+validator_actions('user-delete', qw(
+    account-removable 20
+));
+
+# actions for group-create validator
+validator_actions('group-create', qw(
+                  uniq-account 20
+                  group-length 30
+                  reserved-group 40
+));
+
+# actions for group-delete validator
+validator_actions('group-delete', qw(
+    account-removable 20
+));
+
+#--------------------------------------------------
+# password-expired event
+#--------------------------------------------------
+event_actions('password-expired', qw(
+    nethserver-sssd-mail-password-expired 40
+));
+
+# Add warnpassexpire script in cron.daily jobs list -- Refs #1073
+safe_symlink('/sbin/e-smith/warnpassexpire', 'root/etc/cron.daily/warnpassexpire');
 
