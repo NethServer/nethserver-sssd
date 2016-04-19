@@ -158,7 +158,7 @@ otherwise a base DN calculated from the server domain.
 
 sub baseDN {
     my $self = shift;
-    return $self->{'BaseDN'} if (defined $self->{'BaseDN'});
+    return $self->{'BaseDN'} if (defined $self->{'BaseDN'} && $self->{'BaseDN'});
 
     return __domain2suffix();
 }
@@ -173,7 +173,7 @@ otherwise a bind DN calculated from the server domain.
 sub bindDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'BindDN'} if (defined $self->{'BindDN'});
+    return $self->{'BindDN'} if (defined $self->{'BindDN'} && $self->{'BindDN'});
 
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
@@ -184,7 +184,7 @@ sub bindDN {
     if ($self->isLdap()) {
         return "cn=libuser,$suffix";
     } else {
-        return "cn=Administrator,$suffix";
+        return "cn=Administrator,cn=Users,$suffix";
     }
 }
 
@@ -198,7 +198,7 @@ otherwise a user DN calculated from the server domain.
 sub userDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'UserDN'} if (defined $self->{'UserDN'});
+    return $self->{'UserDN'} if (defined $self->{'UserDN'} && $self->{'UserDN'});
 
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
@@ -223,7 +223,7 @@ otherwise a group DN calculated from the server domain.
 sub groupDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'UserDN'} if (defined $self->{'UserDN'});
+    return $self->{'UserDN'} if (defined $self->{'UserDN'} && $self->{'UserDN'});
 
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
@@ -236,6 +236,21 @@ sub groupDN {
     } else {
         return $suffix;
     }
+}
+
+
+=head2 bindPassword
+
+Return LDAP bind password UserDN if set,
+an empty string otherwise.
+
+=cut
+
+sub bindPassword {
+    my $self = shift;
+    return $self->{'BindPassword'} if (defined $self->{'BindPassword'});
+
+    return '';
 }
 
 
