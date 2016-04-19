@@ -24,6 +24,7 @@ use strict;
 use esmith::ConfigDB;
 use Net::LDAP;
 use Net::DNS::Resolver;
+use NethServer::Password;
 use Carp;
 
 sub __domain2suffix {
@@ -248,7 +249,11 @@ an empty string otherwise.
 
 sub bindPassword {
     my $self = shift;
-    return $self->{'BindPassword'} if (defined $self->{'BindPassword'});
+    return $self->{'BindPassword'} if (defined $self->{'BindPassword'} && $self->{'BindPassword'});
+
+    if ($self->isLdap() && $self->host() eq 'localhost') {
+        return NethServer::Password::store('libuser');
+    }
 
     return '';
 }
