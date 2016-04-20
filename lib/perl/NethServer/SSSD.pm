@@ -259,6 +259,27 @@ sub bindPassword {
 }
 
 
+=head2 bindUser
+
+Return LDAP bind user BindUser if set,
+"libuser" if ldap is local, "Administrator" if is AD
+
+=cut
+
+sub bindUser {
+    my $self = shift;
+    return $self->{'BindUser'} if (defined $self->{'BindUser'} && $self->{'BindUser'});
+
+    if ($self->isLdap() && $self->host() eq 'localhost') {
+        return 'libuser';
+    } elsif ($self->isAD()) {
+        return 'Administrator';
+    }
+
+    return '';
+}
+
+
 =head2 new
 
 Create a NethServer::SSSD instance.
