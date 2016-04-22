@@ -11,6 +11,7 @@ BuildRequires:  nethserver-devtools
 Requires:       realmd, sssd, adcli, nethserver-lib
 # send expiring password warnings: 
 Requires: mailx, postfix, anacron
+Requires:  samba-common-tools
 
 %description
 NethServer SSSD configuration
