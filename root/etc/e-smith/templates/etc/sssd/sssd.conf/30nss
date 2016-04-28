@@ -1,2 +1,1 @@
 [nss]
-override_homedir = /home/%u@%d
