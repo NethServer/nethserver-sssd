@@ -70,3 +70,20 @@ event_actions('password-expired', qw(
 # Add warnpassexpire script in cron.daily jobs list -- Refs #1073
 safe_symlink('/sbin/e-smith/warnpassexpire', 'root/etc/cron.daily/warnpassexpire');
 
+
+#------------------------------------------------------
+# Clear SSSD cache at the end of all user/group events
+#------------------------------------------------------
+
+event_actions($_, qw(
+    nethserver-sssd-clear-cache     90
+)) foreach(qw(
+    user-create
+    user-modify
+    user-delete
+    user-lock
+    user-unlock
+    group-create
+    group-modify
+    group-delete
+));
