@@ -87,3 +87,12 @@ event_actions($_, qw(
     group-modify
     group-delete
 ));
+
+#--------------------------------------------------------
+# Clear SSSD before password-policy-update extra actions
+#--------------------------------------------------------
+
+event_actions('password-policy-update', qw(
+    nethserver-sssd-clear-cache 10
+));
+
