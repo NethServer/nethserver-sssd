@@ -34,7 +34,10 @@ event_actions('nethserver-sssd-update', qw(
               nethserver-sssd-conf           20
 ));
 event_services($event, 'sssd' => 'restart');
-templates2events("/etc/sssd/sssd.conf",  $event);
+event_templates($event, qw(
+    /etc/sssd/sssd.conf
+    /etc/samba/smb.conf
+));
 
 # actions for user-create validator
 validator_actions('user-create', qw(
