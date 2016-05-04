@@ -1,5 +1,5 @@
 [sssd]
-domains = {{$domain}}
+domains = {{$DomainName}}
 config_file_version = 2
 services = nss, pam
 

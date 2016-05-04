@@ -1,7 +1,5 @@
 {
-    our $domain = `hostname -d`;
-    chomp $domain;
-    our $suffix = $domain;
+    our $suffix = $DomainName;
     $suffix =~ s/\./,dc=/g;
     $suffix = "dc=" . $suffix;
     our $provider = $sssd{'Provider'} || 'ldap';
