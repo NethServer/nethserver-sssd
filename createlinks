@@ -33,10 +33,26 @@ event_actions('nethserver-sssd-update', qw(
               initialize-default-databases   00
               nethserver-sssd-conf           20
 ));
-event_services($event, 'sssd' => 'restart');
-event_templates($event, qw(
+event_services('nethserver-sssd-update', qw(
+    sssd restart
+));
+event_templates('nethserver-sssd-update', qw(
     /etc/sssd/sssd.conf
     /etc/samba/smb.conf
+));
+
+#
+# event nethserver-sssd-save
+#
+event_templates('nethserver-sssd-save', qw(
+    /etc/sssd/sssd.conf
+    /etc/samba/smb.conf
+));
+event_actions('nethserver-sssd-save', qw(
+
+));
+event_services('nethserver-sssd-save', qw(
+    sssd restart
 ));
 
 # actions for user-create validator
