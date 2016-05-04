@@ -27,6 +27,7 @@ use Nethgui\Controller\Table\Modify as Table;
  * User modify actions
  *
  * @author Davide Principi <davide.principi@nethesis.it>
+ * @author Stephane de Labrusse <stephdl@de-labrusse.fr> 
  * @since 1.0
  */
 class Modify extends \Nethgui\Controller\Table\Modify
@@ -52,13 +53,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $parameterSchema = array(
             array('username', $userNameValidator, Table::KEY),
-            array('FirstName', Validate::NOTEMPTY, Table::FIELD),
-            array('LastName', Validate::NOTEMPTY, Table::FIELD),
-            array('Company', Validate::ANYTHING, Table::FIELD),
-            array('Department', Validate::ANYTHING, Table::FIELD),
-            array('Street', Validate::ANYTHING, Table::FIELD),
-            array('City', Validate::ANYTHING, Table::FIELD),
-            array('PhoneNumber', Validate::ANYTHING, Table::FIELD),
+            array('FullName', Validate::NOTEMPTY, Table::FIELD),
+            array('PassExpires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD)
         );
 
         $this->setSchema($parameterSchema);
@@ -116,7 +112,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
         } else {
             $event = $this->getIdentifier();
         }
-        $this->getPlatform()->signalEvent(sprintf('user-%s@post-process', $event), array($this->parameters['username']));
+        $this->getPlatform()->signalEvent(sprintf('user-%s', $event), array($this->parameters['username'],$this->parameters['FullName']));
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)

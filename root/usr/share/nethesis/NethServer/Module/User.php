@@ -21,13 +21,11 @@ namespace NethServer\Module;
  */
 
 /**
- * @todo describe class
+ * Handle user list
  * 
- * @link http://redmine.nethesis.it/issues/185
  */
 class User extends \Nethgui\Controller\TableController
 {
-    private $expired = array();
 
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
@@ -36,36 +34,28 @@ class User extends \Nethgui\Controller\TableController
 
     public function initialize()
     {
-        $columns = array(
-            'Key',
-            'FirstName',
-            'LastName',
-            'Actions',
-        );
+        $adapter = new \NethServer\Module\User\UsersAdapter($this->getPlatform());
 
         $this
-            ->setTableAdapter($this->getPlatform()->getTableAdapter('accounts', 'user'))
-            ->setColumns($columns)
-            ->addTableActionPluggable(new User\Modify('create'))
+            ->setTableAdapter($adapter)
+            ->setColumns($adapter->getColumns())
+            ->addTableAction(new User\Modify('create'))
             ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
-            ->addRowActionPluggable(new User\Modify('update'))
+            ->addRowAction(new User\Modify('update'))
             ->addRowAction(new User\ChangePassword())
             ->addRowAction(new User\ToggleLock('lock'))
             ->addRowAction(new User\ToggleLock('unlock'))
             ->addRowAction(new User\Modify('delete'))
         ;
-        $this->expired = json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/password-expiration')->getOutput());
 
         parent::initialize();
     }
 
     public function prepareViewForColumnKey(\Nethgui\Controller\Table\Read $action, \Nethgui\View\ViewInterface $view, $key, $values, &$rowMetadata)
     {
-        $userState = isset($values['__state']) ? strtolower($values['__state']) : 'new';
-        if ($this->expired->$key == 1) {
-            $userState = 'new';
+        if ($values['new'] || $values['expired']) {
+            $rowMetadata['rowCssClass'] = trim($rowMetadata['rowCssClass'] . ' user-new');
         }
-        $rowMetadata['rowCssClass'] = trim($rowMetadata['rowCssClass'] . ' user-' . $userState);
         return strval($key);
     }
 
@@ -82,21 +72,20 @@ class User extends \Nethgui\Controller\TableController
 
         $killList = array();
 
-        $state = isset($values['__state']) ? $values['__state'] : 'new';
-
-        switch ($state) {
-            case 'new':
+        # Users are from remote source, do not display any action
+        if (!isset($values['new']) && !isset($values['new']) && !isset($values['new'])) {
+            return null;
+        }
+    
+        if ($values['new'] || $values['expired']) {
+            $killList[] = 'lock';
+            $killList[] = 'unlock';
+        } else {
+            if ($values['locked']) {
                 $killList[] = 'lock';
+            } else {
                 $killList[] = 'unlock';
-                break;
-            case 'active';
-                $killList[] = 'unlock';
-                break;
-            case 'locked';
-                $killList[] = 'lock';
-                break;
-            default:
-                break;
+            }
         }
 
         foreach (array_keys(iterator_to_array($cellView)) as $key) {
@@ -105,11 +94,17 @@ class User extends \Nethgui\Controller\TableController
             }
         }
 
-        if (isset($values['Removable']) && $values['Removable'] === 'no') {
-            unset($cellView['delete']);
-        }
-        
         return $cellView;
     }
 
+    public function process()
+    {
+        if ($this->getRequest()->isMutation()) {
+            $keyValue = $this->parameters['Id'];
+            //TODO: execute command
+            $this->getAdapter()->flush();
+        } else {
+            parent::process();
+        }
+    }
 }
