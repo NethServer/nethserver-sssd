@@ -8,7 +8,7 @@ use_fully_qualified_names = True
 
     if ($provider eq 'ldap') {
         $OUT .= "auth_provider = ldap\n";
-        $OUT .= "ldap_uri = ".$sssd{'LdapUri'}."\n";
+        $OUT .= "ldap_uri = ".$sssd{'LdapURI'}."\n";
         $OUT .= "ldap_schema = rfc2307\n";
         $OUT .= "ldap_search_base = $suffix\n";
         $OUT .= "ldap_tls_reqcert = never\n";
