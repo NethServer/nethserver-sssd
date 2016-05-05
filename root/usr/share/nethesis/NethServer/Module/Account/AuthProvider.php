@@ -1,6 +1,6 @@
 <?php
 
-namespace NethServer\Module;
+namespace NethServer\Module\Account;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -24,18 +24,12 @@ namespace NethServer\Module;
  *
  * @author Davide Principi <davide.principi@nethesis.it>
  */
-class AuthProvider extends \Nethgui\Controller\TabsController
+class AuthProvider extends \Nethgui\Controller\CompositeController
 {
-
-    protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
-    {
-        return \Nethgui\Module\SimpleModuleAttributesProvider::extendModuleAttributes($base, 'Configuration', 0);
-    }
-
     public function initialize()
     {
         parent::initialize();
-        $this->addChild(new \NethServer\Module\AuthProvider\Select());
-        $this->loadChildrenDirectory($this, 'AuthProvider/Backends');
+        $this->addChild(new \NethServer\Module\Account\AuthProvider\Index());
+        $this->addChild(new \NethServer\Module\Account\AuthProvider\Authenticate());
     }
 }

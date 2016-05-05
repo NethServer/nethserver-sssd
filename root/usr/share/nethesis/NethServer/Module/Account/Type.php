@@ -1,6 +1,6 @@
 <?php
 
-namespace NethServer\Module\AuthProvider;
+namespace NethServer\Module\Account;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -20,11 +20,17 @@ namespace NethServer\Module\AuthProvider;
  */
 
 /**
- * Choose one account provider
+ * Description of Type
  *
  * @author Davide Principi <davide.principi@nethesis.it>
  */
-class Select extends \Nethgui\Controller\AbstractController
+class Type extends \Nethgui\Controller\TabsController
 {
-    //put your code here
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadChildrenDirectory();
+    }
+
 }
