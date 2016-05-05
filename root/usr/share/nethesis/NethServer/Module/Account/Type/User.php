@@ -29,7 +29,7 @@ class User extends \Nethgui\Controller\TableController
 
     public function initialize()
     {
-        $adapter = new User\UsersAdapter($this->getPlatform());
+        $adapter = new User\UserAdapter($this->getPlatform());
 
         $this
             ->setTableAdapter($adapter)
@@ -92,14 +92,4 @@ class User extends \Nethgui\Controller\TableController
         return $cellView;
     }
 
-    public function process()
-    {
-        if ($this->getRequest()->isMutation()) {
-            $keyValue = $this->parameters['Id'];
-            //TODO: execute command
-            $this->getAdapter()->flush();
-        } else {
-            parent::process();
-        }
-    }
 }

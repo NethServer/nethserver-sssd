@@ -50,11 +50,10 @@ class Modify extends \Nethgui\Controller\Table\Modify
         } else {
             $userNameValidator = FALSE;
         }
-
         $parameterSchema = array(
             array('username', $userNameValidator, Table::KEY),
-            array('FullName', Validate::NOTEMPTY, Table::FIELD),
-            array('PassExpires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD)
+            array('gecos', Validate::NOTEMPTY, Table::FIELD),
+            array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD)
         );
 
         $this->setSchema($parameterSchema);
@@ -101,8 +100,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
     }
 
-    protected function onParametersSaved($changedParameters)
+    public function process()
     {
+        if ( ! $this->getRequest()->isMutation()) {
+            return;
+        }
         if ($this->getIdentifier() === 'delete') {
             // delete case is handled in "processDelete()" method: 
             // signalEvent() is invoked there.
@@ -112,13 +114,15 @@ class Modify extends \Nethgui\Controller\Table\Modify
         } else {
             $event = $this->getIdentifier();
         }
-        $this->getPlatform()->signalEvent(sprintf('user-%s', $event), array($this->parameters['username'],$this->parameters['FullName']));
+        $params = array($this->parameters['username'], $this->parameters['gecos'], $this->parameters['shell']);
+        $this->getPlatform()->signalEvent(sprintf('user-%s', $this->getIdentifier()), $params);
+        $this->getParent()->getAdapter()->flush();
     }
+
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
         parent::prepareView($view);
-        $view['contactDefaults'] = $this->getPlatform()->getDatabase('configuration')->getKey('OrganizationContact');
         if (isset($this->parameters['username'])) {
             $view['ChangePassword'] = $view->getModuleUrl('../ChangePassword/' . $this->parameters['username']);
             $view['FormAction'] = $view->getModuleUrl($this->parameters['username']);

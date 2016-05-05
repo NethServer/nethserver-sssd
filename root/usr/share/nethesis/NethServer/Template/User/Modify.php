@@ -13,12 +13,12 @@ echo $view->header('username')->setAttribute('template', $headerText);
 
 $passPanel = $view->fieldset()->setAttribute('template', $T('Options_label'))
     ->insert($view->checkBox('PassExpires', 'yes')->setAttribute('uncheckedValue', 'no'))
-    ->insert($view->checkbox('ssh', '/bin/bash')->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
+    ->insert($view->checkbox('shell', '/bin/bash')->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
 
 $basicInfo = $view->panel()
     ->setAttribute('title', $T('BasicInfo_Title'))
     ->insert($view->textInput('username', ($view->getModule()->getIdentifier() == 'create' ? 0 : $view::STATE_DISABLED | $view::STATE_READONLY )))
-    ->insert($view->textInput('FullName'))
+    ->insert($view->textInput('gecos'))
     ->insert($view->objectPicker('Groups')
     ->setAttribute('objects', 'GroupsDatasource')
     ->setAttribute('template', $T('Groups_label'))
