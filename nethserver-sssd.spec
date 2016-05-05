@@ -27,10 +27,13 @@ perl createlinks
 
 %install
 (cd root   ; find . -depth -print | cpio -dump %{buildroot})
-%{genfilelist} %{buildroot} > %{name}-%{version}-filelist
+%{genfilelist} %{buildroot} | sed '
+\|^%{_sysconfdir}/sudoers.d/20_nethserver_sssd$| d
+' > %{name}-%{version}-filelist
 
 %files -f %{name}-%{version}-filelist
 %doc COPYING
+%config %attr (0440,root,root) %{_sysconfdir}/sudoers.d/20_nethserver_sssd
 %dir %{_nseventsdir}/%{name}-update
 %dir %{_nseventsdir}/group-create
 %dir %{_nseventsdir}/group-delete

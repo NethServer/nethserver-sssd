@@ -1,8 +1,0 @@
-{
-    #
-    # 00nethserver-directory -- interactive commands for adm group members
-    #
-
-    push @adm_commands, '/sbin/e-smith/config', '/sbin/e-smith/expand-template', '/usr/libexec/nethserver/password-expiration';
-    '';
-}

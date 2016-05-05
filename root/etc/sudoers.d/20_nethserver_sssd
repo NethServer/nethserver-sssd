@@ -1,0 +1,6 @@
+#
+# 20_nethserver_sssd
+#
+%adm ALL=NOPASSWD: /usr/sbin/realm join *, /sbin/e-smith/config, /sbin/e-smith/expand-template, /usr/libexec/nethserver/password-expiration
+
+
