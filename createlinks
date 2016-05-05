@@ -55,6 +55,24 @@ event_services('nethserver-sssd-save', qw(
     sssd restart
 ));
 
+validator_actions('ad-dns', qw(
+   srv_record 20
+));
+
+#
+# event nethserver-sssd-save
+#
+event_templates('nethserver-sssd-save', qw(
+    /etc/sssd/sssd.conf
+    /etc/samba/smb.conf
+));
+event_actions('nethserver-sssd-save', qw(
+
+));
+event_services('nethserver-sssd-save', qw(
+    sssd restart
+));
+
 # actions for user-create validator
 validator_actions('user-create', qw(
                   uniq-account 20

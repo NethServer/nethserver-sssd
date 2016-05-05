@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec host -t SRV "_ldap._tcp.$(hostname -d)" "$1"
