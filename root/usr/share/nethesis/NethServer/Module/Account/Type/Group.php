@@ -28,6 +28,13 @@ namespace NethServer\Module\Account\Type;
 class Group extends \Nethgui\Controller\TableController
 {
 
+    protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
+    {
+        return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
+            'languageCatalog' => array('NethServer_Module_Group'))
+        );
+    }
+
     public function initialize()
     {
         $adapter = new Group\GroupAdapter($this->getPlatform());

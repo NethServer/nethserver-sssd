@@ -26,6 +26,12 @@ namespace NethServer\Module\Account\Type;
  */
 class User extends \Nethgui\Controller\TableController
 {
+    protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
+    {
+        return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
+            'languageCatalog' => array('NethServer_Module_User'))
+        );
+    }
 
     public function initialize()
     {

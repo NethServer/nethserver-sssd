@@ -30,7 +30,6 @@ class Account extends \Nethgui\Controller\CompositeController
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
         return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
-            'languageCatalog' => array('NethServer_Module_Account', 'NethServer_Module_User', 'NethServer_Module_Group'),
             'category' => 'Management')
         );
     }
