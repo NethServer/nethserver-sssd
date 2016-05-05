@@ -1,5 +1,5 @@
 <?php
-namespace NethServer\Module;
+namespace NethServer\Module\Account\Type;
 
 /*
  * Copyright (C) 2011 Nethesis S.r.l.
@@ -44,10 +44,10 @@ class Group extends \Nethgui\Controller\TableController
         $this
             ->setTableAdapter($this->getPlatform()->getTableAdapter('accounts', 'group'))
             ->setColumns($columns)
-            ->addTableActionPluggable(new Group\Modify('create'), 'PlugService')
+            ->addTableAction(new Group\Modify('create'))
             ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
-            ->addRowActionPluggable(new Group\Modify('update'), 'PlugService')
-            ->addRowActionPluggable(new Group\Modify('delete'), 'PlugDelete')
+            ->addRowAction(new Group\Modify('update'))
+            ->addRowAction(new Group\Modify('delete'))
         ;
 
         parent::initialize();
