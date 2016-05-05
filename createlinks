@@ -133,3 +133,7 @@ event_actions('password-policy-update', qw(
     nethserver-sssd-clear-cache 10
 ));
 
+# actions for myhostname validator
+validator_actions('myhostname', qw(
+    failifjoin 00
+));

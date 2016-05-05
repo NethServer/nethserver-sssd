@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ "$1" != "$(hostname -f)" && "$(/sbin/e-smith/config getprop sssd Provider)" != "none" ]]; then
+    exit 1
+fi
+
+exit 0
