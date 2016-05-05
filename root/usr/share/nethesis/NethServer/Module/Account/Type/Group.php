@@ -28,22 +28,13 @@ namespace NethServer\Module\Account\Type;
 class Group extends \Nethgui\Controller\TableController
 {
 
-    protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
-    {
-        return \Nethgui\Module\SimpleModuleAttributesProvider::extendModuleAttributes($base, 'Management', 20);
-    }
-
     public function initialize()
     {
-        $columns = array(
-            'Key',
-            'Description',
-            'Actions',
-        );
+        $adapter = new Group\GroupAdapter($this->getPlatform());
 
         $this
-            ->setTableAdapter($this->getPlatform()->getTableAdapter('accounts', 'group'))
-            ->setColumns($columns)
+            ->setTableAdapter($adapter)
+            ->setColumns($adapter->getColumns())
             ->addTableAction(new Group\Modify('create'))
             ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
             ->addRowAction(new Group\Modify('update'))
@@ -52,24 +43,4 @@ class Group extends \Nethgui\Controller\TableController
 
         parent::initialize();
     }
-
-    /**
-     * Honour "Removable=no" prop.
-     *
-     * @param \Nethgui\Controller\Table\Read $action
-     * @param \Nethgui\View\ViewInterface $view
-     * @param type $key
-     * @param type $values
-     * @param type $rowMetadata
-     * @return type
-     */
-    public function prepareViewForColumnActions(\Nethgui\Controller\Table\Read $action, \Nethgui\View\ViewInterface $view, $key, $values, &$rowMetadata)
-    {
-        $cellView = $action->prepareViewForColumnActions($view, $key, $values, $rowMetadata);
-        if (isset($values['Removable']) && $values['Removable'] === 'no') {
-            unset($cellView['delete']);
-        }
-        return $cellView;
-    }
-
 }
