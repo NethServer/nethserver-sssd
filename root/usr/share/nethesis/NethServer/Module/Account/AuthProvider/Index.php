@@ -35,28 +35,33 @@ class Index extends \Nethgui\Controller\AbstractController
     {
         parent::initialize();
         $providerValidator = $this->createValidator()->memberOf('none', 'ldap', 'ad');
+        $ldapUriAdapter = $this->getPlatform()->getMapAdapter(function($v) {
+            return preg_replace('|^ldaps?://|', '', $v);
+        }, function($v) {
+            return array('ldap://' . $v);
+        }, array(array('configuration', 'sssd', 'LdapURI')));
         $this->declareParameter('Provider', $providerValidator, array('configuration', 'sssd', 'Provider'));
-        $this->declareParameter('LdapUri', Validate::ANYTHING, array('configuration', 'sssd', 'LdapURI'));
+        $this->declareParameter('LdapUri', Validate::HOSTADDRESS, $ldapUriAdapter);
         $this->declareParameter('AdDns', Validate::IP_OR_EMPTY, array('configuration', 'sssd', 'AdDns'));
     }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
-        if($this->parameters['Provider'] === 'ad') {
+        if ($this->parameters['Provider'] === 'ad') {
             $this->getValidator('AdDns')->platform('ad-dns');
         }
         parent::validate($report);
     }
 
     protected function onParametersSaved($changedParameters)
-    {        
-        if($this->parameters['Provider'] === 'ad') {
+    {
+        if ($this->parameters['Provider'] === 'ad') {
             $this->isAuthNeeded = TRUE;
             $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
-        } elseif($this->parameters['Provider'] === 'ldap') {
+        } elseif ($this->parameters['Provider'] === 'ldap') {
             $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
             $this->getPlatform()->signalEvent('nethserver-sssd-save');
-        }        
+        }
     }
 
     public function nextPath()
@@ -66,4 +71,5 @@ class Index extends \Nethgui\Controller\AbstractController
         }
         return parent::nextPath();
     }
+
 }
