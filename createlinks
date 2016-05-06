@@ -26,19 +26,8 @@ use esmith::Build::CreateLinks  qw(:all);
 #--------------------------------------------------
 # actions for nethserver-sssd-update event
 #--------------------------------------------------
-
-my $event = "nethserver-sssd-update";
-
 event_actions('nethserver-sssd-update', qw(
-              initialize-default-databases   00
-              nethserver-sssd-conf           20
-));
-event_services('nethserver-sssd-update', qw(
-    sssd restart
-));
-event_templates('nethserver-sssd-update', qw(
-    /etc/sssd/sssd.conf
-    /etc/samba/smb.conf
+    initialize-default-databases   00
 ));
 
 #
@@ -49,7 +38,7 @@ event_templates('nethserver-sssd-save', qw(
     /etc/samba/smb.conf
 ));
 event_actions('nethserver-sssd-save', qw(
-
+    nethserver-sssd-conf    20
 ));
 event_services('nethserver-sssd-save', qw(
     sssd restart
@@ -57,20 +46,6 @@ event_services('nethserver-sssd-save', qw(
 
 validator_actions('ad-dns', qw(
    srv_record 20
-));
-
-#
-# event nethserver-sssd-save
-#
-event_templates('nethserver-sssd-save', qw(
-    /etc/sssd/sssd.conf
-    /etc/samba/smb.conf
-));
-event_actions('nethserver-sssd-save', qw(
-
-));
-event_services('nethserver-sssd-save', qw(
-    sssd restart
 ));
 
 # actions for user-create validator
