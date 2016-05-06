@@ -33,7 +33,13 @@ class GroupProvider
 
     public function getGroups()
     {
-        return $this->groups;
+        $groups = array();
+        if ($this->listGroupsCommand) {
+            $groups = json_decode(exec('/usr/bin/sudo '.$this->listGroupsCommand), TRUE);
+        } else { # groups from remote server
+            $groups = $this->platform->getDatabase('NethServer::Database::Group')->getAll();
+        }
+        return $groups;
     }
 
     public function isReadOnly()
@@ -53,12 +59,5 @@ class GroupProvider
              $columns[] = 'Actions';
              $this->listGroupsCommand = '/usr/libexec/nethserver/ad-list-groups';
          }
-
-        if ($this->listGroupsCommand) {
-            $this->groups = json_decode(exec('/usr/bin/sudo '.$this->listGroupsCommand), TRUE);
-        } else { # groups from remote server
-            $this->groups = $this->platform->getDatabase('NethServer::Database::Group')->getAll();
-        }
     }
-
 }

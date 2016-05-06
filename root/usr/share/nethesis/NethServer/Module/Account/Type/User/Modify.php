@@ -53,6 +53,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $parameterSchema = array(
             array('username', $userNameValidator, Table::KEY),
             array('gecos', Validate::NOTEMPTY, Table::FIELD),
+            array('groups', Validate::NOTEMPTY, Table::FIELD),
             array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD)
         );
 
@@ -62,10 +63,6 @@ class Modify extends \Nethgui\Controller\Table\Modify
     public function bind(\Nethgui\Controller\RequestInterface $request)
     {
         parent::bind($request);
-
-        $groupsAdapter = new MembershipAdapter($this->parameters['username'], $this->getPlatform());
-        $this->declareParameter('Groups', Validate::USERNAME_COLLECTION, $groupsAdapter);
-        $this->declareParameter('GroupsDatasource', FALSE, array($groupsAdapter, 'provideGroupsDatasource'));
 
         /*
          * Having declared Groups parameter after "bind()" call we now perform
@@ -129,6 +126,14 @@ class Modify extends \Nethgui\Controller\Table\Modify
         } else {
             $view['ChangePassword'] = '';
         }
+
+        $provider = new \NethServer\Tool\GroupProvider($this->getParent()->getPlatform());
+        $tmp = array();
+        foreach ($provider->getGroups() as $key => $values) {
+            $tmp[] = array($key, $key);
+        }
+
+        $view['groupsDatasource'] = $tmp;
     }
 
 }
