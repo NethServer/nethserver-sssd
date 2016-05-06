@@ -33,7 +33,6 @@ class UserProvider
 
     public function getUsers()
     {
-        $users = array();
         if ($this->listUsersCommand) {
             $users = json_decode(exec('/usr/bin/sudo '.$this->listUsersCommand), TRUE);
         } else { # users from remote server
@@ -44,7 +43,7 @@ class UserProvider
                 $users[$user] = $fields;
             }
         }
-        return $users;
+        return is_array($users) ? $users : array();
     }
 
     public function isReadOnly()
