@@ -24,6 +24,17 @@ NethServer SSSD configuration
 cp -av lib/perl/NethServer root%{perl_vendorlib}
 %{makedocs}
 perl createlinks
+mkdir -p root/%{_nseventsdir}/group-create
+mkdir -p root/%{_nseventsdir}/group-delete
+mkdir -p root/%{_nseventsdir}/group-modify
+mkdir -p root/%{_nseventsdir}/user-create
+mkdir -p root/%{_nseventsdir}/user-delete
+mkdir -p root/%{_nseventsdir}/user-lock
+mkdir -p root/%{_nseventsdir}/user-modify
+mkdir -p root/%{_nseventsdir}/user-unlock
+mkdir -p root/%{_nseventsdir}/password-policy-update
+mkdir -p root/%{_nseventsdir}/password-modify
+mkdir -p root/var/lib/nethserver/home
 
 %install
 (cd root   ; find . -depth -print | cpio -dump %{buildroot})
@@ -45,6 +56,7 @@ perl createlinks
 %dir %{_nseventsdir}/user-unlock
 %dir %{_nseventsdir}/password-policy-update
 %dir %{_nseventsdir}/password-modify
+%dir /var/lib/nethserver/home
 
 
 %changelog
