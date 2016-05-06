@@ -11,32 +11,22 @@ if ($view->getModule()->getIdentifier() == 'update') {
 
 echo $view->header('username')->setAttribute('template', $headerText);
 
+$passPanel = $view->fieldset()->setAttribute('template', $T('Options_label'))
+    ->insert($view->checkBox('PassExpires', 'yes')->setAttribute('uncheckedValue', 'no'))
+    ->insert($view->checkbox('shell', '/bin/bash')->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
+
 $basicInfo = $view->panel()
     ->setAttribute('title', $T('BasicInfo_Title'))
     ->insert($view->textInput('username', ($view->getModule()->getIdentifier() == 'create' ? 0 : $view::STATE_DISABLED | $view::STATE_READONLY )))
-    ->insert($view->textInput('FirstName'))
-    ->insert($view->textInput('LastName'))
+    ->insert($view->textInput('gecos'))
     ->insert($view->objectPicker('Groups')
     ->setAttribute('objects', 'GroupsDatasource')
     ->setAttribute('template', $T('Groups_label'))
-    ->setAttribute('objectLabel', 1));
+    ->setAttribute('objectLabel', 1))
+    ->insert($passPanel);
 
 
-$infoTab = $view->panel()
-    ->setAttribute('title', $T('ExtraInfo_Title'))
-    ->insert($view->textInput('Company')->setAttribute('placeholder', $view['contactDefaults']['Company']))
-    ->insert($view->textInput('Department')->setAttribute('placeholder', $view['contactDefaults']['Department']))
-    ->insert($view->textInput('Street')->setAttribute('placeholder', $view['contactDefaults']['Street']))
-    ->insert($view->textInput('City')->setAttribute('placeholder', $view['contactDefaults']['City']))
-    ->insert($view->textInput('PhoneNumber')->setAttribute('placeholder', $view['contactDefaults']['PhoneNumber']));
-
-$tabs = $view->tabs()
-    ->insert($basicInfo)
-    ->insert($infoTab)
-    ->insertPlugins()
-;
-
-echo $tabs;
+echo $basicInfo;
 
 $buttons = $view->buttonList($view::BUTTON_SUBMIT | $view::BUTTON_HELP);
 

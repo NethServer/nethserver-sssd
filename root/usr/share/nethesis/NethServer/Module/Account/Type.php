@@ -30,7 +30,8 @@ class Type extends \Nethgui\Controller\TabsController
     public function initialize()
     {
         parent::initialize();
-        $this->loadChildrenDirectory();
+        $this->addChild(new \NethServer\Module\Account\Type\User());
+        $this->addChild(new \NethServer\Module\Account\Type\Group());
     }
 
 }
