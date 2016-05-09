@@ -54,7 +54,7 @@ class User extends \Nethgui\Controller\TableController
 
     public function prepareViewForColumnKey(\Nethgui\Controller\Table\Read $action, \Nethgui\View\ViewInterface $view, $key, $values, &$rowMetadata)
     {
-        if ($values['new'] || $values['expired']) {
+        if ($values['new'] || $values['expired'] || $values['locked']) {
             $rowMetadata['rowCssClass'] = trim($rowMetadata['rowCssClass'] . ' user-new');
         }
         return strval($key);
