@@ -43,9 +43,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $parameterSchema = array(
             array('groupname', $groupNameValidator, Table::KEY),
-            array('Description', Validate::ANYTHING, Table::FIELD, 'Description'),
-            array('Members', Validate::USERNAME_COLLECTION, Table::FIELD, 'Members', ','),
-            array('MembersDatasource', FALSE, array($this, 'provideMembersDatasource')), // this parameter will never be submitted: set an always-failing validator
+            array('members', Validate::ANYTHING, Table::FIELD),
         );
         
         $this->setSchema($parameterSchema);
@@ -53,29 +51,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
         parent::initialize();
     }
 
-    public function provideMembersDatasource()
-    {
-        $platform = $this->getPlatform();
-        if (is_null($platform)) {
-            return array();
-        }
-
-        $users = $platform->getTableAdapter('accounts', 'user');
-
-        $values = array();
-
-        // Build the datasource rows couples <key, label>
-        foreach ($users as $username => $row) {
-            $values[] = array($username, sprintf('%s %s (%s)', $row['FirstName'], $row['LastName'], $username));
-        }
-
-        return $values;
-    }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
         if ($this->getIdentifier() === 'delete') {
-            $v = $this->createValidator(Validate::USERNAME)->platform('group-delete');
+            $v = $this->createValidator()->platform('group-delete');
             if( ! $v->evaluate($this->getAdapter()->getKeyValue())) {
                 $report->addValidationError($this, 'groupname', $v);
             }
@@ -83,32 +63,33 @@ class Modify extends \Nethgui\Controller\Table\Modify
         parent::validate($report);
     }
 
-    /**
-     * Delete the record after the event has been successfully completed
-     * @param string $key
-     */
-    protected function processDelete($key)
+    public function process()
     {
-        $accountDb = $this->getPlatform()->getDatabase('accounts');
-        $accountDb->setType($key, 'group-deleted');
-        $deleteProcess = $this->getPlatform()->signalEvent('group-delete', array($key));
-        if ($deleteProcess->getExitCode() === 0) {
-            parent::processDelete($key);
+        if ( ! $this->getRequest()->isMutation()) {
+            return;
         }
-    }
 
-    protected function onParametersSaved($changedParameters)
-    {
         if ($this->getIdentifier() === 'delete') {
-            // delete case is handled in "processDelete()" method:
-            // signalEvent() is invoked there.
+            $this->getPlatform()->signalEvent('group-delete',  array($this->parameters['groupname']));
+            $this->getParent()->getAdapter()->flush();
             return;
         } elseif ($this->getIdentifier() === 'update') {
             $event = 'modify';
         } else {
             $event = $this->getIdentifier();
         }
-        $this->getPlatform()->signalEvent(sprintf('group-%s@post-process', $event), array($this->parameters['groupname']));
+        $params[] = $this->parameters['groupname'];
+        if (!$this->parameters['members']) {
+            $this->parameters['members'] = array();
+        }
+        $members = array_unique($this->parameters['members']);
+        foreach ($members as $u) {
+            $tmp = explode('@',$u);
+            $params[] = $tmp[0];
+        }
+
+        $this->getPlatform()->signalEvent(sprintf('group-%s', $event), $params);
+        $this->getParent()->getAdapter()->flush();
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
@@ -120,6 +101,15 @@ class Modify extends \Nethgui\Controller\Table\Modify
             'delete' => 'Nethgui\Template\Table\Delete',
         );
         $view->setTemplate($templates[$this->getIdentifier()]);
+
+        $provider = new \NethServer\Tool\UserProvider($this->getParent()->getPlatform());
+        $tmp = array();
+        foreach ($provider->getUsers() as $key => $values) {
+            $tmp[] = array($key, $key);
+        }
+
+        $view['membersDatasource'] = $tmp;
+
     }
 
 }
