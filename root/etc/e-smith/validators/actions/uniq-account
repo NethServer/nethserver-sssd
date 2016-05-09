@@ -22,7 +22,7 @@
 
 package esmith;
 
-use esmith::AccountsDB;
+use esmith::ConfigDB;;
 
 
 =head2 validate_acctName_conflict
@@ -33,23 +33,14 @@ otherwise.
 =cut
 
 my $acctName = shift || die('Missing account name argument');
-my $accountdb = esmith::AccountsDB->open_ro() || die('Could not open AccountsDB');
+my $db = esmith::ConfigDB->open_ro() || die('Could not open AccountsDB');
 
-my $account = $accountdb->get($acctName);
-my $type;
+my $domain = $db->get_value('DomainName');
+$acctName = $acctName.'@'.$domain;
 
-if (defined $account)
+if (defined getpwnam($acctName) || defined getgrnam($acctName))
 {
-    $type = $account->prop('type');
+    print "An account with the same name already exists\n";
+    exit 3;
 }
-elsif (defined getpwnam($acctName) || defined getgrnam($acctName))
-{
-    $type = "system";
-}
-else
-{
-    exit 0;
-}
-
-print "A $type account with the same name already exists\n";
-exit 3;
+exit 0;
