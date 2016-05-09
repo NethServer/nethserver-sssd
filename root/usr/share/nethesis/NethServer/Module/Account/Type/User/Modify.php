@@ -33,6 +33,16 @@ use Nethgui\Controller\Table\Modify as Table;
 class Modify extends \Nethgui\Controller\Table\Modify
 {
 
+    private $provider = null;
+
+    private function getGroupProvider()
+    {
+        if(!$this->provider) {
+            $this->provider = new \NethServer\Tool\GroupProvider($this->getPlatform());
+        }
+        return $this->provider;
+    }
+
     public function initialize()
     {
         parent::initialize();
@@ -69,6 +79,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
                 $report->addValidationError($this, 'username', $v);
             }
         }
+        if ($this->getIdentifier() === 'update' || $this->getIdentifier() === 'create') {
+            $groups = array_keys($this->getGroupProvider()->getGroups());
+            $this->getValidator('groups')->memberOf($groups);
+        }
+
         parent::validate($report);
     }
     private function saveGroups($user, $groups)
@@ -77,8 +92,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
            $groups = array();
         }
         $updatedGroups = array();
-        $provider = new \NethServer\Tool\GroupProvider($this->getPlatform());
-        $currentGroups = $provider->getGroups();
+        $currentGroups = $this->getGroupProvider()->getGroups();
         foreach ($currentGroups as $group => $v) {
             $members = $v['members'];
             if (in_array($group, $groups)) { # we must add $user to $group
@@ -138,9 +152,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $view['ChangePassword'] = '';
         }
 
-        $provider = new \NethServer\Tool\GroupProvider($this->getParent()->getPlatform());
         $tmp = array();
-        foreach ($provider->getGroups() as $key => $values) {
+        foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
             $tmp[] = array($key, $key);
         }
 
