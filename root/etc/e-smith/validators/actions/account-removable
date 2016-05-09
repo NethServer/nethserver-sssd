@@ -19,7 +19,7 @@
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
 use strict;
-use esmith::AccountsDB;
+use esmith::ConfigDB;
 
 =head2 account-removable
 
@@ -29,13 +29,22 @@ Exit code 4, if account is not removable
 
 =cut
 
-my $accountName = shift || die("Missing account name argument");
-my $db = esmith::AccountsDB->open_ro() or die("Could not open AccountsDB");
-    
-my $removable = $db->get_prop($accountName, 'Removable');
+my $acctName = shift || die("Missing account name argument");
+my $db = esmith::ConfigDB->open_ro() or die("Could not open ConfigDB");
 
-if( defined $removable && $removable eq 'no')  {
-    printf "Account `%s` is not removable\n", $accountName;
+my $domain = $db->get_value('DomainName');
+if ($acctName !~ $domain) {
+    $acctName = $acctName.'@'.$domain;
+}
+
+my ($name, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell) = getpwnam($acctName);
+($name, $passwd, $gid, my $members) = getgrnam($acctName);
+if (!defined($uid) && !defined($gid)) {
+    printf "User account `%s` does not exist\n", $acctName;
+    exit 4;
+}
+if ( (defined($uid) && $uid < 1000) || (defined($gid) && $gid < 1000)) {
+    printf "Account `%s` is not removable\n", $acctName;
     exit 4;
 }
 
