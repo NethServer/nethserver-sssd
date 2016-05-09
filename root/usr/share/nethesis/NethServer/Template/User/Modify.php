@@ -1,8 +1,6 @@
 <?php
 /* @var $view \Nethgui\Renderer\Xhtml */
 
-$view->requireFlag($view::INSET_FORM);
-
 if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Update user `${0}`');
 } else {
@@ -12,7 +10,7 @@ if ($view->getModule()->getIdentifier() == 'update') {
 echo $view->header('username')->setAttribute('template', $headerText);
 
 $passPanel = $view->fieldset()->setAttribute('template', $T('Options_label'))
-    ->insert($view->checkBox('PassExpires', 'yes')->setAttribute('uncheckedValue', 'no'))
+    ->insert($view->checkBox('expires', 'yes')->setAttribute('uncheckedValue', 'no'))
     ->insert($view->checkbox('shell', '/bin/bash')->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
 
 $basicInfo = $view->panel()
@@ -37,11 +35,3 @@ $buttons->insert($view->button('Cancel', $view::BUTTON_CANCEL));
 
 echo $buttons;
 
-$actionId = $view->getUniqueId();
-$view->includeJavascript("
-jQuery(function($){
-    $('#${actionId}').on('nethguishow', function () {
-        $(this).find('.Tabs').tabs('select', 0);
-    });
-});
-");

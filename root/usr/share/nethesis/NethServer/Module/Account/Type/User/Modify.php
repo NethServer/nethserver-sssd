@@ -53,24 +53,12 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $parameterSchema = array(
             array('username', $userNameValidator, Table::KEY),
             array('gecos', Validate::NOTEMPTY, Table::FIELD),
-            array('groups', Validate::NOTEMPTY, Table::FIELD),
+            array('groups', Validate::ANYTHING, Table::FIELD),
+            array('expires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD),
             array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD)
         );
 
         $this->setSchema($parameterSchema);
-    }
-
-    public function bind(\Nethgui\Controller\RequestInterface $request)
-    {
-        parent::bind($request);
-
-        /*
-         * Having declared Groups parameter after "bind()" call we now perform
-         * the value assignment by hand.
-         */
-        if ($request->isMutation() && $request->hasParameter('Groups')) {
-            $this->parameters['Groups'] = $request->getParameter('Groups');
-        }
     }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
@@ -97,6 +85,41 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
     }
 
+    private function saveGroups($user, $groups)
+    {
+        if (!$groups) {
+           $groups = array();
+        }
+        $updatedGroups = array();
+        $provider = new \NethServer\Tool\GroupProvider($this->getPlatform());
+        $currentGroups = $provider->getGroups();
+        foreach ($currentGroups as $group => $v) {
+            $members = $v['members'];
+            if (in_array($group, $groups)) { # we must add $user to $group
+                $members[] = $user;
+                $updatedGroups[$group] = $members;
+            }
+            if (in_array($user, $members) && !in_array($group, $groups)) { # $user removed from $group
+                if(($key = array_search($user, $members)) !== false) { 
+                    unset($members[$key]);
+                }
+                $updatedGroups[$group] = $members;
+            }
+        }
+
+        # apply the configuration
+        foreach ($updatedGroups as $group => $members) {
+            $params = array();
+            $params[] = $group;
+            $members = array_unique($members);
+            foreach ($members as $u) {
+                $tmp = explode('@',$u);
+                $params[] = $tmp[0];
+            }
+            $this->getPlatform()->signalEvent('group-modify', $params);
+        }
+    }
+
     public function process()
     {
         if ( ! $this->getRequest()->isMutation()) {
@@ -112,7 +135,9 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $event = $this->getIdentifier();
         }
         $params = array($this->parameters['username'], $this->parameters['gecos'], $this->parameters['shell']);
-        $this->getPlatform()->signalEvent(sprintf('user-%s', $this->getIdentifier()), $params);
+        $this->getPlatform()->signalEvent('user-'.$event, $params);
+        $this->saveGroups($this->parameters['username'], $this->parameters['groups']);
+        $this->getPlatform()->signalEvent('password-policy-update', array($this->parameters['username'], $this->parameters['expires']));
         $this->getParent()->getAdapter()->flush();
     }
 
