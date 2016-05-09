@@ -56,7 +56,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         // The user name must satisfy the USERNAME generic grammar:
         if ($this->getIdentifier() === 'create') {
-            $userNameValidator = $this->createValidator(Validate::USERNAME)->platform('user-create');
+            $userNameValidator = $this->createValidator(Validate::USERNAME);
         } else {
             $userNameValidator = FALSE;
         }
@@ -82,6 +82,18 @@ class Modify extends \Nethgui\Controller\Table\Modify
         if ($this->getIdentifier() === 'update' || $this->getIdentifier() === 'create') {
             $groups = array_keys($this->getGroupProvider()->getGroups());
             $this->getValidator('groups')->memberOf($groups);
+        }
+        if ($this->getIdentifier() === 'create') {
+            $users = array();
+            $userProvider = new \NethServer\Tool\UserProvider($this->getPlatform());
+            foreach (array_keys($userProvider->getUsers()) as $u) {
+                 $tmp = explode('@',$u);
+                 $users[] = $tmp[0];
+            }
+
+            if ( in_array($this->parameters['username'], $users) ) { # user already exists
+                $report->addValidationErrorMessage($this, 'username', 'user_exists');
+            }
         }
 
         parent::validate($report);
