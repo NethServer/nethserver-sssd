@@ -32,6 +32,16 @@ use Nethgui\Controller\Table\Modify as Table;
 class Modify extends \Nethgui\Controller\Table\Modify
 {
 
+    private $provider = null;
+
+    private function getUserProvider()
+    {
+        if(!$this->provider) {
+            $this->provider = new \NethServer\Tool\UserProvider($this->getPlatform());
+        }
+        return $this->provider;
+    }
+
     public function initialize()
     {
         // The group name must satisfy the USERNAME generic grammar:
@@ -60,6 +70,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
                 $report->addValidationError($this, 'groupname', $v);
             }
         }
+        if ($this->getIdentifier() === 'update' || $this->getIdentifier() === 'create') {
+            $users = array_keys($this->getUserProvider()->getUsers());
+            $this->getValidator('members')->memberOf($users);
+        }
+
         parent::validate($report);
     }
 
@@ -102,9 +117,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
         );
         $view->setTemplate($templates[$this->getIdentifier()]);
 
-        $provider = new \NethServer\Tool\UserProvider($this->getParent()->getPlatform());
         $tmp = array();
-        foreach ($provider->getUsers() as $key => $values) {
+        foreach ($this->getUserProvider()->getUsers() as $key => $values) {
             $tmp[] = array($key, $key);
         }
 
