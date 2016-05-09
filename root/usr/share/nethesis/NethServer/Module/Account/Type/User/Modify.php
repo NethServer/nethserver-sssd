@@ -64,27 +64,13 @@ class Modify extends \Nethgui\Controller\Table\Modify
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
         if ($this->getIdentifier() === 'delete') {
-            $v = $this->createValidator(Validate::USERNAME)->platform('user-delete');
+            $v = $this->createValidator()->platform('user-delete');
             if( ! $v->evaluate($this->getAdapter()->getKeyValue())) {
                 $report->addValidationError($this, 'username', $v);
             }
         }
         parent::validate($report);
     }
-    /**
-     * Delete the record after the event has been successfully completed
-     * @param string $key
-     */
-    protected function processDelete($key)
-    {
-        $accountDb = $this->getPlatform()->getDatabase('accounts');
-        $accountDb->setType($key, 'user-deleted');
-        $deleteProcess = $this->getPlatform()->signalEvent('user-delete', array($key));
-        if ($deleteProcess->getExitCode() === 0) {
-            parent::processDelete($key);
-        }
-    }
-
     private function saveGroups($user, $groups)
     {
         if (!$groups) {
@@ -126,8 +112,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
             return;
         }
         if ($this->getIdentifier() === 'delete') {
-            // delete case is handled in "processDelete()" method: 
-            // signalEvent() is invoked there.
+            $this->getPlatform()->signalEvent('user-delete', array($this->parameters['username']));
+            $this->getParent()->getAdapter()->flush();
             return;
         } elseif ($this->getIdentifier() === 'update') {
             $event = 'modify';
