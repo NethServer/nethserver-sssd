@@ -77,7 +77,6 @@ event_services('nethserver-sssd-save', qw(
 validator_actions('user-create', qw(
                   uniq-account 20
                   user-length 30
-                  max-users 90
 ));
 
 # actions for user-delete validator
