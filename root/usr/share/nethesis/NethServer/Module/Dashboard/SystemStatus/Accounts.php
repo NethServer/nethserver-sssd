@@ -34,10 +34,9 @@ class Accounts extends \Nethgui\Controller\AbstractController
 
     private function readAccounts()
     {
-        //$accounts = array('users' => 0, 'ibays' => 0, 'groups' => 0);
-        $accounts = array();
+        $accounts = array('user' => 0, 'group' => 0, 'ibay' => 0, 'pseudonym' => 0, 'ftp' => 0, 'vpn' => 0, 'machine' => 0);
         foreach ($this->getPlatform()->getDatabase('NethServer::Database::Passwd')->getAll() as $record) {
-            if ($record['uid' < 1000]) {
+            if ($record['uid'] < 1000) {
                 continue;
             }
 
@@ -49,7 +48,7 @@ class Accounts extends \Nethgui\Controller\AbstractController
         }
 
         foreach ($this->getPlatform()->getDatabase('NethServer::Database::Group')->getAll() as $record) {
-            if ($record['gid' < 1000]) {
+            if ($record['gid'] < 1000) {
                 continue;
             }
             $accounts['group'] += 1;
