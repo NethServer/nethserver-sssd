@@ -26,10 +26,30 @@ namespace NethServer\Module\Sssd;
  */
 class Index extends \Nethgui\Controller\AbstractController
 {
+
+    private $details = '';
+    private $provider = '';
+
+    public function process()
+    {
+        parent::process();
+        $this->provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
+        if ($this->getRequest()->isValidated()) {
+            if ($this->provider === 'ad') {
+                $this->details = $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads info 2>&1')->getOutput() . "\n"
+                        . $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads testjoin 2>&1')->getOutput();
+            } elseif ($this->provider === 'ldap') {
+                $this->details = 'LDAP URI: ' . $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'LdapURI');
+            }
+        }
+    }
+
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
         parent::prepareView($view);
         $view['domain'] = \Nethgui\array_end(explode('.', \gethostname(), 2));
-        $view['Provider'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
+        $view['Provider'] = $this->provider;
+        $view['Details'] = $this->details;
     }
+
 }
