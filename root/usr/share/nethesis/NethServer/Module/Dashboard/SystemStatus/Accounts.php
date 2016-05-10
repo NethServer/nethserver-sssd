@@ -1,4 +1,5 @@
 <?php
+
 namespace NethServer\Module\Dashboard\SystemStatus;
 
 /*
@@ -29,25 +30,43 @@ class Accounts extends \Nethgui\Controller\AbstractController
 {
 
     public $sortId = 40;
- 
     private $accounts = array();
 
     private function readAccounts()
     {
         //$accounts = array('users' => 0, 'ibays' => 0, 'groups' => 0);
         $accounts = array();
-        $records = $this->getPlatform()->getDatabase('accounts')->getAll();
-        foreach ($records as $record) {
-            # skip deleted account
-            if (strpos($record['type'],'delete') !== FALSE) {
+        foreach ($this->getPlatform()->getDatabase('NethServer::Database::Passwd')->getAll() as $record) {
+            if ($record['uid' < 1000]) {
                 continue;
             }
-            if (!isset($accounts[$record['type']])) {
-                $accounts[$record['type']] = 0;
+
+            if (strstr($record['name'], '$@')) {
+                $accounts['machine'] += 1;
+            } else {
+                $accounts['user'] += 1;
             }
-            $accounts[$record['type']] = $accounts[$record['type']]+1;
         }
- 
+
+        foreach ($this->getPlatform()->getDatabase('NethServer::Database::Group')->getAll() as $record) {
+            if ($record['gid' < 1000]) {
+                continue;
+            }
+            $accounts['group'] += 1;
+        }
+
+        foreach ($this->getPlatform()->getDatabase('accounts')->getAll() as $record) {
+            if ($record['type'] === 'ibay') {
+                $accounts['ibay'] += 1;
+            } elseif ($record['type'] === 'pseudonym') {
+                $accounts['pseudonym'] += 1;
+            } elseif ($record['type'] === 'ftp') {
+                $accounts['ftp'] += 1;
+            } elseif ($record['type'] === 'vpn') {
+                $accounts['vpn'] += 1;
+            }
+        }
+
         return $accounts;
     }
 
@@ -55,13 +74,14 @@ class Accounts extends \Nethgui\Controller\AbstractController
     {
         $this->accounts = $this->readAccounts();
     }
- 
+
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
-        if (!$this->accounts) {
+        if ( ! $this->accounts) {
             $this->accounts = $this->readAccounts();
         }
 
         $view['accounts'] = $this->accounts;
     }
+
 }
