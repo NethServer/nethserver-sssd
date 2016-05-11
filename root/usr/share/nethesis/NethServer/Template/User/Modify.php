@@ -3,15 +3,17 @@
 
 if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Update user `${0}`');
+    $shellStyle = $view::STATE_DISABLED;
 } else {
     $headerText = $T('Create a new user');
+    $shellStyle = 0;
 }
 
 echo $view->header('username')->setAttribute('template', $headerText);
 
 $passPanel = $view->fieldset()->setAttribute('template', $T('Options_label'))
     ->insert($view->checkBox('expires', 'yes')->setAttribute('uncheckedValue', 'no'))
-    ->insert($view->checkbox('shell', '/bin/bash')->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
+    ->insert($view->checkbox('shell', '/bin/bash', $shellStyle)->setAttribute('uncheckedValue', '/usr/libexec/openssh/sftp-server'));
 
 $basicInfo = $view->panel()
     ->setAttribute('title', $T('BasicInfo_Title'))

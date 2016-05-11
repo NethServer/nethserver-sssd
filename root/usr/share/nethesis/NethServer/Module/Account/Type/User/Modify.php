@@ -168,7 +168,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
         foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
             $tmp[] = array($key, $key);
         }
-
+        $view['isAD'] = $this->getGroupProvider()->isAD();
         $view['groupsDatasource'] = $tmp;
     }
 

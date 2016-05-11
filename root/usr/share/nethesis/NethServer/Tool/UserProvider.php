@@ -30,6 +30,7 @@ class UserProvider
 
     private $listUsersCommand = '';
     private $platform;
+    private $ad = false;
 
     public function getUsers()
     {
@@ -51,6 +52,11 @@ class UserProvider
         return (!$this->listUsersCommand);
     }
 
+    public function isAD()
+    {
+        return $ad;
+    }
+
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
          $this->platform = $platform;
@@ -59,9 +65,11 @@ class UserProvider
          if (file_exists('/usr/libexec/nethserver/ldap-list-users')) {
              $columns[] = 'Actions';
              $this->listUsersCommand = '/usr/libexec/nethserver/ldap-list-users';
+             $this->ad = false;
          } else if (file_exists('/usr/libexec/nethserver/ad-list-users')) {
              $columns[] = 'Actions';
              $this->listUsersCommand = '/usr/libexec/nethserver/ad-list-users';
+             $this->ad = true;
          }
     }
 

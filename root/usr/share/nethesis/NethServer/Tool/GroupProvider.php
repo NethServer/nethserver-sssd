@@ -30,6 +30,7 @@ class GroupProvider
 
     private $listGroupsCommand = '';
     private $platform;
+    private $ad = false;
 
     public function getGroups()
     {
@@ -46,6 +47,11 @@ class GroupProvider
     {
         return (!$this->listGroupsCommand);
     }
+
+    public function isAD()
+    {
+        return $ad;
+    }
     
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
@@ -55,9 +61,11 @@ class GroupProvider
          if (file_exists('/usr/libexec/nethserver/ldap-list-groups')) {
              $columns[] = 'Actions';
              $this->listGroupsCommand = '/usr/libexec/nethserver/ldap-list-groups';
+             $this->ad = false;
          } else if (file_exists('/usr/libexec/nethserver/ad-list-groups')) {
              $columns[] = 'Actions';
              $this->listGroupsCommand = '/usr/libexec/nethserver/ad-list-groups';
+             $this->ad = true;
          }
     }
 }
