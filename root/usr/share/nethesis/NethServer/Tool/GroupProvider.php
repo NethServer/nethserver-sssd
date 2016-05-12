@@ -34,13 +34,17 @@ class GroupProvider
 
     public function getGroups()
     {
-        $groups = array();
+        $provider = $this->platform->getDatabase('configuration')->getProp('sssd', 'Provider');
+        if ($provider != 'ad' && $provider != 'ldap') {
+            return array();
+        }
+
         if ($this->listGroupsCommand) {
             $groups = json_decode(exec('/usr/bin/sudo '.$this->listGroupsCommand), TRUE);
         } else { # groups from remote server
             $groups = $this->platform->getDatabase('NethServer::Database::Group')->getAll();
         }
-        return $groups;
+        return is_array($groups) ? $groups : array();
     }
 
     public function isReadOnly()

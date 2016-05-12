@@ -34,6 +34,11 @@ class UserProvider
 
     public function getUsers()
     {
+        $provider = $this->platform->getDatabase('configuration')->getProp('sssd', 'Provider');
+        if ($provider != 'ad' && $provider != 'ldap') {
+            return array();
+        }
+
         if ($this->listUsersCommand) {
             $users = json_decode(exec('/usr/bin/sudo '.$this->listUsersCommand), TRUE);
         } else { # users from remote server
