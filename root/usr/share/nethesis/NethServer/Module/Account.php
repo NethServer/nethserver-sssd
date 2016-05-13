@@ -26,7 +26,6 @@ namespace NethServer\Module;
  */
 class Account extends \Nethgui\Controller\CompositeController
 {
-
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
         return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
@@ -37,23 +36,32 @@ class Account extends \Nethgui\Controller\CompositeController
     public function initialize()
     {
         parent::initialize();
-        $this->addChild(new \NethServer\Module\Account\Type());
-        $this->addChild(new \NethServer\Module\Account\AuthProvider());        
-    }
-
-    public function prepareView(\Nethgui\View\ViewInterface $view)
-    {
         $provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
-        if ($provider === 'none') {
-            $this->sortChildren(function ($a, $b) {
-                if ($a->getIdentifier() === 'AuthProvider') {
-                    return -1;
-                }
-                return 0;
-            });
-        }
 
-        parent::prepareView($view);
+        $children = array();
+        if(class_exists("\NethServer\Module\Account\DomainController")) { # Samba 4 is installed
+            if ($provider ==='none') { # and it's not configured, we must configure it
+                $children[] = new \NethServer\Module\Account\DomainController();
+                $children[] = new \NethServer\Module\Account\Type();
+                $children[] = new \NethServer\Module\Account\AuthProvider();
+            } else { # already configured, display users
+                $children[] = new \NethServer\Module\Account\Type();
+                $children[] = new \NethServer\Module\Account\AuthProvider();
+                $children[] = new \NethServer\Module\Account\DomainController();
+            }
+        } else {
+            if ($provider ==='none') { # nothing configured, display form for remote provider
+                $children[] = new \NethServer\Module\Account\AuthProvider();
+                $children[] = new \NethServer\Module\Account\Type();
+            } else { # display remote users
+                $children[] = new \NethServer\Module\Account\Type();
+                $children[] = new \NethServer\Module\Account\AuthProvider();
+            }
+        } 
+
+        foreach ($children as $child) {
+             $this->addChild($child);
+        }
     }
 
 }
