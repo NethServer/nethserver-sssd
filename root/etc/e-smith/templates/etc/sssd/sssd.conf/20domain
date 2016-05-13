@@ -9,6 +9,7 @@ use_fully_qualified_names = True
     if ($provider eq 'ldap') {
         $OUT .= "ldap_uri = " . $sssd{'LdapURI'} . "\n";
         $OUT .= "ldap_search_base = $suffix\n";
+        $OUT .= "ldap_tls_reqcert = never\n";
     } elsif ($provider eq 'ad') {
         $OUT .= "access_provider = ad\n";
         $OUT .= "ad_domain = $DomainName\n";
