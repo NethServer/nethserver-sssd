@@ -5,7 +5,6 @@ echo $view->header()->setAttribute('template', $T('Password_Title'));
 
 echo $view->panel()
         ->insert($view->checkbox('Users', 'strong')->setAttribute('uncheckedValue', 'none'))
-        ->insert($view->checkbox('Admin', 'strong')->setAttribute('uncheckedValue', 'none'))
         ->insert($view->checkbox('PassExpires', 'yes')->setAttribute('uncheckedValue', 'no'))
         ->insert($view->slider('MaxPassAge', $view::SLIDER_ENUMERATIVE | $view::LABEL_ABOVE)
                 ->setAttribute('label', $T('Maximum password age (${0})')))

@@ -47,19 +47,10 @@ class Password extends \Nethgui\Controller\AbstractController
     public function initialize()
     {
         $this->declareParameter('Users', $this->createValidator()->memberOf('none', 'strong'), array('configuration', 'passwordstrength', 'Users'));
-        $this->declareParameter('Admin', $this->createValidator()->memberOf('none', 'strong'), array('configuration', 'passwordstrength', 'Admin'));
         $this->declareParameter('MaxPassAge', Validate::POSITIVE_INTEGER, array('configuration', 'passwordstrength', 'MaxPassAge'));
         $this->declareParameter('MinPassAge', $this->createValidator()->memberOf('0', '30', '60', '90', '180', '365'), array('configuration', 'passwordstrength', 'MinPassAge'));
         $this->declareParameter('PassExpires', $this->createValidator()->memberOf('yes', 'no'), array('configuration', 'passwordstrength', 'PassExpires'));
         $this->declareParameter('PassWarning', Validate::POSITIVE_INTEGER, array('configuration', 'passwordstrength', 'PassWarning'));
-
-        $this->setDefaultValues('Users', 'strong');
-        $this->setDefaultValues('Admin', 'strong');
-        $this->setDefaultValues('MaxPassAge', '180');
-        $this->setDefaultValues('MinPassAge', '0');
-        $this->setDefaultValues('PassExpires', 'yes');
-        $this->setDefaultValues('PassWarning', '7');
-
 
         parent::initialize();
     }
@@ -68,27 +59,44 @@ class Password extends \Nethgui\Controller\AbstractController
     {
         parent::prepareView($view);
 
+        $maxPassAgeDatasource = array(
+            '30' => $view->translate('${0} days', array(30)),
+            '60' => $view->translate('${0} days', array(60)),
+            '90' => $view->translate('${0} days', array(90)),
+            '180' => $view->translate('${0} days', array(180)),
+            '365' => $view->translate('${0} days', array(365)),
+        );
+        if(!isset($maxPassAgeDatasource[$this->parameters['MaxPassAge']])) {
+            $maxPassAgeDatasource[$this->parameters['MaxPassAge']] = $view->translate('${0} days', array($this->parameters['MaxPassAge']));
+        }
+        \ksort($maxPassAgeDatasource);
 
-        $view['MaxPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource(array(
-                    '30' => $view->translate('${0} days', array(30)),
-                    '60' => $view->translate('${0} days', array(60)),
-                    '90' => $view->translate('${0} days', array(90)),
-                    '180' => $view->translate('${0} days', array(180)),
-                    '365' => $view->translate('${0} days', array(365)),
-        ));
-        $view['MinPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource(array(
-                    '0' => $view->translate('${0} days', array(0)),
-                    '30' => $view->translate('${0} days', array(30)),
-                    '60' => $view->translate('${0} days', array(60)),
-                    '90' => $view->translate('${0} days', array(90)),
-                    '180' => $view->translate('${0} days', array(180)),
-                    '365' => $view->translate('${0} days', array(365)),
-        ));
-        $view['PassWarningDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource(array(
-                    '7' => $view->translate('${0} days', array(7)),
-                    '15' => $view->translate('${0} days', array(15)),
-                    '30' => $view->translate('${0} days', array(30)),
-        ));
+        $minPassAgeDatasource = array(
+            '0' => $view->translate('${0} days', array(0)),
+            '30' => $view->translate('${0} days', array(30)),
+            '60' => $view->translate('${0} days', array(60)),
+            '90' => $view->translate('${0} days', array(90)),
+            '180' => $view->translate('${0} days', array(180)),
+            '365' => $view->translate('${0} days', array(365)),
+        );
+        if(!isset($minPassAgeDatasource[$this->parameters['MinPassAge']])) {
+            $minPassAgeDatasource[$this->parameters['MinPassAge']] = $view->translate('${0} days', array($this->parameters['MinPassAge']));
+        }
+        \ksort($minPassAgeDatasource);
+
+        $passWarningDatasource = array(
+            '7' => $view->translate('${0} days', array(7)),
+            '15' => $view->translate('${0} days', array(15)),
+            '30' => $view->translate('${0} days', array(30)),
+        );
+        if(!isset($passWarningDatasource[$this->parameters['PassWarning']])) {
+            $passWarningDatasource[$this->parameters['PassWarning']] = $view->translate('${0} days', array($this->parameters['PassWarning']));
+        }
+        \ksort($passWarningDatasource);
+
+        $view['MaxPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($maxPassAgeDatasource);
+        $view['MinPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($minPassAgeDatasource);
+        $view['PassWarningDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($passWarningDatasource);
     }
 
     protected function onParametersSaved($changes)
