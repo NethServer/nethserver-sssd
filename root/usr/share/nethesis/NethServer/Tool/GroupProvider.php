@@ -44,7 +44,30 @@ class GroupProvider
         } else { # groups from remote server
             $groups = $this->platform->getDatabase('NethServer::Database::Group')->getAll();
         }
-        return is_array($groups) ? $groups : array();
+        /*Filter out system groups*/
+        $handle = fopen('/etc/nethserver/system-groups','r');
+        $systemGroups = array();
+        if ($handle){
+            while (($line = fgets($handle)) !== false) {
+                $systemGroups[] = strtolower(trim($line));
+            }
+        }
+        fclose($handle);
+        if (!empty($groups))
+        {
+            foreach ($groups as $key => $group)
+            {
+                $tmp = split ('@',strtolower($key)); 
+                if (in_array($tmp[0],$systemGroups))
+                {
+                    /*Remove group if it's a system group*/
+                    unset($groups[$key]);
+                } 
+            }
+            return $groups;
+        }
+        return array();
+        
     }
 
     public function isReadOnly()
