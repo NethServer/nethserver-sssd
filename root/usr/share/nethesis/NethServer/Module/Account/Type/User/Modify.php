@@ -69,9 +69,14 @@ class Modify extends \Nethgui\Controller\Table\Modify
         );
 
         $this->setSchema($parameterSchema);
+    }
+
+    public function bind(\Nethgui\Controller\RequestInterface $request)
+    {
         $this->setCreateDefaults(array(
-            'expires' => 'yes'
+            'expires' => $this->getPlatform()->getDatabase('configuration')->getProp('passwordstrength', 'PassExpires')
         ));
+        parent::bind($request);
     }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
