@@ -69,6 +69,9 @@ class Modify extends \Nethgui\Controller\Table\Modify
         );
 
         $this->setSchema($parameterSchema);
+        $this->setCreateDefaults(array(
+            'expires' => 'yes'
+        ));
     }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
