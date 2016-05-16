@@ -49,7 +49,27 @@ class UserProvider
                 $users[$user] = $fields;
             }
         }
-        return is_array($users) ? $users : array();
+        /*Filter out system users*/
+        $handle = fopen('/etc/nethserver/system-users','r');
+        $systemUsers = array();
+        if ($handle){
+            while (($line = fgets($handle)) !== false) {
+                $systemUsers[] = strtolower(trim($line));
+            }
+        }
+        if (!empty($users))
+        {
+            foreach ($users as $key => $user)
+            {
+                $tmp = split ('@',strtolower($key));
+                if (in_array($tmp[0],$systemUsers))
+                {
+                    unset($users[$key]);
+                }
+            }
+            return $users;
+        }
+        return array();
     }
 
     public function isReadOnly()
