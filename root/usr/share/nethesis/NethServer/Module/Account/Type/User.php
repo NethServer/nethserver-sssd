@@ -40,14 +40,16 @@ class User extends \Nethgui\Controller\TableController
         $this
             ->setTableAdapter($adapter)
             ->setColumns($adapter->getColumns())
-            ->addTableAction(new User\Modify('create'))
-            ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
             ->addRowAction(new User\Modify('update'))
             ->addRowAction(new User\ChangePassword())
             ->addRowAction(new User\ToggleLock('lock'))
             ->addRowAction(new User\ToggleLock('unlock'))
             ->addRowAction(new User\Modify('delete'))
         ;
+        if (in_array('Actions', $adapter->getColumns())) {
+           $this->addTableAction(new User\Modify('create'));
+           $this->addTableAction(new \Nethgui\Controller\Table\Help('Help'));
+        }
 
         parent::initialize();
     }

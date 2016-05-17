@@ -42,11 +42,13 @@ class Group extends \Nethgui\Controller\TableController
         $this
             ->setTableAdapter($adapter)
             ->setColumns($adapter->getColumns())
-            ->addTableAction(new Group\Modify('create'))
-            ->addTableAction(new \Nethgui\Controller\Table\Help('Help'))
             ->addRowAction(new Group\Modify('update'))
             ->addRowAction(new Group\Modify('delete'))
         ;
+        if (in_array('Actions', $adapter->getColumns())) {
+           $this->addTableAction(new Group\Modify('create'));
+           $this->addTableAction(new \Nethgui\Controller\Table\Help('Help'));
+        }
 
         parent::initialize();
     }
