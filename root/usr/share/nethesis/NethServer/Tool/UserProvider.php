@@ -42,12 +42,7 @@ class UserProvider
         if ($this->listUsersCommand) {
             $users = json_decode(exec('/usr/bin/sudo '.$this->listUsersCommand), TRUE);
         } else { # users from remote server
-            foreach ($this->platform->getDatabase('NethServer::Database::Passwd')->getAll() as $user => $fields) {
-                if ($fields['uid'] < 1000) {
-                    continue;
-                }
-                $users[$user] = $fields;
-            }
+            $users = $this->platform->getDatabase('NethServer::Database::Passwd')->getAll();
         }
         /*Filter out system users*/
         $handle = fopen('/etc/nethserver/system-users','r');
@@ -62,7 +57,8 @@ class UserProvider
             foreach ($users as $key => $user)
             {
                 $tmp = split ('@',strtolower($key));
-                if (in_array($tmp[0],$systemUsers))
+                # hide system users and machine accounts
+                if (in_array($tmp[0],$systemUsers) || $user['uid'] < 1000 || strpos($tmp[0], '$') !== false)
                 {
                     unset($users[$key]);
                 }

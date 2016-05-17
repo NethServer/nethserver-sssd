@@ -58,16 +58,15 @@ class GroupProvider
             foreach ($groups as $key => $group)
             {
                 $tmp = split ('@',strtolower($key)); 
-                if (in_array($tmp[0],$systemGroups))
+                if (in_array($tmp[0],$systemGroups) || $group['gid'] < 1000)
                 {
                     /*Remove group if it's a system group*/
                     unset($groups[$key]);
                 } 
             }
-            return $groups;
         }
-        return array();
-        
+
+        return is_array($groups) ? $groups : array();
     }
 
     public function isReadOnly()
