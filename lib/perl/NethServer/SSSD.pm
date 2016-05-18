@@ -251,7 +251,7 @@ sub bindPassword {
     my $self = shift;
     return $self->{'BindPassword'} if (defined $self->{'BindPassword'} && $self->{'BindPassword'});
 
-    if ($self->isLdap() && $self->host() eq 'localhost') {
+    if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return NethServer::Password::store('libuser');
     }
 
@@ -270,7 +270,7 @@ sub bindUser {
     my $self = shift;
     return $self->{'BindUser'} if (defined $self->{'BindUser'} && $self->{'BindUser'});
 
-    if ($self->isLdap() && $self->host() eq 'localhost') {
+    if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return 'libuser';
     } elsif ($self->isAD()) {
         return 'Administrator';
