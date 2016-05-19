@@ -185,7 +185,9 @@ sub bindDN {
     if ($self->isLdap()) {
         return "cn=libuser,$suffix";
     } else {
-        return "cn=Administrator,cn=Users,$suffix";
+        my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
+        chomp($machineName);
+        return "cn=". substr($machineName, 0, 15) . ",cn=Computers,$suffix";
     }
 }
 
@@ -326,7 +328,7 @@ sub new
        $self->{$key} = $props{$key};
     }
     $self->{'config'} = $db;
-    if (!defined $self->{'LdapURI'}  || $self->{'LdapURI'} eq '') {
+    if (!defined $self->{'LdapURI'} || $self->{'LdapURI'} eq '') {
         my $host = __findHost($db) || die ("Can't find LDAP URI");
         $self->{'LdapURI'} = "ldap://$host:389";
     }
