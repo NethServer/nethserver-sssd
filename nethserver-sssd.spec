@@ -12,6 +12,7 @@ Requires:       realmd, sssd, adcli, nethserver-lib
 # send expiring password warnings: 
 Requires: mailx, postfix, anacron
 Requires:  samba-common-tools
+Requires: krb5-workstation
 
 %description
 NethServer SSSD configuration
