@@ -216,3 +216,6 @@ password renewal, and crojob tasks: ::
   The unix bit permissions in octal form. Default is ``0400``. This is applied to both the credentials cache file and the keytab file.
 
 The implementation is provided by ``/usr/libexec/nethserver/smbads``.
+
+Individual services can link themselves to ``nethserver-sssd-initkeytabs``
+action in the respective ``-update`` event.
