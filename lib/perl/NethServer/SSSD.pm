@@ -253,6 +253,32 @@ sub bindPassword {
 
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return NethServer::Password::store('libuser');
+    } elsif ($self->isAD()) {
+        my $workgroup = qx(/usr/bin/testparm -s --parameter-name=workgroup 2>/dev/null);
+        chomp($workgroup);
+        my $secret = "";
+        my $pyscript = <<EOF;
+import tdb
+db = tdb.open("/var/lib/samba/private/secrets.tdb")
+print db["SECRETS/MACHINE_PASSWORD/${workgroup}"].rstrip("\\000")
+EOF
+
+        pipe RH, WH;
+        open(OLDIN, "<&STDIN");
+        open(STDIN, "<&RH");
+        if(open(PIPE, "-|")) {
+            close(RH);
+            print WH $pyscript;
+            close(WH);
+            $secret = <PIPE>;
+            chomp($secret);
+        } else {
+            exec("/usr/bin/python -");
+        }
+        close(PIPE);
+        close(RH);
+        open(STDIN, "<&OLDIN");
+        return $secret;
     }
 
     return '';
@@ -273,7 +299,9 @@ sub bindUser {
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return 'libuser';
     } elsif ($self->isAD()) {
-        return 'Administrator';
+        my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
+        chomp($machineName);
+        return substr($machineName, 0, 15) . '$';
     }
 
     return '';

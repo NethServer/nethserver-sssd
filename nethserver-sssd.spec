@@ -13,6 +13,7 @@ Requires:       realmd, sssd, adcli, nethserver-lib
 Requires: mailx, postfix, anacron
 Requires:  samba-common-tools
 Requires: krb5-workstation
+Requires: python-tdb
 
 %description
 NethServer SSSD configuration
