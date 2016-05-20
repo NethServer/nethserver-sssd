@@ -6,13 +6,14 @@ Is possible to connect this system to an external LDAP or Active Directory accou
 It's also possible to install an LDAP or Active Directory account provider in this system, installing nethserver-directory or nethserver-dc package.
 
 LDAP
-----
+====
 
 Server URI
     to configure an external LDAP provider insert ldap URI like ldap://192.168.1.10:389
 
 Active Directory
------------------
+=================
+
 DNS server IP address
     IP address of domain controller DNS server (usually the address of domain controller itself)
 
@@ -43,7 +44,6 @@ password). A newly created user account remains locked until it has
 set a password. A blocked user can not use the services of
 servers that require authentication.
 
-===============
 Create / Modify
 ===============
 
@@ -53,7 +53,7 @@ be changed after creation.
 These actions are available only if there is a user backend installed
 
 User
-------
+----
 
 Basic information about the user. These fields are
  required.
@@ -90,7 +90,7 @@ The password must meet the following requirements:
 This action is available only if there is a user backend installed
 
 Lock / Unlock
-----------------
+-------------
 
 Allows you to lock or unlock a user. User data will not be deleted.
 
@@ -116,7 +116,7 @@ Create / Modify
 ===============
 
 Group
--------------
+-----
 
 Create a new group, adding members to the group.
 
