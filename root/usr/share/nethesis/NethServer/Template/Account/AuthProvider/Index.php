@@ -2,7 +2,7 @@
 
 /* @var $view \Nethgui\Renderer\Xhtml */
 
-echo $view->header()->setAttribute('template', $T('AuthProvider_header'));
+echo $view->header('domain')->setAttribute('template', $T('AuthProvider_header'));
 
 $formState = 0;
 if($view['Provider'] !== 'none') {

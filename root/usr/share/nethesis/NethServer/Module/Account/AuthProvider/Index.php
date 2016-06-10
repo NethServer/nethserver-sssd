@@ -64,6 +64,12 @@ class Index extends \Nethgui\Controller\AbstractController
         }
     }
 
+    public function prepareView(\Nethgui\View\ViewInterface $view)
+    {
+        parent::prepareView($view);
+        $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+    }
+
     public function nextPath()
     {
         if ($this->isAuthNeeded) {

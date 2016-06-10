@@ -5,7 +5,7 @@ $L['Account_Description'] = 'Manage users and groups, configure the domain ident
 $L['Account_Tags'] = 'sssd user group realm domain account kerberos ldap';
 $L['Select_Title'] = 'Backend choice';
 
-$L['AuthProvider_header'] = 'Select the users and groups provider';
+$L['AuthProvider_header'] = 'Select the users and groups provider of domain "${0}"';
 $L['Provider_none_label'] = 'None (disabled)';
 $L['Provider_ldap_label'] = 'LDAP';
 $L['Provider_ad_label'] = 'Active Directory';
