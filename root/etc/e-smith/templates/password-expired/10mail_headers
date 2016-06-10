@@ -1,4 +1,0 @@
-From: dont-reply@{ $hostname }
-To: { use Encode; encode('MIME-Header', decode('UTF-8', $recipientName)) } <{ $recipientAddress }>
-Subject: { sprintf(gettext("%s, your password is about to expire"), $recipientName); }
-

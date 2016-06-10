@@ -69,17 +69,6 @@ validator_actions('group-delete', qw(
     account-removable 20
 ));
 
-#--------------------------------------------------
-# password-expired event
-#--------------------------------------------------
-event_actions('password-expired', qw(
-    nethserver-sssd-mail-password-expired 40
-));
-
-# Add warnpassexpire script in cron.daily jobs list -- Refs #1073
-safe_symlink('/sbin/e-smith/warnpassexpire', 'root/etc/cron.daily/warnpassexpire');
-
-
 #------------------------------------------------------
 # Clear SSSD cache at the end of all user/group events
 #------------------------------------------------------
