@@ -76,7 +76,7 @@ class GroupProvider
 
     public function isAD()
     {
-        return $ad;
+        return $this->ad;
     }
     
     public function __construct(\Nethgui\System\PlatformInterface $platform)
