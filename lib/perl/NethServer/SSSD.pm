@@ -41,7 +41,7 @@ sub __findHost {
     if ($provider eq 'ldap') {
         my $ldap = Net::LDAP->new('localhost') || return '';
         return 'localhost';
-    } else {
+    } elsif ($provider eq 'ad') {
         my $res = Net::DNS::Resolver->new();
         my $domain = $db->get('DomainName')->value();
         my $reply = $res->send("_ldap._tcp.".$domain, "SRV");
@@ -329,8 +329,10 @@ sub new
     }
     $self->{'config'} = $db;
     if (!defined $self->{'LdapURI'} || $self->{'LdapURI'} eq '') {
-        my $host = __findHost($db) || die ("Can't find LDAP URI");
-        $self->{'LdapURI'} = "ldap://$host:389";
+        my $host = __findHost($db);
+        if ($host) {
+            $self->{'LdapURI'} = "ldap://$host:389";
+        }
     }
 
 
