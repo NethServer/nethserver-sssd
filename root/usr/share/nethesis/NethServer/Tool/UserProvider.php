@@ -84,11 +84,9 @@ class UserProvider
 
          # Search for installed provider
          if (file_exists('/usr/libexec/nethserver/ldap-list-users')) {
-             $columns[] = 'Actions';
              $this->listUsersCommand = '/usr/libexec/nethserver/ldap-list-users';
              $this->ad = false;
          } else if (file_exists('/usr/libexec/nethserver/ad-list-users')) {
-             $columns[] = 'Actions';
              $this->listUsersCommand = '/usr/libexec/nethserver/ad-list-users';
              $this->ad = true;
          }

@@ -85,11 +85,9 @@ class GroupProvider
 
          # Search for installed provider
          if (file_exists('/usr/libexec/nethserver/ldap-list-groups')) {
-             $columns[] = 'Actions';
              $this->listGroupsCommand = '/usr/libexec/nethserver/ldap-list-groups';
              $this->ad = false;
          } else if (file_exists('/usr/libexec/nethserver/ad-list-groups')) {
-             $columns[] = 'Actions';
              $this->listGroupsCommand = '/usr/libexec/nethserver/ad-list-groups';
              $this->ad = true;
          }
