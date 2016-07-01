@@ -57,7 +57,7 @@ class GroupProvider
         {
             foreach ($groups as $key => $group)
             {
-                $tmp = split ('@',strtolower($key)); 
+                $tmp = explode('@',strtolower($key)); 
                 if ( in_array($tmp[0],$systemGroups) || (isset($group['gid']) && ($group['gid'] < 1000)) )
                 {
                     /*Remove group if it's a system group*/
