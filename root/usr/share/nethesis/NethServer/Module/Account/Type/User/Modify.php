@@ -65,7 +65,10 @@ class Modify extends \Nethgui\Controller\Table\Modify
             array('gecos', Validate::NOTEMPTY, Table::FIELD),
             array('groups', Validate::ANYTHING, Table::FIELD),
             array('expires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD),
-            array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD)
+            array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD),
+            array('setPassword',Validate::SERVICESTATUS),
+            array('newPassword', $this->getPlatform()->createValidator()->platform('password-strength', 'Users')),
+            array('confirmNewPassword', Validate::ANYTHING)
         );
 
         $this->setSchema($parameterSchema);
@@ -158,6 +161,12 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $this->getPlatform()->signalEvent('user-'.$event, $params);
         $this->saveGroups($this->parameters['username'], $this->parameters['groups']);
         $this->getPlatform()->signalEvent('password-policy-update', array($this->parameters['username'], $this->parameters['expires']));
+        if ($this->getIdentifier() === 'create' && $this->parameters['setPassword']==='enabled'){
+            #User created, launch password-modify event
+            $this->stash = new \NethServer\Tool\PasswordStash();
+            $this->stash->store($this->parameters['newPassword']);
+            $this->getPlatform()->signalEvent('password-modify', array($this->parameters['username'].'@'.$this->getPlatform()->getDatabase('configuration')->getType('DomainName'), $this->stash->getFilePath()));
+        }
         $this->getParent()->getAdapter()->flush();
     }
 
@@ -165,6 +174,9 @@ class Modify extends \Nethgui\Controller\Table\Modify
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
         parent::prepareView($view);
+        if (! $this->getRequest()->isMutation()){
+            $this->parameters['setPassword']='enabled';
+        }
         if (isset($this->parameters['username'])) {
             $view['ChangePassword'] = $view->getModuleUrl('../ChangePassword/' . $this->parameters['username']);
             $view['FormAction'] = $view->getModuleUrl($this->parameters['username']);

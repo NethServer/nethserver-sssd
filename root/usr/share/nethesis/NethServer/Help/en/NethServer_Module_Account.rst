@@ -75,8 +75,8 @@ Remote shell (SSH)
     Allow user to log in to system using SSH secure shell
 
 
-Change Password
----------------
+Set Password / Change Password
+------------------------------
 
 Allows to set an initial password, or change the user's password.
 
