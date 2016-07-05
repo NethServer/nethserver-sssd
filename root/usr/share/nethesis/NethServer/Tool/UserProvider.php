@@ -56,7 +56,7 @@ class UserProvider
         {
             foreach ($users as $key => $user)
             {
-                $tmp = split ('@',strtolower($key));
+                $tmp = explode('@',strtolower($key));
                 # hide system users and machine accounts
                 if (in_array($tmp[0],$systemUsers) || (isset($user['uid']) && $user['uid'] < 1000) || strpos($tmp[0], '$') !== false)
                 {
