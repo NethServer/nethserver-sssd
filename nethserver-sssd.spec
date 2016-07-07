@@ -1,6 +1,6 @@
 Name:           nethserver-sssd
-Version:        0.0.1
-Release:        1%{?dist}
+Version: 1.0.0
+Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
 License:        GPLv3+
@@ -63,5 +63,8 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Jul 07 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.0-1
+- First NS7 release
+
 * Fri Jan 29 2016 Davide Principi <davide.principi@nethesis.it>
 - Initial version
