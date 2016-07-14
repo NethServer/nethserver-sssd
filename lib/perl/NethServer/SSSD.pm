@@ -26,6 +26,7 @@ use Net::LDAP;
 use Net::DNS::Resolver;
 use NethServer::Password;
 use Carp;
+use URI;
 
 sub __domain2suffix {
     my $domain = `hostname -d`;
