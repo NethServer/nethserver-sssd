@@ -146,7 +146,7 @@ Return LDAP host if set.
 
 sub host {
     my $self = shift;
-    my $uri = URI->new($self->{'LdapURI'}) || '';
+    my $uri = URI->new($self->{'LdapURI'}) || return '';
 
     return $uri->host();
 }
