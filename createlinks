@@ -40,6 +40,7 @@ event_templates('nethserver-sssd-save', qw(
 event_actions('nethserver-sssd-save', qw(
     nethserver-sssd-conf    20
     nethserver-sssd-initkeytabs 30
+    system-adjust  80
 ));
 event_services('nethserver-sssd-save', qw(
     sssd restart
