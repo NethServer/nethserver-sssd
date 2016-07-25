@@ -3,12 +3,15 @@
 
 if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Update user `${0}`');
+    $username = (string)$view->textInput('username', $view::STATE_DISABLED | $view::STATE_READONLY );
     if ($view['isAD']) {
         $shellStyle = $view::STATE_DISABLED;
     }
 } else {
     $headerText = $T('Create a new user');
     $shellStyle = 0;
+    $username = (string)$view->textInput('username');
+    $username = str_replace("</div>", "@".$view['domain']."</div>", $username);
 }
 
 echo $view->header('username')->setAttribute('template', $headerText);
@@ -19,7 +22,7 @@ $passPanel = $view->fieldset()->setAttribute('template', $T('Options_label'))
 
 $basicInfo = $view->panel()
     ->setAttribute('title', $T('BasicInfo_Title'))
-    ->insert($view->textInput('username', ($view->getModule()->getIdentifier() == 'create' ? 0 : $view::STATE_DISABLED | $view::STATE_READONLY )))
+    ->insert($view->literal($username))
     ->insert($view->textInput('gecos'))
     ->insert($view->objectPicker('groups')
     ->setAttribute('objects', 'groupsDatasource')

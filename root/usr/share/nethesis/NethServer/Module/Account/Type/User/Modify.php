@@ -190,6 +190,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
         $view['isAD'] = $this->getGroupProvider()->isAD();
         $view['groupsDatasource'] = $tmp;
+        $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
     }
 
 }
