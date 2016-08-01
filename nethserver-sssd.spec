@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.1
+Version: 1.0.2
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Aug 01 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.2-1
+- Accounts: web interface tweaks - NethServer/dev#5073
+- sssd-save event: execute system-adjust. NethServer/dev#5071
+
 * Thu Jul 21 2016 Stefano Fancello <stefano.fancello@nethesis.it> - 1.0.1-1
 - NethServer::SSSD: can't use method port() - Bug NethServer/dev#5051
 
