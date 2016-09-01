@@ -52,7 +52,6 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
         if ($err === 0) {
             $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
             $this->getPlatform()->signalEvent('nethserver-sssd-save');
-            $this->nextModule = 'Index';
         } else {
             $this->joinError = TRUE;
             $this->getLog()->error("[ERROR] exit code from realm join operation is $err");
@@ -65,15 +64,12 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
         if ($this->getRequest()->isMutation()) {
             if ($this->joinError === TRUE) {
                 $this->notifications->error('Invalid credentials');
+            } else {
+                $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/Account'));
             }
         } elseif ( ! $view['login']) {
             $view['login'] = 'Administrator';
         }
-    }
-
-    public function nextPath()
-    {
-        return isset($this->nextModule) ? $this->nextModule : parent::nextPath();
     }
 
     public function setUserNotifications(\Nethgui\Model\UserNotifications $n)
