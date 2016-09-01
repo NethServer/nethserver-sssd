@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Sep 01 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.3-1
+- UI stale after joining a remote account provider - Bug NethServer/dev#5097
+
 * Mon Aug 01 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.2-1
 - Accounts: web interface tweaks - NethServer/dev#5073
 - sssd-save event: execute system-adjust. NethServer/dev#5071
