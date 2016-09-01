@@ -9,7 +9,7 @@ LDAP
 ====
 
 Server URI
-    to configure an external LDAP provider insert ldap URI like ldap://192.168.1.10:389
+    to configure an external LDAP provider insert the IP address or host name of LDAP server.
 
 Active Directory
 =================

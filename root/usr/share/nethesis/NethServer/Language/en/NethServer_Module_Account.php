@@ -10,7 +10,7 @@ $L['Provider_none_label'] = 'None (disabled)';
 $L['Provider_ldap_label'] = 'LDAP';
 $L['Provider_ad_label'] = 'Active Directory';
 $L['AdDns_label'] = 'DNS server IP address';
-$L['LdapUri_label'] = 'Server URI';
+$L['LdapUri_label'] = 'Server IP address';
 $L['BindProvider_label'] = 'Bind';
 
 $L['login_label'] = 'Privileged user name';
