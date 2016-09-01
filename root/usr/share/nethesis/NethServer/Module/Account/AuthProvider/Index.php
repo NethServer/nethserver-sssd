@@ -30,6 +30,7 @@ class Index extends \Nethgui\Controller\AbstractController
 {
 
     protected $isAuthNeeded = FALSE;
+    protected $reloadPage = FALSE;
 
     public function initialize()
     {
@@ -60,7 +61,8 @@ class Index extends \Nethgui\Controller\AbstractController
             $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
         } elseif ($this->parameters['Provider'] === 'ldap') {
             $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
-            $this->getPlatform()->signalEvent('nethserver-sssd-save');
+            $this->getPlatform()->signalEvent('nethserver-sssd-save &');
+            $this->reloadPage = TRUE;
         }
     }
 
@@ -68,12 +70,24 @@ class Index extends \Nethgui\Controller\AbstractController
     {
         parent::prepareView($view);
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+        if($this->getRequest()->isMutation() && $this->reloadPage) {
+            $this->getPlatform()->setDetachedProcessCondition('success', array(
+                'location' => array(
+                    'url' => $view->getModuleUrl('/Account/AuthProvider/Index?installSuccess'),
+                    'freeze' => TRUE,
+            )));
+        }
+        if($this->getRequest()->hasParameter('installSuccess')) {
+            $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/Account'));
+        }
     }
 
     public function nextPath()
     {
         if ($this->isAuthNeeded) {
             return 'Authenticate';
+        } elseif($this->reloadPage) {
+            return FALSE;
         }
         return parent::nextPath();
     }
