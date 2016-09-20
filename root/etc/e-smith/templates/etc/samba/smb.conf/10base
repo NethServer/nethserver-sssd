@@ -7,5 +7,6 @@ server string = NethServer {$sysconfig{'Version'} . ' ' . $sysconfig{'Release'}}
 security = { $sssd{'Provider'} eq 'ad' ? 'ADS' : 'user' }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }realm = { uc($DomainName) }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }kerberos method = secrets and keytab
+netbios name = { uc(substr($SystemName, 0, 15)); }
 
 

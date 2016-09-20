@@ -352,7 +352,7 @@ sub read_krb_configs()
 sub get_machine_principal()
 {
     my %cfg = esmith::ConfigDB->as_hash();
-    my $principal = uc($cfg{SystemName}->{type} . "\$\@" . ($cfg{smb}{AdsRealm} || $cfg{DomainName}->{type}));
+    my $principal = uc(substr($cfg{SystemName}->{type}, 0, 15) . "\$\@" . ($cfg{smb}{AdsRealm} || $cfg{DomainName}->{type}));
     return $principal;
 }
 
