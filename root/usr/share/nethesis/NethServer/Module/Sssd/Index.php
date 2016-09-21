@@ -36,8 +36,16 @@ class Index extends \Nethgui\Controller\AbstractController
         $this->provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
         if ($this->getRequest()->isValidated()) {
             if ($this->provider === 'ad') {
-                $this->details = $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads info 2>&1')->getOutput() . "\n"
-                        . $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads testjoin 2>&1')->getOutput();
+                $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads info 2>&1')->getOutput() . "\n\n";
+                $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads testjoin 2>&1')->getOutput() . "\n";
+
+                $netbiosname = substr($this->getPlatform()->getDatabase('configuration')->getType('SystemName'), 0, 15) . '$';
+                $searchCmd = $this->getPlatform()->exec("/usr/bin/sudo net ads search -P '(&(sAMAccountName=${netbiosname})(objectCategory=computer))' name sAMAccountName distinguishedName servicePrincipalName objectSid dNSHostName pwdLastSet lastLogon whenCreated whenChanged accountExpires 2>&1");
+                if($searchCmd->getExitCode() === 0) {
+                    $this->details .= implode("\n", array_slice($searchCmd->getOutputArray(), 3));
+                } else {
+                    $this->details .= $searchCmd->getOutput();
+                }
             } elseif ($this->provider === 'ldap') {
                 $this->details = 'LDAP URI: ' . $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'LdapURI');
             }
