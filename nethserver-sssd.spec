@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.3
+Version: 1.0.4
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Fri Sep 23 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.4-1
+- Nsdc domain join fails with long hostname - Bug NethServer/dev#5110
+
 * Thu Sep 01 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.3-1
 - UI stale after joining a remote account provider - Bug NethServer/dev#5097
 
