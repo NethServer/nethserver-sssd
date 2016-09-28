@@ -2,7 +2,7 @@
 #
 # 10base
 #
-workgroup = { $sssd{'Provider'} eq 'ad' ? uc((split('\.', $DomainName))[0]) : ($smb{'Workgroup'} || 'WORKGROUP') }
+workgroup = { $workgroup }
 server string = NethServer {$sysconfig{'Version'} . ' ' . $sysconfig{'Release'}} (Samba %v)
 security = { $sssd{'Provider'} eq 'ad' ? 'ADS' : 'user' }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }realm = { uc($DomainName) }
