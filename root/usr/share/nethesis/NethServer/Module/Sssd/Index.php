@@ -36,6 +36,8 @@ class Index extends \Nethgui\Controller\AbstractController
         $this->provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
         if ($this->getRequest()->isValidated()) {
             if ($this->provider === 'ad') {
+                $workgroup = trim($this->getPlatform()->exec('testparm -s -d 0 --parameter-name=workgroup 2>/dev/null')->getOutput());
+                $this->details .= "NetBIOS domain name: ${workgroup}\n";
                 $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads info 2>&1')->getOutput() . "\n\n";
                 $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads testjoin 2>&1')->getOutput() . "\n";
 
