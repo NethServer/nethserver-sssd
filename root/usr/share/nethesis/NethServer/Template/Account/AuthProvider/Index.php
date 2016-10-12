@@ -15,6 +15,7 @@ echo $view->panel($formState)
                 ->insert($view->textInput('LdapUri')->setAttribute('placeholder', $view['defaultLdapUri']))
         )
         ->insert($view->fieldsetSwitch('Provider', 'ad', $view::FIELDSET_EXPANDABLE | $formState)
+                ->insert($view->textInput('NetbiosDomain', $view::STATE_DISABLED | $view::STATE_READONLY))
                 ->insert($view->textInput('AdDns')->setAttribute('placeholder', $view['defaultAdDns']))
         )
 ;

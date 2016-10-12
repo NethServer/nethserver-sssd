@@ -70,6 +70,11 @@ class Index extends \Nethgui\Controller\AbstractController
     {
         parent::prepareView($view);
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+        $view['NetbiosDomain'] = $this->getPlatform()->getDatabase('configuration')->getProp('smb', 'Workgroup');
+        if (!$view['NetbiosDomain']) {
+            $view['NetbiosDomain'] = $view['domain'];
+        }
+        $view['NetbiosDomain'] = substr($view['NetbiosDomain'], 0, 15);
         if($this->getRequest()->isMutation() && $this->reloadPage) {
             $this->getPlatform()->setDetachedProcessCondition('success', array(
                 'location' => array(
