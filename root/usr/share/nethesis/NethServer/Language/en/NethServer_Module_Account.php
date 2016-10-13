@@ -12,6 +12,7 @@ $L['Provider_ad_label'] = 'Active Directory';
 $L['AdDns_label'] = 'DNS server IP address';
 $L['LdapUri_label'] = 'Server IP address';
 $L['BindProvider_label'] = 'Bind';
+$L['NetbiosDomain_label'] = 'NetBIOS domain';
 
 $L['login_label'] = 'Privileged user name';
 $L['password_label'] = 'Password';
