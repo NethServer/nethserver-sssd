@@ -67,7 +67,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             array('expires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD),
             array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD),
             array('setPassword',Validate::SERVICESTATUS),
-            array('newPassword', $this->getPlatform()->createValidator()->platform('password-strength', 'Users')),
+            array('newPassword', Validate::ANYTHING),
             array('confirmNewPassword', Validate::ANYTHING)
         );
 
@@ -96,6 +96,18 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
         if ($this->getIdentifier() === 'create') {
             $users = array();
+            if ( $this->parameters['setPassword']==='enabled' ) {
+                $passwordValidator = $this->getPlatform()->createValidator()->platform('password-strength', 'Users');
+
+                $this->stash = new \NethServer\Tool\PasswordStash();
+                $this->stash->store($this->parameters['newPassword']);
+
+                if ($this->parameters['newPassword'] !== $this->parameters['confirmNewPassword']) {
+                    $report->addValidationErrorMessage($this, 'confirmNewPassword', 'ConfirmNoMatch_label');
+                } elseif( ! $passwordValidator->evaluate($this->stash->getFilePath())) {
+                   $report->addValidationError($this, 'newPassword', $passwordValidator);
+                }
+            }
             $userProvider = new \NethServer\Tool\UserProvider($this->getPlatform());
             foreach (array_keys($userProvider->getUsers()) as $u) {
                  $tmp = explode('@',$u);
@@ -163,8 +175,6 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $this->getPlatform()->signalEvent('password-policy-update', array($this->parameters['username'], $this->parameters['expires']));
         if ($this->getIdentifier() === 'create' && $this->parameters['setPassword']==='enabled'){
             #User created, launch password-modify event
-            $this->stash = new \NethServer\Tool\PasswordStash();
-            $this->stash->store($this->parameters['newPassword']);
             $this->getPlatform()->signalEvent('password-modify', array($this->parameters['username'].'@'.$this->getPlatform()->getDatabase('configuration')->getType('DomainName'), $this->stash->getFilePath()));
         }
         $this->getParent()->getAdapter()->flush();
