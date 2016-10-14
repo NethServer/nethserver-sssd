@@ -14,6 +14,11 @@ Server URI
 Active Directory
 =================
 
+NetBIOS domain
+    This value also known as "workgroup" could be required to access SMB
+    resources, like *Shared folders*.  It is set automatically to the leftmost
+    part of the DNS domain suffix.  It is truncated to 15 characters.
+
 DNS server IP address
     IP address of domain controller DNS server (usually the address of domain controller itself)
 
