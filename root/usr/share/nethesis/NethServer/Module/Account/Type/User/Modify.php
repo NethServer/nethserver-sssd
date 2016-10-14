@@ -84,6 +84,10 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
+        if ( ! $this->getRequest()->isMutation()) {
+            return;
+        }
+
         if ($this->getIdentifier() === 'delete') {
             $v = $this->createValidator()->platform('user-delete');
             if( ! $v->evaluate($this->getAdapter()->getKeyValue())) {
