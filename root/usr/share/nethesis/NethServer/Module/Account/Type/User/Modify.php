@@ -198,9 +198,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $view['ChangePassword'] = '';
         }
 
-        $tmp = array();
-        foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
-            $tmp[] = array($key, $key);
+        if ($this->getRequest()->isValidated()) {
+            $tmp = array();
+            foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
+                $tmp[] = array($key, $key);
+            }
         }
         $view['isAD'] = $this->getGroupProvider()->isAD();
         $view['groupsDatasource'] = $tmp;

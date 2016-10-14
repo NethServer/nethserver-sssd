@@ -133,9 +133,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
         );
         $view->setTemplate($templates[$this->getIdentifier()]);
 
-        $tmp = array();
-        foreach ($this->getUserProvider()->getUsers() as $key => $values) {
-            $tmp[] = array($key, $key);
+        if ($this->getRequest()->isValidated()) {
+            $tmp = array();
+            foreach ($this->getUserProvider()->getUsers() as $key => $values) {
+                $tmp[] = array($key, $key);
+            }
         }
 
         $view['membersDatasource'] = $tmp;
