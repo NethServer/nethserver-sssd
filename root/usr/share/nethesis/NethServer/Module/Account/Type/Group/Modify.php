@@ -134,12 +134,18 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $view->setTemplate($templates[$this->getIdentifier()]);
 
         $tmp = array();
-        foreach ($this->getUserProvider()->getUsers() as $key => $values) {
-            $tmp[] = array($key, $key);
+        if ($this->getRequest()->isValidated()) {
+            foreach ($this->getUserProvider()->getUsers() as $key => $values) {
+                $tmp[] = array($key, $key);
+            }
+            $view->getCommandList()->show(); // required by nextPath() method of this class
         }
-
         $view['membersDatasource'] = $tmp;
-
     }
 
+    public function nextPath()
+    {
+        // FALSE disables prepareNextViewOptimized() call from parent module:
+        return $this->getRequest()->isMutation() ? 'read' : FALSE;
+    }
 }

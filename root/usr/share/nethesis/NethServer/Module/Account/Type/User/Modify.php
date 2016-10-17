@@ -188,8 +188,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
         parent::prepareView($view);
-        if (! $this->getRequest()->isMutation()){
-            $this->parameters['setPassword']='enabled';
+        if ($this->getIdentifier() === 'create' && ! $this->getRequest()->isMutation()) {
+            $view['setPassword'] = 'enabled';
         }
         if (isset($this->parameters['username'])) {
             $view['ChangePassword'] = $view->getModuleUrl('../ChangePassword/' . $this->parameters['username']);
@@ -199,12 +199,21 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
 
         $tmp = array();
-        foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
-            $tmp[] = array($key, $key);
+        if ($this->getRequest()->isValidated()) {
+            foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
+                $tmp[] = array($key, $key);
+            }
+            $view->getCommandList()->show(); // required by nextPath() method of this class
         }
         $view['isAD'] = $this->getGroupProvider()->isAD();
         $view['groupsDatasource'] = $tmp;
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+    }
+
+    public function nextPath()
+    {
+        // FALSE disables prepareNextViewOptimized() call from parent module:
+        return $this->getRequest()->isMutation() ? 'read' : FALSE;
     }
 
 }
