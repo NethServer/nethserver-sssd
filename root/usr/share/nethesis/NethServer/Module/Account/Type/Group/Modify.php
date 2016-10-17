@@ -141,6 +141,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $view->getCommandList()->show(); // required by nextPath() method of this class
         }
         $view['membersDatasource'] = $tmp;
+        $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
     }
 
     public function nextPath()
