@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.5
+Version: 1.0.6
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Oct 17 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.6-1
+- Display NetBIOS domain name on DC configuration page - NethServer/dev#5124
+
 * Mon Oct 10 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.5-1
 - Controller provisioning fails with long domain name - Bug NethServer/dev#5116
 
