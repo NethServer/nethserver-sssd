@@ -35,7 +35,13 @@ class Password extends \Nethgui\Controller\AbstractController
 
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
-        return \Nethgui\Module\SimpleModuleAttributesProvider::extendModuleAttributes($base, 'Security', 30);
+        $provider = new \NethServer\Tool\UserProvider($this->getPlatform());
+        # hide this module if no provider is installed
+        if ($provider->isReadOnly()) {
+            return $base;
+        } else {
+            return \Nethgui\Module\SimpleModuleAttributesProvider::extendModuleAttributes($base, 'Security', 30);
+        }
     }
 
     public function setDefaultValues($parameterName, $value)
