@@ -17,6 +17,7 @@ use_fully_qualified_names = True
         $OUT .= "realmd_tags = manages-system joined-with-samba\n";
         $OUT .= "krb5_store_password_if_offline = True\n";
         $OUT .= "ldap_id_mapping = True\n";
+        $OUT .= "override_homedir = /var/lib/nethserver/home/%u\n";
     }
 }
 
