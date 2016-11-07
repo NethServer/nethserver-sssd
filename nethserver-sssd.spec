@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.6
+Version: 1.0.7
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,12 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Nov 07 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.7-1
+- Legacy short user name support - NethServer/dev#5144
+- Missing home dir on RSAT-created accounts - NethServer/dev#5137
+- Useless Password policy page - NethServer/dev#5136
+- Missing inline help in Password policy page - NethServer/5135
+
 * Mon Oct 17 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.6-1
 - Display NetBIOS domain name on DC configuration page - NethServer/dev#5124
 
