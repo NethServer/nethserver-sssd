@@ -1,0 +1,9 @@
+{
+    #
+    # 01provider_config_homedir
+    #
+    if($provider eq 'ad') {
+        $provider_config .= "override_homedir = /var/lib/nethserver/home/%u\n";
+    }
+    '';
+}

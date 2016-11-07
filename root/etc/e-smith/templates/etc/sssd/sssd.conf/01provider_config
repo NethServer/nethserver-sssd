@@ -1,0 +1,21 @@
+{
+    #
+    # 01provider_config
+    #
+
+    our $provider_config = "id_provider = $provider\n";
+
+    if ($provider eq 'ldap') {
+        $provider_config .= "ldap_uri = " . $sssd{'LdapURI'} . "\n";
+        $provider_config .= "ldap_search_base = $suffix\n";
+        $provider_config .= "ldap_tls_reqcert = never\n";
+    } elsif ($provider eq 'ad') {
+        $provider_config .= "access_provider = ad\n";
+        $provider_config .= "ad_domain = " . lc($DomainName) . "\n";
+        $provider_config .= "krb5_realm = " . uc($DomainName) . "\n";
+        $provider_config .= "krb5_store_password_if_offline = True\n";
+        $provider_config .= "ldap_id_mapping = True\n";
+    }
+
+    '';
+}

@@ -1,0 +1,8 @@
+{
+    #
+    # 01provider_config_shell
+    #
+
+    $provider_config .= "default_shell = /usr/libexec/openssh/sftp-server\n";
+    '';
+}
