@@ -184,7 +184,7 @@ sub bindDN {
     }
 
     if ($self->isLdap()) {
-        return "cn=libuser,$suffix";
+        return "cn=ldapservice,$suffix";
     } else {
         my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
         chomp($machineName);
@@ -255,7 +255,7 @@ sub bindPassword {
     return $self->{'BindPassword'} if (defined $self->{'BindPassword'} && $self->{'BindPassword'});
 
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
-        return NethServer::Password::store('libuser');
+        return NethServer::Password::store('ldapservice');
     } elsif ($self->isAD()) {
         my $workgroup = qx(/usr/bin/testparm -s --parameter-name=workgroup 2>/dev/null);
         chomp($workgroup);
@@ -291,7 +291,7 @@ EOF
 =head2 bindUser
 
 Return LDAP bind user BindUser if set,
-"libuser" if ldap is local, "Administrator" if is AD
+"ldapservice" if ldap is local, "Administrator" if is AD
 
 =cut
 
@@ -300,7 +300,7 @@ sub bindUser {
     return $self->{'BindUser'} if (defined $self->{'BindUser'} && $self->{'BindUser'});
 
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
-        return 'libuser';
+        return 'ldapservice';
     } elsif ($self->isAD()) {
         my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
         chomp($machineName);
