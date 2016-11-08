@@ -177,6 +177,10 @@ All functions are documented using perldoc ::
 
   perldoc NethServer::SSSD
 
+This command prints out the current settings, by querying ``NethServer::SSSD`` 
+methods ::
+    
+    perl -MNethServer::SSSD -MJSON -e '$o = NethServer::SSSD->new(); print JSON::to_json({'BaseDN' => $o->baseDN(), 'BindDN' => $o->bindDN(), 'BindPassword' => $o->bindPassword(), 'UserDN' => $o->userDN(), 'GroupDN' => $o->groupDN()});' | python -mjson.tool
 
 Join Active Directory
 ---------------------
