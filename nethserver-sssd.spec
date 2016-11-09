@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.7
+Version: 1.0.8
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -63,6 +63,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Wed Nov 09 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.8-1
+- LDAP account with read-only privileges - NethServer/dev#5145
+
 * Mon Nov 07 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.7-1
 - Legacy short user name support - NethServer/dev#5144
 - Missing home dir on RSAT-created accounts - NethServer/dev#5137
