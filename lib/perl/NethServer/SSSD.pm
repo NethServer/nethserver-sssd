@@ -36,6 +36,10 @@ sub __domain2suffix {
     return $domain;
 }
 
+sub __builtinSuffix {
+    return 'dc=directory,dc=nh';
+}
+
 sub __findHost {
     my $db = shift;
     my $provider = $db->get_prop('sssd','Provider') || 'ldap';
@@ -162,7 +166,7 @@ sub baseDN {
     my $self = shift;
     return $self->{'BaseDN'} if (defined $self->{'BaseDN'} && $self->{'BaseDN'});
 
-    return __domain2suffix();
+    return $self->isAD() ? __domain2suffix() : __builtinSuffix();
 }
 
 =head2 bindDN
@@ -180,7 +184,7 @@ sub bindDN {
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
-        $suffix = __domain2suffix();
+        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
     }
 
     if ($self->isLdap()) {
@@ -207,7 +211,7 @@ sub userDN {
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
-        $suffix = __domain2suffix();
+        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
     }
     
     if ($self->isLdap()) {
@@ -232,7 +236,7 @@ sub groupDN {
     if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
-        $suffix = __domain2suffix();
+        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
     }
     
     if ($self->isLdap()) {
@@ -291,7 +295,7 @@ EOF
 =head2 bindUser
 
 Return LDAP bind user BindUser if set,
-"ldapservice" if ldap is local, "Administrator" if is AD
+"ldapservice" if ldap is local, machine account if is AD
 
 =cut
 
