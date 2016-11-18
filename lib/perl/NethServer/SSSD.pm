@@ -23,7 +23,6 @@ package NethServer::SSSD;
 use strict;
 use esmith::ConfigDB;
 use Net::LDAP;
-use Net::DNS::Resolver;
 use NethServer::Password;
 use Carp;
 use URI;
@@ -38,26 +37,6 @@ sub __domain2suffix {
 
 sub __builtinSuffix {
     return 'dc=directory,dc=nh';
-}
-
-sub __findHost {
-    my $db = shift;
-    my $provider = $db->get_prop('sssd','Provider') || 'ldap';
-    if ($provider eq 'ldap') {
-        my $ldap = Net::LDAP->new('localhost') || return '';
-        return 'localhost';
-    } elsif ($provider eq 'ad') {
-        my $res = Net::DNS::Resolver->new();
-        my $domain = $db->get('DomainName')->value();
-        my $reply = $res->send("_ldap._tcp.".$domain, "SRV");
-        if ($reply) {
-            foreach my $rr ($reply->answer) {
-                next unless $rr->type eq "SRV";
-                return $rr->target;
-            }
-        }
-    }
-    return '';
 }
 
 =head1 NAME
@@ -334,10 +313,11 @@ sub new
     }
     $self->{'config'} = $db;
     if (!defined $self->{'LdapURI'} || $self->{'LdapURI'} eq '') {
-        my $host = __findHost($db);
-        if ($host) {
-            $self->{'LdapURI'} = "ldap://$host:389";
+        my $host = 'localhost';
+        if($self->{'Provider'} eq 'ad') {
+            $host = $db->get('DomainName')->value();
         }
+        $self->{'LdapURI'} = "ldap://$host:389";
     }
 
 
