@@ -1,0 +1,22 @@
+{
+    #
+    # 01provider_config_remoteldap -- additional bind configurations for remote LDAP providers
+    #
+
+    if ($provider ne 'ldap') {
+        return '';
+    }
+
+    my $bindDN = $sssd{'BindDN'} || '';
+    if($bindDN) {
+        $provider_config .= "ldap_default_bind_dn = $bindDN\n";
+    }
+
+    my $authtok = $sssd{'BindPassword'} || '';
+    if($authtok) {
+        $provider_config .= "ldap_default_authtok = $authtok\n";
+        $provider_config .= "ldap_id_use_start_tls = true\n";
+    }
+
+    '';
+}
