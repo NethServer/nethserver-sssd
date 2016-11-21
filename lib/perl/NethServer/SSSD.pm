@@ -22,8 +22,6 @@ package NethServer::SSSD;
 
 use strict;
 use esmith::ConfigDB;
-use Net::LDAP;
-use Net::DNS::Resolver;
 use NethServer::Password;
 use Carp;
 use URI;
@@ -38,26 +36,6 @@ sub __domain2suffix {
 
 sub __builtinSuffix {
     return 'dc=directory,dc=nh';
-}
-
-sub __findHost {
-    my $db = shift;
-    my $provider = $db->get_prop('sssd','Provider') || 'ldap';
-    if ($provider eq 'ldap') {
-        my $ldap = Net::LDAP->new('localhost') || return '';
-        return 'localhost';
-    } elsif ($provider eq 'ad') {
-        my $res = Net::DNS::Resolver->new();
-        my $domain = $db->get('DomainName')->value();
-        my $reply = $res->send("_ldap._tcp.".$domain, "SRV");
-        if ($reply) {
-            foreach my $rr ($reply->answer) {
-                next unless $rr->type eq "SRV";
-                return $rr->target;
-            }
-        }
-    }
-    return '';
 }
 
 =head1 NAME
@@ -97,7 +75,7 @@ false otherwise
 
 sub isLdap {
     my $self = shift;
-    return ( ($self->{'Provider'} || '') eq 'ldap');
+    return ( $self->{'Provider'} eq 'ldap');
 }
 
 
@@ -110,7 +88,7 @@ false otherwise
 
 sub isAD {
     my $self = shift;
-    return ( ($self->{'Provider'} || '') eq 'ad');
+    return ( $self->{'Provider'} eq 'ad');
 }
 
 
@@ -164,7 +142,7 @@ otherwise a base DN calculated from the server domain.
 
 sub baseDN {
     my $self = shift;
-    return $self->{'BaseDN'} if (defined $self->{'BaseDN'} && $self->{'BaseDN'});
+    return $self->{'BaseDN'} if ($self->{'BaseDN'});
 
     return $self->isAD() ? __domain2suffix() : __builtinSuffix();
 }
@@ -179,9 +157,9 @@ otherwise a bind DN calculated from the server domain.
 sub bindDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'BindDN'} if (defined $self->{'BindDN'} && $self->{'BindDN'});
+    return $self->{'BindDN'} if ($self->{'BindDN'});
 
-    if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
+    if ($self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
         $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
@@ -206,9 +184,9 @@ otherwise a user DN calculated from the server domain.
 sub userDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'UserDN'} if (defined $self->{'UserDN'} && $self->{'UserDN'});
+    return $self->{'UserDN'} if ($self->{'UserDN'});
 
-    if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
+    if ($self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
         $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
@@ -231,9 +209,9 @@ otherwise a group DN calculated from the server domain.
 sub groupDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'UserDN'} if (defined $self->{'UserDN'} && $self->{'UserDN'});
+    return $self->{'UserDN'} if ($self->{'UserDN'});
 
-    if (defined $self->{'BaseDN'} && $self->{'BaseDN'}) {
+    if ($self->{'BaseDN'}) {
         $suffix = $self->{'BaseDN'};
     } else {
         $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
@@ -256,7 +234,7 @@ an empty string otherwise.
 
 sub bindPassword {
     my $self = shift;
-    return $self->{'BindPassword'} if (defined $self->{'BindPassword'} && $self->{'BindPassword'});
+    return $self->{'BindPassword'} if ($self->{'BindPassword'});
 
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return NethServer::Password::store('ldapservice');
@@ -301,7 +279,7 @@ Return LDAP bind user BindUser if set,
 
 sub bindUser {
     my $self = shift;
-    return $self->{'BindUser'} if (defined $self->{'BindUser'} && $self->{'BindUser'});
+    return $self->{'BindUser'} if ($self->{'BindUser'});
 
     if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
         return 'ldapservice';
@@ -324,20 +302,27 @@ Create a NethServer::SSSD instance.
 sub new 
 {
     my $class = shift;
-    my $self = {};
-    
+
     my $db = esmith::ConfigDB->open_ro();
     my $sssd = $db->get('sssd') || die("No sssd key defined");
-    my %props = $sssd->props();
-    foreach my $key (keys %props) { 
-       $self->{$key} = $props{$key};
-    }
-    $self->{'config'} = $db;
-    if (!defined $self->{'LdapURI'} || $self->{'LdapURI'} eq '') {
-        my $host = __findHost($db);
-        if ($host) {
-            $self->{'LdapURI'} = "ldap://$host:389";
+
+    my $self = {
+        'AdDns' => '',
+        'Provider' => '',
+        'LdapURI' => '',
+        'BaseDN' => '',
+        'BindDN' => '',
+        'BindPassword' => '',
+        'UserDN' => '',
+        $sssd->props()
+    };
+
+    if ($self->{'LdapURI'} eq '') {
+        my $host = 'localhost';
+        if($self->{'Provider'} eq 'ad') {
+            $host = $db->get('DomainName')->value();
         }
+        $self->{'LdapURI'} = "ldap://$host:389";
     }
 
 
