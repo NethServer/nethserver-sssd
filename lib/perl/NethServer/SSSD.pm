@@ -319,10 +319,12 @@ sub new
 
     if ($self->{'LdapURI'} eq '') {
         my $host = 'localhost';
+        my $proto = 'ldap';
         if($self->{'Provider'} eq 'ad') {
             $host = $db->get('DomainName')->value();
+            $proto = 'ldaps'; # Active Directory wants bind over SSL
         }
-        $self->{'LdapURI'} = "ldap://$host:389";
+        $self->{'LdapURI'} = "$proto://$host";
     }
 
 
