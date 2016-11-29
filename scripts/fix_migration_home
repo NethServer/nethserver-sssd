@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2015 Nethesis S.r.l.
+# http://www.nethesis.it - support@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see .
+#
+
+#
+# fix_migration_home
+#
+# For each existing directory under the default homedir path, 
+# move contents of $HOME/home dir to $HOME.
+#
+
+shopt -s nullglob
+shopt -s dotglob
+
+for H in $(ls -d /var/lib/nethserver/home/*); do
+    ! [ -d "$H/home" ] && continue; 
+    targets=($H/home/*)
+    [[ ${#targets[@]} == 0 ]] && continue;
+    for P in "${targets[@]}"; do
+       mv -v -t "${H}" "${P}"
+    done
+done

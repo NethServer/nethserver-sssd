@@ -47,6 +47,7 @@ mkdir -p root/var/lib/nethserver/home
 %files -f %{name}-%{version}-filelist
 %doc COPYING
 %doc README.rst
+%doc scripts
 %config %attr (0440,root,root) %{_sysconfdir}/sudoers.d/20_nethserver_sssd
 %dir %{_nseventsdir}/%{name}-update
 %dir %{_nseventsdir}/group-create
