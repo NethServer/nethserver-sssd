@@ -27,8 +27,7 @@ use Carp;
 use URI;
 
 sub __domain2suffix {
-    my $domain = `hostname -d`;
-    chomp $domain;
+    my $domain = shift;
     $domain =~ s/\./,dc=/g;
     $domain = "dc=" . $domain;
     return $domain;
@@ -91,6 +90,25 @@ sub isAD {
     return ( $self->{'Provider'} eq 'ad');
 }
 
+=head2 isLocalProvider
+
+Return true if the account provider is running on the local machine. False otherwise.
+
+Note that the Samba Active Directory container is considered "local", even if it
+actually runs behind a "remote" IP.
+
+=cut
+
+sub isLocalProvider {
+    my $self = shift;
+    my $host = $self->host();
+    if($self->isLdap() && ($host eq '127.0.0.1' || $host eq 'localhost')) {
+        return 1;
+    } elsif($self->isAD() && $self->{'nsdc'}->{'status'} eq 'enabled') {
+        return 1;
+    }
+    return 0;
+}
 
 =head2 ldapURI
 
@@ -144,7 +162,7 @@ sub baseDN {
     my $self = shift;
     return $self->{'BaseDN'} if ($self->{'BaseDN'});
 
-    return $self->isAD() ? __domain2suffix() : __builtinSuffix();
+    return ($self->isLocalProvider() && $self->isLdap()) ? __builtinSuffix() : __domain2suffix($self->{'Domain'});
 }
 
 =head2 bindDN
@@ -159,19 +177,17 @@ sub bindDN {
     my $suffix = '';
     return $self->{'BindDN'} if ($self->{'BindDN'});
 
-    if ($self->{'BaseDN'}) {
-        $suffix = $self->{'BaseDN'};
-    } else {
-        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
-    }
+    $suffix = $self->baseDN();
 
-    if ($self->isLdap()) {
+    if ($self->isLdap() && $self->isLocalProvider()) {
         return "cn=ldapservice,$suffix";
-    } else {
+    } elsif($self->isAD()) {
         my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
         chomp($machineName);
         return "cn=". substr($machineName, 0, 15) . ",cn=Computers,$suffix";
     }
+
+    return ""; # implies anonymous binds
 }
 
 =head2 userDN
@@ -186,17 +202,13 @@ sub userDN {
     my $suffix = '';
     return $self->{'UserDN'} if ($self->{'UserDN'});
 
-    if ($self->{'BaseDN'}) {
-        $suffix = $self->{'BaseDN'};
-    } else {
-        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
-    }
-    
-    if ($self->isLdap()) {
+    $suffix = $self->baseDN();
+
+    if ($self->isLdap() && $self->isLocalProvider()) {
         return "ou=People,$suffix";
-    } else {
-        return "cn=Users,$suffix";
     }
+
+    return $suffix;
 }
 
 =head2 groupDN
@@ -211,17 +223,13 @@ sub groupDN {
     my $suffix = '';
     return $self->{'UserDN'} if ($self->{'UserDN'});
 
-    if ($self->{'BaseDN'}) {
-        $suffix = $self->{'BaseDN'};
-    } else {
-        $suffix = $self->isAD() ? __domain2suffix() : __builtinSuffix();
-    }
+    $suffix = $self->baseDN();
     
-    if ($self->isLdap()) {
+    if ($self->isLdap() && $self->isLocalProvider()) {
         return "ou=Groups,$suffix";
-    } else {
-        return $suffix;
     }
+
+    return $suffix;
 }
 
 
@@ -236,7 +244,7 @@ sub bindPassword {
     my $self = shift;
     return $self->{'BindPassword'} if ($self->{'BindPassword'});
 
-    if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
+    if ($self->isLdap() && $self->isLocalProvider()) {
         return NethServer::Password::store('ldapservice');
     } elsif ($self->isAD()) {
         my $workgroup = qx(/usr/bin/testparm -s --parameter-name=workgroup 2>/dev/null);
@@ -281,7 +289,7 @@ sub bindUser {
     my $self = shift;
     return $self->{'BindUser'} if ($self->{'BindUser'});
 
-    if ($self->isLdap() && ($self->host() eq 'localhost' || $self->host() eq '127.0.0.1') ) {
+    if ($self->isLdap() && $self->isLocalProvider() ) {
         return 'ldapservice';
     } elsif ($self->isAD()) {
         my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
@@ -304,25 +312,33 @@ sub new
     my $class = shift;
 
     my $db = esmith::ConfigDB->open_ro();
-    my $sssd = $db->get('sssd') || die("No sssd key defined");
+    my $sssd = $db->get('sssd');
+    my $nsdc = $db->get('nsdc');
 
     my $self = {
+        'nsdc' => {
+            'status' => 'disabled',
+            $nsdc ? $nsdc->props() : ()
+        },
         'AdDns' => '',
-        'Provider' => '',
+        'Provider' => 'ldap',
         'LdapURI' => '',
         'BaseDN' => '',
         'BindDN' => '',
         'BindPassword' => '',
         'UserDN' => '',
+        'Domain' => $db->get('DomainName')->value(),
         $sssd->props()
     };
 
     if ($self->{'LdapURI'} eq '') {
         my $host = 'localhost';
+        my $proto = 'ldap';
         if($self->{'Provider'} eq 'ad') {
-            $host = $db->get('DomainName')->value();
+            $host = $self->{'Domain'};
+            $proto = 'ldap'; # FIXME Active Directory might want simple binds over SSL
         }
-        $self->{'LdapURI'} = "ldap://$host:389";
+        $self->{'LdapURI'} = "$proto://$host";
     }
 
 

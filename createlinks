@@ -23,9 +23,13 @@
 use strict;
 use esmith::Build::CreateLinks  qw(:all);
 
-#--------------------------------------------------
-# actions for nethserver-sssd-update event
-#--------------------------------------------------
+#
+# event nethserver-sssd-update event
+#
+event_templates('nethserver-sssd-update', qw(
+    /etc/openldap/ldap.conf
+));
+
 event_actions('nethserver-sssd-update', qw(
     initialize-default-databases   00
 ));
@@ -36,6 +40,7 @@ event_actions('nethserver-sssd-update', qw(
 event_templates('nethserver-sssd-save', qw(
     /etc/sssd/sssd.conf
     /etc/samba/smb.conf
+    /etc/openldap/ldap.conf
 ));
 event_actions('nethserver-sssd-save', qw(
     nethserver-sssd-conf    20

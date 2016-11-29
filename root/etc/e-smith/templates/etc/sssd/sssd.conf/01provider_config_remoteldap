@@ -3,19 +3,21 @@
     # 01provider_config_remoteldap -- additional bind configurations for remote LDAP providers
     #
 
-    if ($provider ne 'ldap') {
+    if ( ! $sssd_object->isLdap() || $sssd_object->isLocalProvider()) {
         return '';
     }
 
-    my $bindDN = $sssd{'BindDN'} || '';
+    my $bindDN = $sssd_object->bindDN();
     if($bindDN) {
         $provider_config .= "ldap_default_bind_dn = $bindDN\n";
     }
 
-    my $authtok = $sssd{'BindPassword'} || '';
+    my $authtok = $sssd_object->bindPassword();
     if($authtok) {
         $provider_config .= "ldap_default_authtok = $authtok\n";
-        $provider_config .= "ldap_id_use_start_tls = true\n";
+        if($sssd_object->ldapURI() !~ /^ldaps/) {
+            $provider_config .= "ldap_id_use_start_tls = true\n";
+        }
     }
 
     '';
