@@ -56,7 +56,7 @@ connect directly to the LDAP server.
 Usage example:
 
   use NethServer::SSSD;
-  my $sssd = new NethServer::SSSD();
+  my $sssd = NethServer::SSSD->new();
 
   print $sssd->host();
 
@@ -108,6 +108,28 @@ sub isLocalProvider {
         return 1;
     }
     return 0;
+}
+
+=head2 startTls
+
+Return true ('1') if the LDAP STARTTLS command is required, false ('') otherwise
+
+=cut
+
+sub startTls {
+    my $self = shift;
+    if($self->{'StartTls'} eq 'enabled') {
+        return '1';
+    } elsif($self->{'StartTls'} eq 'disabled') {
+        return '';
+    }
+
+    return $self->bindDN()
+        && $self->bindPassword()
+        && $self->isLdap()
+        && ! $self->isLocalProvider()
+        && $self->ldapURI() !~ /^ldaps/
+    ;
 }
 
 =head2 ldapURI
@@ -328,6 +350,7 @@ sub new
         'BindPassword' => '',
         'UserDN' => '',
         'Domain' => $db->get('DomainName')->value(),
+        'StartTls' => '',
         $sssd->props()
     };
 
