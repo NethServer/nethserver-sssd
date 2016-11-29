@@ -336,7 +336,7 @@ sub new
         my $proto = 'ldap';
         if($self->{'Provider'} eq 'ad') {
             $host = $self->{'Domain'};
-            $proto = 'ldaps'; # Active Directory wants bind over SSL
+            $proto = 'ldap'; # FIXME Active Directory might want simple binds over SSL
         }
         $self->{'LdapURI'} = "$proto://$host";
     }
