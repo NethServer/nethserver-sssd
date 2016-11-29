@@ -24,9 +24,12 @@ use strict;
 
 use esmith::event;
 use File::Temp qw(tempfile);
+use Sys::Hostname;
 
 my $file = shift;
 my $separator = shift;
+
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 
 if($file) {
     open(FH, "<", $file) or die;
@@ -65,14 +68,14 @@ while(<FH>) {
         print $pfh $password;
         close($pfh);
 
-        if( ! esmith::event::event_signal('password-modify', $username, $pfilename) ) {
+        if( ! esmith::event::event_signal('password-modify', "$username\@$domainName", $pfilename) ) {
             warn "[ERROR] Account `$username` user-create event failed.\n";
             next;
         }
         unlink $pfilename;
     }
 
-    warn "[INFO] imported $username\n";
+    warn "[INFO] imported $username as $username\@$domainName\n";
 
 }
 
