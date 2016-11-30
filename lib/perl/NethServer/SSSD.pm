@@ -243,7 +243,7 @@ otherwise a group DN calculated from the server domain.
 sub groupDN {
     my $self = shift;
     my $suffix = '';
-    return $self->{'UserDN'} if ($self->{'UserDN'});
+    return $self->{'GroupDN'} if ($self->{'GroupDN'});
 
     $suffix = $self->baseDN();
     
