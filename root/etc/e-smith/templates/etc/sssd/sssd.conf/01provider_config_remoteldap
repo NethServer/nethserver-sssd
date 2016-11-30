@@ -13,11 +13,12 @@
     }
 
     my $authtok = $sssd_object->bindPassword();
-    if($authtok) {
+    if($authtok && $bindDN) {
         $provider_config .= "ldap_default_authtok = $authtok\n";
-        if($sssd_object->ldapURI() !~ /^ldaps/) {
-            $provider_config .= "ldap_id_use_start_tls = true\n";
-        }
+    }
+
+    if($sssd_object->startTls()) {
+        $provider_config .= "ldap_id_use_start_tls = true\n";
     }
 
     '';
