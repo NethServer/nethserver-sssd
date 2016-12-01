@@ -355,7 +355,7 @@ sub new
     };
 
     if ($self->{'LdapURI'} eq '') {
-        my $host = 'localhost';
+        my $host = '127.0.0.1';
         my $proto = 'ldap';
         if($self->{'Provider'} eq 'ad') {
             $host = $self->{'Domain'};
