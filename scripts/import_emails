@@ -24,12 +24,13 @@ use strict;
 
 use esmith::AccountsDB;
 use esmith::event;
-use File::Temp qw(tempfile);
+use Sys::Hostname;
 
 my $file = shift;
 my $separator = shift;
 my $accountsDb = esmith::AccountsDB->open() || die("Could not open accounts DB");
 my $pseudonym = '';
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 
 if($file) {
     open(FH, "<", $file) or die;
@@ -72,7 +73,7 @@ while(<FH>) {
     
     if( ! $accountsDb->new_record($pseudonym, {
         'type'=>'pseudonym', 
-        'Account'=>$username,
+        'Account'=>"$username\@$domainName",
         'Access'=>'public',
         'Description'=>'',
     })) {
