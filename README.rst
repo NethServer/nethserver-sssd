@@ -178,9 +178,13 @@ All functions are documented using perldoc ::
   perldoc NethServer::SSSD
 
 This command prints out the current settings, by querying ``NethServer::SSSD`` 
-methods ::
-    
-    perl -MNethServer::SSSD -MJSON -e '$o = NethServer::SSSD->new(); print JSON::to_json({'BaseDN' => $o->baseDN(), 'BindDN' => $o->bindDN(), 'BindPassword' => $o->bindPassword(), 'UserDN' => $o->userDN(), 'GroupDN' => $o->groupDN(), 'LdapURI' => $o->ldapURI(), 'host' => $o->host(), 'port' => $o->port(), 'startTls'=> $o->startTls()});' | python -mjson.tool
+methods. It requires the package ``openldap-clients`` ::
+
+    /usr/sbin/account-provider-test dump
+
+Check the bind credentials are OK ::
+
+    /usr/sbin/account-provider-test
 
 Join Active Directory
 ---------------------
@@ -189,6 +193,22 @@ The Active Directory join operation is run by *realmd*. After the AD has been
 joined sucessfully the system keytab file is initialized as long as individual
 service keytabs, as defined on the respective *service* record (see `Service
 configuration hooks`_).
+
+Leave Active Directory
+----------------------
+
+This is the manual procedure ::
+    
+    realm leave
+    systemctl stop sssd
+    config delete sssd
+    /etc/e-smith/events/actions/initialize-default-databases
+    > /etc/sssd/sssd.conf
+
+Go to page :guilabel:`System name` and change the domain suffix in the FQDN field.
+
+In page :guilabel:`Users and groups` join the new domain.
+
 
 Service configuration hooks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -209,7 +229,7 @@ password renewal, and crojob tasks: ::
 * ``KrbKeytabPath``
   Keytab file path. If empty, ``/var/lib/misc/nsrv-<service>.keytab`` is assumed
 * ``KrbPrimaryList <comma separated words list>``
-  Defines the keytab contents. In Kerberos jargon a "primary" is the first part of the "principal":http://web.mit.edu/kerberos/krb5-1.5/krb5-1.5.4/doc/krb5-user/What-is-a-Kerberos-Principal*003f.html string, before the slash (``/``) character. Any primary in this list is exported to the keytab.
+  Defines the keytab contents. In Kerberos jargon a "primary" is the first part of the `principal string<http://web.mit.edu/kerberos/krb5-1.5/krb5-1.5.4/doc/krb5-user/What-is-a-Kerberos-Principal*003f.html>`_, before the slash (``/``) character. Any primary in this list is exported to the keytab.
 * ``KrbKeytabOwner``
   The unix file owner. Default is the ``service`` name. This is applied to both the credentials cache file and the keytab file.
 * ``KrbKeytabPerms``
@@ -226,35 +246,3 @@ The following props are no longer honoured since ns7:
   This is the main switch. If set to ``enabled`` a ticket credential cache file is kept valid by the hourly cronjob
 * ``KrbCredentialsCachePath``
   The path of the credentials cache. It defaults to ``/tmp/krb5cc*<service*uid>``, if ``service`` is also a system user.
-
-Account import scripts
-----------------------
-
-There are some perl scripts under the documentation ``scripts/`` directory. ::
-    
-    rpm -qd nethserver-sssd
-
-import_users
-^^^^^^^^^^^^
-
-It is possible to create user accounts from a TSV (Tab Separated Values) file with the following format: ::
-
-  username <TAB> fullName <TAB> password <NEWLINE>
-
-Sample invocation: ::
-
-  import_users users.tsv
-
-Alternative separator character: ::
-
-  import_users users.csv ','
-
-
-import_emails
-^^^^^^^^^^^^^
-
-It is possible to create mail aliases from a TSV (Tab Separated Values) file with the following format: ::
-
-  username <TAB> emailaddress <NEWLINE>
-
-See ``import_users`` section for a sample script invocation.
