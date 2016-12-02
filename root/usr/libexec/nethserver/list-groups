@@ -1,0 +1,147 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+use strict;
+use NethServer::SSSD;
+use NethServer::Password;
+use Sys::Hostname;
+use Net::LDAP;
+use Getopt::Std;
+use JSON;
+
+our $opt_A;
+
+#
+# Invocation flags:
+#    -A      list all groups returned by LDAP server. If not specified items listed in /etc/nethserver/system-groups are hidden
+#
+getopts('A');
+
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
+my $sssd = NethServer::SSSD->new();
+my @systemGroups = ();
+
+if( ! $opt_A) {
+    open(FH, '<', '/etc/nethserver/system-groups');
+    chomp(@systemGroups = <FH>);
+    close(FH);
+    @systemGroups = map { lc($_) } @systemGroups;
+}
+
+my %config = (
+    'bindDN' => $sssd->bindDN(),
+    'bindPassword' => $sssd->bindPassword(),
+);
+
+if($sssd->isLdap()) {
+    if($sssd->isLocalProvider()) {
+        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
+        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
+    }
+
+    %config = ( %config,
+        'keyattr' => 'cn',
+        'filter' => '(objectClass=posixGroup)',
+    );
+
+} elsif($sssd->isAD()) {
+    %config = ( %config,
+        'keyattr' => 'sAMAccountName',
+        'filter' => '(objectCategory=group)',
+    );
+}
+
+my $exitCode = 0;
+my $result;
+
+my $ldap_error_handler = sub {
+    my $message = shift;
+    if($message && $message->is_error()) {
+        my $code = $message->code();
+        my $text = $message->error();
+        warn "[ERROR] (code $code): $text\n";
+        exit($code);
+    }
+    return $message;
+};
+
+my $ldap = Net::LDAP->new($sssd->ldapURI(),
+    'timeout' => 30,
+    'async' => 0,
+    'onerror' => $ldap_error_handler,
+    'verify' => 'none',
+);
+
+if($sssd->startTls()) {
+    $ldap->start_tls('verify' => 'none');
+}
+
+$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+
+$result = $ldap->search(
+    'base' => $sssd->groupDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => 10,
+    'filter' => $config{'filter'},
+);
+
+print '{';
+
+my $entry;
+my $separator = '';
+while($entry = $result->pop_entry()) {
+    my $key = get_group_key($entry);
+    if(grep { $key eq $_ } @systemGroups) {
+        next;
+    }
+
+    print $separator;
+    print JSON->new()->allow_nonref()->encode($key . '@' . $domainName);
+    print ":";
+    print JSON->new()->encode(get_user_value($entry));
+    $separator = ',';
+}
+
+print '}';
+
+$ldap->unbind();
+$ldap->disconnect();
+exit($exitCode);
+
+################################################################################
+################################################################################
+################################################################################
+
+sub get_group_key()
+{
+    my $entry = shift;
+    return lc($entry->get_value($config{'keyattr'}));
+}
+
+sub get_user_value()
+{
+    my $e = shift;
+    return {
+        members => []
+    };
+}

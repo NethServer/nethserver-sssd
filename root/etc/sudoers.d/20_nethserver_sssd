@@ -7,6 +7,7 @@
   /usr/bin/net ads testjoin, \
   /sbin/e-smith/config, \
   /usr/libexec/nethserver/list-users, \
+  /usr/libexec/nethserver/list-groups, \
   /sbin/e-smith/expand-template
 
 
