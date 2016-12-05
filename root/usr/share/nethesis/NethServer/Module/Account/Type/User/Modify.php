@@ -43,6 +43,15 @@ class Modify extends \Nethgui\Controller\Table\Modify
         return $this->provider;
     }
 
+    private function getGroups()
+    {
+        static $groups;
+        if( ! isset($groups)) {
+            $groups = array_keys($this->getGroupProvider()->getGroups());
+        }
+        return $groups;
+    }
+
     public function initialize()
     {
         parent::initialize();
@@ -95,8 +104,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             }
         }
         if ($this->getIdentifier() === 'update' || $this->getIdentifier() === 'create') {
-            $groups = array_keys($this->getGroupProvider()->getGroups());
-            $this->getValidator('groups')->memberOf($groups);
+            $this->getValidator('groups')->memberOf($this->getGroups());
         }
         if ($this->getIdentifier() === 'create') {
             $users = array();
@@ -131,7 +139,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
            $groups = array();
         }
         $updatedGroups = array();
-        $currentGroups = $this->getGroupProvider()->getGroups();
+        $currentGroups = $this->getGroups();
         foreach ($currentGroups as $group => $v) {
             $members = $v['members'];
             if (in_array($group, $groups)) { # we must add $user to $group
@@ -200,7 +208,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $tmp = array();
         if ($this->getRequest()->isValidated()) {
-            foreach ($this->getGroupProvider()->getGroups() as $key => $values) {
+            foreach ($this->getGroups() as $key => $values) {
                 $tmp[] = array($key, $key);
             }
             $view->getCommandList()->show(); // required by nextPath() method of this class
