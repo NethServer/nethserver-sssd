@@ -32,14 +32,22 @@ use Nethgui\Controller\Table\Modify as Table;
 class Modify extends \Nethgui\Controller\Table\Modify
 {
 
-    private $provider = null;
+    private function getGroupProvider()
+    {
+        static $provider;
+        if( ! $provider) {
+            $provider = new \NethServer\Tool\GroupProvider($this->getPlatform());
+        }
+        return $provider;
+    }
 
     private function getUserProvider()
     {
-        if(!$this->provider) {
-            $this->provider = new \NethServer\Tool\UserProvider($this->getPlatform());
+        static $provider;
+        if( ! $provider) {
+            $provider = new \NethServer\Tool\UserProvider($this->getPlatform());
         }
-        return $this->provider;
+        return $provider;
     }
 
     private function getUsers()
@@ -49,6 +57,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $users = array_keys($this->getUserProvider()->getUsers());
         }
         return $users;
+    }
+
+    public function readMembers()
+    {
+        return $this->getGroupProvider()->getGroupMembers($this->parameters['groupname']);
     }
 
     public function initialize()
@@ -62,7 +75,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $parameterSchema = array(
             array('groupname', $groupNameValidator, Table::KEY),
-            array('members', Validate::ANYTHING, Table::FIELD),
+            array('members', Validate::ANYTHING, array($this, 'readMembers')),
         );
         
         $this->setSchema($parameterSchema);
@@ -143,7 +156,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $tmp = array();
         if ($this->getRequest()->isValidated()) {
-            foreach ($this->getUsers() as $key => $values) {
+            foreach ($this->getUsers() as $key) {
                 $tmp[] = array($key, $key);
             }
             $view->getCommandList()->show(); // required by nextPath() method of this class

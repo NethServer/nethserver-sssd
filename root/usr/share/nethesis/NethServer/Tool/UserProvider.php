@@ -34,11 +34,20 @@ class UserProvider
 
     public function getUsers()
     {
-        $users = json_decode(exec('/usr/bin/sudo /usr/libexec/nethserver/list-users'), TRUE);
+        $users = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-users')->getOutput(), TRUE);
         if( ! is_array($users)) {
             return array();
         }
         return $users;
+    }
+
+    public function getUserMembership($userName)
+    {
+        $groups = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-user-membership ${@}', array($userName))->getOutput(), TRUE);
+        if( ! is_array($groups)) {
+            return array();
+        }
+        return $groups;
     }
 
     public function isReadOnly()

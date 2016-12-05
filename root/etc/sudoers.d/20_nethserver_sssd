@@ -8,6 +8,8 @@
   /sbin/e-smith/config, \
   /usr/libexec/nethserver/list-users, \
   /usr/libexec/nethserver/list-groups, \
+  /usr/libexec/nethserver/list-user-membership, \
+  /usr/libexec/nethserver/list-group-members, \
   /sbin/e-smith/expand-template
 
 

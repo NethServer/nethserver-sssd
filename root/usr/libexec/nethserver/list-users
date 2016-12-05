@@ -29,12 +29,14 @@ use Getopt::Std;
 use JSON;
 
 our $opt_A;
+our $opt_s;
 
 #
 # Invocation flags:
 #    -A      list all users returned by LDAP server. If not specified items listed in /etc/nethserver/system-users are hidden
+#    -s      strip the @domain suffix from users and groups
 #
-getopts('A');
+getopts('As');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $now = time();
@@ -200,7 +202,7 @@ while($entry = $result->pop_entry()) {
     }
 
     print $separator;
-    print JSON->new()->allow_nonref()->encode($key . '@' . $domainName);
+    print JSON->new()->allow_nonref()->encode($key . ($opt_s ? "": "\@$domainName"));
     print ":";
     print JSON->new()->encode(get_user_value($entry));
     $separator = ',';

@@ -35,11 +35,20 @@ class GroupProvider
 
     public function getGroups()
     {
-        $groups = json_decode(exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups'), TRUE);
+        $groups = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups')->getOutput(), TRUE);
         if( ! is_array($groups)) {
             return array();
         }
         return $groups;
+    }
+
+    public function getGroupMembers($groupName)
+    {
+        $members = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members ${@}', array($groupName))->getOutput(), TRUE);
+        if( ! is_array($members)) {
+            return array();
+        }
+        return $members;
     }
 
     public function isReadOnly()

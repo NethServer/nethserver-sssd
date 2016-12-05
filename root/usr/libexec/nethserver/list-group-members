@@ -40,13 +40,23 @@ getopts('As');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
+my $groupName = shift;
+
+$groupName =~ s/\@$domainName$//; #trim @domain suffix
+
 my @systemGroups = ();
+my @systemUsers = ();
 
 if( ! $opt_A) {
     open(FH, '<', '/etc/nethserver/system-groups');
     chomp(@systemGroups = <FH>);
     close(FH);
     @systemGroups = map { lc($_) } @systemGroups;
+
+    open(FH, '<', '/etc/nethserver/system-users');
+    chomp(@systemUsers = <FH>);
+    close(FH);
+    @systemUsers = map { lc($_) } @systemUsers;
 }
 
 my %config = (
@@ -61,14 +71,22 @@ if($sssd->isLdap()) {
     }
 
     %config = ( %config,
-        'keyattr' => 'cn',
-        'filter' => '(objectClass=posixGroup)',
+        'userkeyattr' => 'uid',
+        'groupkeyattr' => 'cn',
+        'memberattr' => 'memberUid',
+        'filter' => "(&(objectClass=posixGroup)(cn=$groupName))",
+        'groupclass' => 'posixGroup',
+        'memberfilter' => '(objectClass=shadowAccount)'
     );
 
 } elsif($sssd->isAD()) {
     %config = ( %config,
-        'keyattr' => 'sAMAccountName',
-        'filter' => '(objectClass=group)',
+        'userkeyattr' => 'sAMAccountName',
+        'groupkeyattr' => 'sAMAccountName',
+        'memberattr' => 'member',
+        'filter' => "(&(objectClass=group)(sAMAccountName=$groupName))",
+        'groupclass' => 'group',
+        'memberfilter' => '(objectClass=*)',
     );
 }
 
@@ -99,32 +117,30 @@ if($sssd->startTls()) {
 
 $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
 
-$result = $ldap->search(
+my $entry = $ldap->search(
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => 10,
     'filter' => $config{'filter'},
-);
+)->pop_entry();
 
-print '{';
+my @members;
 
-my $entry;
-my $separator = '';
-while($entry = $result->pop_entry()) {
-    my $key = get_group_key($entry);
-    if(grep { $key eq $_ } @systemGroups) {
-        next;
+if($entry) {
+    foreach ($entry->get_value($config{'memberattr'})) {
+        my $member = get_member($_);
+        if($member && ! grep { $member eq $_ } @systemGroups, @systemUsers) {
+            if($opt_s) {
+                push @members, $member;
+            } else {
+                push @members, "$member\@$domainName";
+            }
+        }
     }
-
-    print $separator;
-    print JSON->new()->allow_nonref()->encode($key . ($opt_s ? "" : "\@$domainName"));
-    print ":";
-    print JSON->new()->encode(get_user_value($entry));
-    $separator = ',';
 }
 
-print '}';
+print JSON->new()->encode(\@members);
 
 $ldap->unbind();
 $ldap->disconnect();
@@ -134,16 +150,41 @@ exit($exitCode);
 ################################################################################
 ################################################################################
 
-sub get_group_key()
+sub get_member()
 {
-    my $entry = shift;
-    return lc($entry->get_value($config{'keyattr'}));
+    my $member = shift;
+    my $retval = undef;
+    my $scope = 'sub';
+    my $filter = undef;
+
+    my $baseDn = undef;
+    if($sssd->isAD()) {
+        $baseDn = $member;
+        $scope = 'base';
+        $filter = $config{'memberfilter'};
+    } elsif($sssd->isLdap()) {
+        $baseDn = $sssd->userDN();
+        $filter = "(&$config{'memberfilter'}($config{'userkeyattr'}=$member))";
+    }
+
+    my $entry = $ldap->search(
+        'base' => $baseDn,
+        'scope' => $scope,
+        'timeout' => 10,
+        'filter' => $filter,
+        'deref' => 'never',
+    )->pop_entry();
+
+    if( ! $entry) {
+        return undef;
+    }
+
+    if($entry->get_value('objectClass') eq $config{'groupclass'}) {
+        $retval = $entry->get_value($config{'groupkeyattr'});
+    } else {
+        $retval = $entry->get_value($config{'userkeyattr'});
+    }
+
+    return lc($retval);
 }
 
-sub get_user_value()
-{
-    my $e = shift;
-    return {
-        members => []
-    };
-}

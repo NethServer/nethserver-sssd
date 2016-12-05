@@ -34,6 +34,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 {
 
     private $provider = null;
+    private $currentGroups = array();
 
     private function getGroupProvider()
     {
@@ -43,6 +44,15 @@ class Modify extends \Nethgui\Controller\Table\Modify
         return $this->provider;
     }
 
+    private function getUserProvider()
+    {
+        static $userProvider;
+        if( ! $userProvider) {
+            $userProvider = new \NethServer\Tool\UserProvider($this->getPlatform());
+        }
+        return $userProvider;
+    }
+
     private function getGroups()
     {
         static $groups;
@@ -50,6 +60,11 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $groups = array_keys($this->getGroupProvider()->getGroups());
         }
         return $groups;
+    }
+
+    public function readGroups()
+    {
+        return $this->getUserProvider()->getUserMembership($this->parameters['username']);
     }
 
     public function initialize()
@@ -72,7 +87,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $parameterSchema = array(
             array('username', $userNameValidator, Table::KEY),
             array('gecos', Validate::NOTEMPTY, Table::FIELD),
-            array('groups', Validate::ANYTHING, Table::FIELD),
+            array('groups', Validate::ANYTHING, array($this, 'readGroups')),
             array('expires', $this->createValidator()->memberOf('yes', 'no'), Table::FIELD),
             array('shell', $this->createValidator()->memberOf('/bin/bash', '/usr/libexec/openssh/sftp-server'), Table::FIELD),
             array('setPassword',Validate::SERVICESTATUS),
@@ -120,50 +135,44 @@ class Modify extends \Nethgui\Controller\Table\Modify
                    $report->addValidationError($this, 'newPassword', $passwordValidator);
                 }
             }
-            $userProvider = new \NethServer\Tool\UserProvider($this->getPlatform());
-            foreach (array_keys($userProvider->getUsers()) as $u) {
-                 $tmp = explode('@',$u);
-                 $users[] = $tmp[0];
-            }
 
-            if ( in_array($this->parameters['username'], $users) ) { # user already exists
+            $users = array_keys($this->getUserProvider()->getUsers());
+
+            if ( in_array($this->parameters['username'], $this->stripDomainSuffix($users)) ) { # user already exists
                 $report->addValidationErrorMessage($this, 'username', 'user_exists');
             }
         }
 
         parent::validate($report);
     }
+
+    private function stripDomainSuffix($a)
+    {
+        $o = array();
+        foreach($a as $item) {
+            $o[] = \Nethgui\array_head(explode('@', $item));
+        }
+        return $o;
+    }
+
     private function saveGroups($user, $groups)
     {
         if (!$groups) {
            $groups = array();
         }
-        $updatedGroups = array();
-        $currentGroups = $this->getGroups();
-        foreach ($currentGroups as $group => $v) {
-            $members = $v['members'];
-            if (in_array($group, $groups)) { # we must add $user to $group
-                $members[] = $user;
-                $updatedGroups[$group] = $members;
-            }
-            if (in_array($user, $members) && !in_array($group, $groups)) { # $user removed from $group
-                if(($key = array_search($user, $members)) !== false) { 
-                    unset($members[$key]);
-                }
-                $updatedGroups[$group] = $members;
-            }
+
+        $currentGroups = $this->readGroups();
+
+        $groupsAdded = array_diff($groups, $currentGroups);
+        foreach($groupsAdded as $g) {
+            $members = $this->getGroupProvider()->getGroupMembers($g);
+            $this->getPlatform()->signalEvent('group-modify', $this->stripDomainSuffix(array_merge(array($g), $members, array($user))));
         }
 
-        # apply the configuration
-        foreach ($updatedGroups as $group => $members) {
-            $params = array();
-            $params[] = $group;
-            $members = array_unique($members);
-            foreach ($members as $u) {
-                $tmp = explode('@',$u);
-                $params[] = $tmp[0];
-            }
-            $this->getPlatform()->signalEvent('group-modify', $params);
+        $groupsRemoved = array_diff($currentGroups, $groups);
+        foreach($groupsRemoved as $g) {
+            $members = $this->getGroupProvider()->getGroupMembers($g);
+            $this->getPlatform()->signalEvent('group-modify', $this->stripDomainSuffix(array_merge(array($g), array_diff($members, array($user)))));
         }
     }
 
@@ -208,7 +217,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $tmp = array();
         if ($this->getRequest()->isValidated()) {
-            foreach ($this->getGroups() as $key => $values) {
+            foreach ($this->getGroups() as $key) {
                 $tmp[] = array($key, $key);
             }
             $view->getCommandList()->show(); // required by nextPath() method of this class
