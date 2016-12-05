@@ -31,6 +31,7 @@ class GroupProvider
     private $listGroupsCommand = '';
     private $platform;
     private $provider = false;
+    private $isLocalProvider = FALSE;
 
     public function getGroups()
     {
@@ -43,7 +44,7 @@ class GroupProvider
 
     public function isReadOnly()
     {
-        return TRUE; // FIXME;
+        return $this->isLocalProvider === FALSE;
     }
 
     public function isAD()
@@ -54,6 +55,16 @@ class GroupProvider
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
          $this->platform = $platform;
-         $this->provider = $platform->getDatabase('configuration')->getProp('sssd', 'Provider');
+
+         $sssd = $platform->getDatabase('configuration')->getKey('sssd');
+         $this->provider = $sssd['Provider'];
+
+         if(   ( $this->provider === 'ldap' 
+                 && $sssd['LdapURI'] === '')
+            || ( $this->provider === 'ad' 
+                 && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')
+             ) {
+             $this->isLocalProvider = TRUE;
+         }
     }
 }

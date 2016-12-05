@@ -30,6 +30,7 @@ class UserProvider
 
     private $platform;
     private $provider = false;
+    private $isLocalProvider = FALSE;
 
     public function getUsers()
     {
@@ -42,7 +43,7 @@ class UserProvider
 
     public function isReadOnly()
     {
-        return TRUE; // FIXME
+        return $this->isLocalProvider === FALSE;
     }
 
     public function isAD()
@@ -52,8 +53,18 @@ class UserProvider
 
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
-         $this->platform = $platform;
-         $this->provider = $platform->getDatabase('configuration')->getProp('sssd', 'Provider');
+        $this->platform = $platform;
+
+        $sssd = $platform->getDatabase('configuration')->getKey('sssd');
+        $this->provider = $sssd['Provider'];
+
+        if(   ( $this->provider === 'ldap' 
+                && $sssd['LdapURI'] === '')
+           || ( $this->provider === 'ad' 
+                && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')
+            ) {
+            $this->isLocalProvider = TRUE;
+        }
     }
 
 }
