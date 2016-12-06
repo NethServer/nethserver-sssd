@@ -164,6 +164,11 @@ my $ldap_error_handler = sub {
     if($message && $message->is_error()) {
         my $code = $message->code();
         my $text = $message->error();
+        if($code == 4) {
+            warn "[WARNING] (code $code): $text\n";
+            $exitCode = $code;
+            return $message;
+        }
         warn "[ERROR] (code $code): $text\n";
         exit($code);
     }
