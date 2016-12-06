@@ -22,6 +22,7 @@
 
 use strict;
 use NethServer::SSSD;
+use NethServer::AccountsList;
 use NethServer::Password;
 use Sys::Hostname;
 use Net::LDAP;
@@ -29,7 +30,6 @@ use Getopt::Std;
 use JSON;
 
 our ($opt_A, $opt_s, $opt_t);
-
 
 #
 # Invocation flags:
@@ -39,19 +39,12 @@ our ($opt_A, $opt_s, $opt_t);
 #
 getopts('Ast:');
 
+my $al = NethServer::AccountsList->new();
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
-my @systemGroups = ();
 
 if( ! $opt_t) {
     $opt_t = 10;
-}
-
-if( ! $opt_A) {
-    open(FH, '<', '/etc/nethserver/system-groups');
-    chomp(@systemGroups = <FH>);
-    close(FH);
-    @systemGroups = map { lc($_) } @systemGroups;
 }
 
 my %config = (
@@ -123,7 +116,8 @@ my $entry;
 my $separator = '';
 while($entry = $result->pop_entry()) {
     my $key = get_group_key($entry);
-    if(grep { $key eq $_ } @systemGroups) {
+    if( ! $opt_A && (($sssd->isAD() && $al->is_system_group($entry->get_value('objectSid')))
+        || $al->is_system_group($key))) {
         next;
     }
 

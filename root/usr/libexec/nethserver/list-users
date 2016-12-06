@@ -22,6 +22,7 @@
 
 use strict;
 use NethServer::SSSD;
+use NethServer::AccountsList;
 use NethServer::Password;
 use Sys::Hostname;
 use Net::LDAP;
@@ -42,14 +43,7 @@ getopts('Ast:');
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $now = time();
 my $sssd = NethServer::SSSD->new();
-my @systemUsers = ();
-
-if( ! $opt_A) {
-    open(FH, '<', '/etc/nethserver/system-users');
-    chomp(@systemUsers = <FH>);
-    close(FH);
-    @systemUsers = map { lc($_) } @systemUsers;
-}
+my $al = NethServer::AccountsList->new();
 
 my %config = (
     'bindDN' => $sssd->bindDN(),
@@ -203,7 +197,7 @@ my $entry;
 my $separator = '';
 while($entry = $result->pop_entry()) {
     my $key = get_user_key($entry);
-    if(grep { $key eq $_ } @systemUsers) {
+    if( ! $opt_A && (($sssd->isAD() && $al->is_system_user($entry->get_value('objectSid'))) || $al->is_system_user($key))) {
         next;
     }
 

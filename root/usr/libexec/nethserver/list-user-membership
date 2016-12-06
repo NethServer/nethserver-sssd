@@ -22,6 +22,7 @@
 
 use strict;
 use NethServer::SSSD;
+use NethServer::AccountsList;
 use NethServer::Password;
 use Sys::Hostname;
 use Net::LDAP;
@@ -42,16 +43,9 @@ getopts('Ast:');
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
 my $userName = shift;
+my $al = NethServer::AccountsList->new();
 
 $userName =~ s/\@$domainName$//; #trim @domain suffix
-
-my @systemGroups = ();
-if( ! $opt_A) {
-    open(FH, '<', '/etc/nethserver/system-groups');
-    chomp(@systemGroups = <FH>);
-    close(FH);
-    @systemGroups = map { lc($_) } @systemGroups;
-}
 
 my %config = (
     'bindDN' => $sssd->bindDN(),
@@ -127,7 +121,7 @@ my @groups = ();
 if($entry) {
     foreach (get_user_membership($entry)) {
         my $groupName = lc($_->get_value($config{'groupkeyattr'}));
-        if($groupName && ! grep { $groupName eq $_ } @systemGroups) {
+        if($groupName && ! $al->is_system_group($groupName) && ! $al->is_system_group($_->get_value('objectSid'))) {
             if($opt_s) {
                 push @groups, "$groupName";
             } else {

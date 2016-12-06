@@ -22,6 +22,7 @@
 
 use strict;
 use NethServer::SSSD;
+use NethServer::AccountsList;
 use NethServer::Password;
 use Sys::Hostname;
 use Net::LDAP;
@@ -29,7 +30,6 @@ use Getopt::Std;
 use JSON;
 
 our ($opt_A, $opt_s, $opt_t);
-
 
 #
 # Invocation flags:
@@ -39,26 +39,12 @@ our ($opt_A, $opt_s, $opt_t);
 #
 getopts('Ast:');
 
+my $al = NethServer::AccountsList->new();
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
 my $groupName = shift;
 
 $groupName =~ s/\@$domainName$//; #trim @domain suffix
-
-my @systemGroups = ();
-my @systemUsers = ();
-
-if( ! $opt_A) {
-    open(FH, '<', '/etc/nethserver/system-groups');
-    chomp(@systemGroups = <FH>);
-    close(FH);
-    @systemGroups = map { lc($_) } @systemGroups;
-
-    open(FH, '<', '/etc/nethserver/system-users');
-    chomp(@systemUsers = <FH>);
-    close(FH);
-    @systemUsers = map { lc($_) } @systemUsers;
-}
 
 my %config = (
     'bindDN' => $sssd->bindDN(),
@@ -137,13 +123,16 @@ my @members;
 if($entry) {
     foreach ($entry->get_value($config{'memberattr'})) {
         my $member = get_member($_);
-        if($member && ! grep { $member eq $_ } @systemGroups, @systemUsers) {
-            if($opt_s) {
-                push @members, $member;
-            } else {
-                push @members, "$member\@$domainName";
-            }
+        if( ! $member) {
+            next;
         }
+
+        if($opt_s) {
+            push @members, $member;
+        } else {
+            push @members, "$member\@$domainName";
+        }
+
     }
 }
 
@@ -163,6 +152,7 @@ sub get_member()
     my $retval = undef;
     my $scope = 'sub';
     my $filter = undef;
+    my $sid = undef;
 
     my $baseDn = undef;
     if($sssd->isAD()) {
@@ -183,6 +173,15 @@ sub get_member()
     )->pop_entry();
 
     if( ! $entry) {
+        return undef;
+    }
+
+    if($sssd->isAD()) {
+        $sid = $entry->get_value('objectSid');
+    }
+
+    if($al->is_system_user($member) || $al->is_system_group($member) 
+        || $al->is_system_user($sid) || $al->is_system_group($sid) ) {
         return undef;
     }
 
