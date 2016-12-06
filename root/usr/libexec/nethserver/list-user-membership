@@ -28,15 +28,16 @@ use Net::LDAP;
 use Getopt::Std;
 use JSON;
 
-our $opt_A;
-our $opt_s;
+our ($opt_A, $opt_s, $opt_t);
+
 
 #
 # Invocation flags:
 #    -A      list all groups returned by LDAP server. If not specified items listed in /etc/nethserver/system-groups are hidden
 #    -s      strip the @domain suffix from users and groups
+#    -t N    timeout for each network call (default 10 seconds)
 #
-getopts('As');
+getopts('Ast:');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
@@ -101,7 +102,7 @@ my $ldap_error_handler = sub {
 };
 
 my $ldap = Net::LDAP->new($sssd->ldapURI(),
-    'timeout' => 30,
+    'timeout' => $opt_t,
     'async' => 0,
     'onerror' => $ldap_error_handler,
     'verify' => 'none',
@@ -117,7 +118,7 @@ my $entry = $ldap->search(
     'base' => $sssd->userDN(),
     'scope' => 'subtree',
     'deref' => 'never',
-    'timelimit' => 10,
+    'timelimit' => $opt_t,
     'filter' => $config{'filter'},
 )->pop_entry();
 
@@ -164,7 +165,7 @@ sub get_user_membership()
         'base' => $sssd->groupDN(),
         'scope' => 'subtree',
         'deref' => 'never',
-        'timelimit' => 10,
+        'timelimit' => $opt_t,
         'filter' => "(&(objectClass=$config{'groupclass'})($config{'memberattr'}=$memberAttrValue))",
     )->entries();
 }
@@ -177,7 +178,7 @@ sub get_member()
     my $entry = $ldap->search(
         'base' => $member,
         'scope' => 'base',
-        'timeout' => 10,
+        'timeout' => $opt_t,
         'filter' => '(objectClass=*)',
     )->pop_entry();
 

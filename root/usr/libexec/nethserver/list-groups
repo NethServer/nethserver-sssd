@@ -28,19 +28,24 @@ use Net::LDAP;
 use Getopt::Std;
 use JSON;
 
-our $opt_A;
-our $opt_s;
+our ($opt_A, $opt_s, $opt_t);
+
 
 #
 # Invocation flags:
 #    -A      list all groups returned by LDAP server. If not specified items listed in /etc/nethserver/system-groups are hidden
 #    -s      strip the @domain suffix from users and groups
+#    -t N    timeout for each network call (default 10 seconds)
 #
-getopts('As');
+getopts('Ast:');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $sssd = NethServer::SSSD->new();
 my @systemGroups = ();
+
+if( ! $opt_t) {
+    $opt_t = 10;
+}
 
 if( ! $opt_A) {
     open(FH, '<', '/etc/nethserver/system-groups');
@@ -92,7 +97,7 @@ my $ldap_error_handler = sub {
 };
 
 my $ldap = Net::LDAP->new($sssd->ldapURI(),
-    'timeout' => 30,
+    'timeout' => $opt_t,
     'async' => 0,
     'onerror' => $ldap_error_handler,
     'verify' => 'none',
@@ -108,7 +113,7 @@ $result = $ldap->search(
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
-    'timelimit' => 10,
+    'timelimit' => $opt_t,
     'filter' => $config{'filter'},
 );
 
