@@ -10,6 +10,7 @@
   /usr/libexec/nethserver/list-groups, \
   /usr/libexec/nethserver/list-user-membership, \
   /usr/libexec/nethserver/list-group-members, \
+  /usr/libexec/nethserver/count-accounts, \
   /sbin/e-smith/expand-template
 
 

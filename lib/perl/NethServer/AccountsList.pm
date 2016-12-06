@@ -74,7 +74,6 @@ sub is_in_db
                     return 1;
                 }
             }
-            warn "[INFO] miss $sid\n";
             return 0;
         }
     }
@@ -84,7 +83,6 @@ sub is_in_db
             return 1;
         }
     }
-    warn "[INFO] miss $entry\n";
     return 0;
 }
 

@@ -165,6 +165,10 @@ To retrieve the members of a group and the membership of a specific user:
 
 - ``/usr/libexec/nethserver/list-user-membership``
 
+The Dashboard account counters are provided by:
+
+- ``/usr/libexec/nethserver/count-accounts``
+
 All those helpers support the ``-A`` flag, to include hidden entries, 
 and the ``-s`` flag to return entries without ``@domain`` suffix.
 
