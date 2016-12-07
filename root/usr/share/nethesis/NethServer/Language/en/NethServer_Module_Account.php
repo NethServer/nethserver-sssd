@@ -19,4 +19,6 @@ $L['password_label'] = 'Password';
 $L['Join_label'] = 'Join';
 $L['Authenticate_header'] = 'Join the AD domain with privileged user credentials';
 
+$L['NoConfig_header'] = 'Domain ${0}';
+
 $L['valid_platform,ad-dns,srv_record,1'] = 'Does not seem an Active Directory domain controller';

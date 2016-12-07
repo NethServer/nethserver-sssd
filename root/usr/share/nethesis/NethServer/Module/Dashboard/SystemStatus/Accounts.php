@@ -30,7 +30,6 @@ class Accounts extends \Nethgui\Controller\AbstractController
 {
 
     public $sortId = 40;
-    private $accounts = array();
 
     private function readAccounts()
     {
@@ -56,18 +55,11 @@ class Accounts extends \Nethgui\Controller\AbstractController
         return $accounts;
     }
 
-    public function process()
-    {
-        $this->accounts = $this->readAccounts();
-    }
-
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
-        if ( ! $this->accounts) {
-            $this->accounts = $this->readAccounts();
-        }
-
-        $view['accounts'] = $this->accounts;
+        parent::prepareView($view);
+        $view['provider'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
+        $view['accounts'] = $this->readAccounts();
     }
 
 }

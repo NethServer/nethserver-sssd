@@ -1,5 +1,5 @@
 <?php
-namespace NethServer\Module\Account\Type\Group;
+namespace NethServer\Module\Account\Group;
 
 /*
  * Copyright (C) 2016 Nethesis Srl

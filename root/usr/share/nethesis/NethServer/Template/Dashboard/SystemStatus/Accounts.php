@@ -1,5 +1,9 @@
 <?php
 
+if($view['provider'] === 'none') {
+    return;
+}
+
 echo "<div class='dashboard-item'>";
 echo $view->header()->setAttribute('template',$T('accounts_title'));
 echo "<dl>";

@@ -1,6 +1,6 @@
 <?php
 
-namespace NethServer\Module\Account\AuthProvider;
+namespace NethServer\Module\SssdConfig\AuthProvider;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -65,7 +65,7 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
             if ($this->joinError === TRUE) {
                 $this->notifications->error('Invalid credentials');
             } else {
-                $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/Account'));
+                $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig'));
             }
         } elseif ( ! $view['login']) {
             $view['login'] = 'Administrator';

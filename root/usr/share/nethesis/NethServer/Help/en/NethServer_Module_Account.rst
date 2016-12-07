@@ -1,39 +1,4 @@
-========================
-Authentication providers
-========================
 
-Is possible to connect this system to an external LDAP or Active Directory account provider. Is NOT possible to change account provider once configured.
-It's also possible to install an LDAP or Active Directory account provider in this system, installing nethserver-directory or nethserver-dc package.
-
-LDAP
-====
-
-Server URI
-    to configure an external LDAP provider insert the IP address or host name of LDAP server.
-
-Active Directory
-=================
-
-NetBIOS domain
-    This value also known as "workgroup" could be required to access SMB
-    resources, like *Shared folders*.  It is set automatically to the leftmost
-    part of the DNS domain suffix.  It is truncated to 15 characters.
-
-DNS server IP address
-    IP address of domain controller DNS server (usually the address of domain controller itself)
-
-===============================
-Domain controller configuration
-===============================
-
-Set the IP address for the machine that is going to run the Samba Active Directory Domain Controller (DC). The chosen IP address must satisfy three conditions:
-
-* The IP address must be in the same subnet range of a green network.
-* The green network must be bound to a bridged interface.
-* The IP address must not be used by any other machine.
-
-Create a bridge interface for the green network
-    Automatically create a bridge on green interface for the DC machine
 
 =====
 Users

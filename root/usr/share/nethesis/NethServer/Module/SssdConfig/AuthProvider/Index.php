@@ -1,6 +1,6 @@
 <?php
 
-namespace NethServer\Module\Account\AuthProvider;
+namespace NethServer\Module\SssdConfig\AuthProvider;
 
 /*
  * Copyright (C) 2016 Nethesis Srl

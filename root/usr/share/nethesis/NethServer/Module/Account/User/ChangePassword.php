@@ -1,5 +1,5 @@
 <?php
-namespace NethServer\Module\Account\Type\User;
+namespace NethServer\Module\Account\User;
 /*
  * Copyright (C) 2012 Nethesis S.r.l.
  *
