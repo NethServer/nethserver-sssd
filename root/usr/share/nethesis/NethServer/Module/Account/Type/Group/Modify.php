@@ -59,6 +59,23 @@ class Modify extends \Nethgui\Controller\Table\Modify
         return $users;
     }
 
+    private function getGroups()
+    {
+        static $groups;
+        if( ! isset($groups)) {
+            $groups = array_keys($this->getGroupProvider()->getGroups());
+        }
+        return $groups;
+    }
+
+    private function enumerateMembers()
+    {
+        if($this->getGroupProvider()->isAD()) {
+            return array_unique(array_merge($this->getUsers(), $this->getGroups()));
+        }
+        return $this->getUsers();
+    }
+
     public function readMembers()
     {
         return $this->getGroupProvider()->getGroupMembers($this->parameters['groupname']);
@@ -97,7 +114,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             }
         }
         if ($this->getIdentifier() === 'update' || $this->getIdentifier() === 'create') {
-            $this->getValidator('members')->memberOf($this->getUsers());
+            $this->getValidator('members')->memberOf($this->enumerateMembers());
         }
         if ($this->getIdentifier() === 'create') {
             $groups = array();
@@ -156,7 +173,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $tmp = array();
         if ($this->getRequest()->isValidated()) {
-            foreach ($this->getUsers() as $key) {
+            foreach ($this->enumerateMembers() as $key) {
                 $tmp[] = array($key, $key);
             }
             $view->getCommandList()->show(); // required by nextPath() method of this class
