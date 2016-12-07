@@ -63,6 +63,13 @@ class Index extends \Nethgui\Controller\AbstractController
             $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
             $this->getPlatform()->signalEvent('nethserver-sssd-save &');
             $this->reloadPage = TRUE;
+        } else {
+            $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'disabled'));
+            if(array_keys($this->getPlatform()->getDatabase('NethServer::Database::Realmd')->getAll())) {
+                $this->getPlatform()->exec('/usr/bin/sudo /usr/sbin/realm leave');
+            }
+            $this->getPlatform()->signalEvent('nethserver-sssd-save &');
+            $this->reloadPage = TRUE;
         }
     }
 
@@ -78,12 +85,12 @@ class Index extends \Nethgui\Controller\AbstractController
         if($this->getRequest()->isMutation() && $this->reloadPage) {
             $this->getPlatform()->setDetachedProcessCondition('success', array(
                 'location' => array(
-                    'url' => $view->getModuleUrl('/Account/AuthProvider/Index?installSuccess'),
+                    'url' => $view->getModuleUrl('/SssdConfig/AuthProvider/Index?installSuccess'),
                     'freeze' => TRUE,
             )));
         }
         if($this->getRequest()->hasParameter('installSuccess')) {
-            $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/Account'));
+            $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig'));
         }
     }
 

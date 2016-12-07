@@ -43,12 +43,20 @@ event_templates('nethserver-sssd-save', qw(
     /etc/openldap/ldap.conf
 ));
 event_actions('nethserver-sssd-save', qw(
+    nethserver-sssd-cleanup 01
     nethserver-sssd-conf    20
     nethserver-sssd-initkeytabs 30
     nethserver-sssd-notifyclients 80
 ));
 event_services('nethserver-sssd-save', qw(
     sssd restart
+));
+
+#
+# event nethserver-sssd-cleanup
+#
+event_actions('nethserver-sssd-cleanup', qw(
+    nethserver-sssd-cleanup 20
 ));
 
 validator_actions('ad-dns', qw(

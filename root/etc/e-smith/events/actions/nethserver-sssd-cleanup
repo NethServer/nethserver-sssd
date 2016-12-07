@@ -21,8 +21,11 @@
 #
 
 EVENT=$1
-PROVIDER=$(/sbin/e-smith/config getprop sssd Provider)
 
-if [[ "$PROVIDER" != "none" ]]; then
-    authconfig --enablesssdauth --enablemkhomedir --update
+if systemctl -q is-active sssd; then
+    systemctl stop sssd
 fi
+
+echo "[NOTICE] wipe out sssd databases and configuration"
+find /var/lib/sss/ -name '*.ldb' -delete
+> /etc/sssd/sssd.conf

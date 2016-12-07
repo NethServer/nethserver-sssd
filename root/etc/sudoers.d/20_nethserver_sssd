@@ -2,6 +2,7 @@
 # 20_nethserver_sssd
 #
 %adm ALL=NOPASSWD: /usr/sbin/realm join *, \
+  /usr/sbin/realm leave, \
   /usr/bin/net ads search -P *, \
   /usr/bin/net ads info, \
   /usr/bin/net ads testjoin, \

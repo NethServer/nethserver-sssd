@@ -45,6 +45,8 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
 
         $domain = \Nethgui\array_end(\explode('.', \gethostname(), 2));
 
+        $this->getPlatform()->signalEvent('nethserver-sssd-cleanup');
+
         $ph = popen('/usr/bin/sudo /usr/sbin/realm join ' . $domain, 'w');
         fwrite($ph, $this->parameters['password'] . "\n");
         $err = pclose($ph);
