@@ -38,12 +38,17 @@ our ($opt_A, $opt_s, $opt_t);
 #    -s      strip the @domain suffix from users and groups
 #    -t N    timeout for each network call (default 10 seconds)
 #
+# If an argument is added, limit the list to the given entry only, i.e.
+#
+#    list-users -s admin
+#
 getopts('Ast:');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $now = time();
 my $sssd = NethServer::SSSD->new();
 my $al = NethServer::AccountsList->new();
+my $thisEntry = shift; $thisEntry =~ s/\@$domainName$//;
 
 my %config = (
     'bindDN' => $sssd->bindDN(),
@@ -188,7 +193,7 @@ $result = $ldap->search(
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
-    'filter' => $config{'filter'},
+    'filter' => $thisEntry ? "(&$config{'filter'}($config{'keyattr'}=$thisEntry))" : $config{'filter'},
 );
 
 print '{';
