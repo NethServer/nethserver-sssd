@@ -44,6 +44,13 @@ class Index extends \Nethgui\Controller\AbstractController
         $this->declareParameter('Provider', $providerValidator, array('configuration', 'sssd', 'Provider'));
         $this->declareParameter('LdapUri', Validate::HOSTADDRESS, $ldapUriAdapter);
         $this->declareParameter('AdDns', Validate::IP_OR_EMPTY, array('configuration', 'sssd', 'AdDns'));
+        $this->declareParameter('BindDN', Validate::ANYTHING, array('configuration', 'sssd', 'BindDN'));
+        $this->declareParameter('BindPassword', Validate::ANYTHING, array('configuration', 'sssd', 'BindPassword'));
+        $this->declareParameter('BaseDN', Validate::ANYTHING, array('configuration', 'sssd', 'BaseDN'));
+        $this->declareParameter('UserDN', Validate::ANYTHING, array('configuration', 'sssd', 'UserDN'));
+        $this->declareParameter('GroupDN', Validate::ANYTHING, array('configuration', 'sssd', 'GroupDN'));
+        $this->declareParameter('RawLdapUri', Validate::ANYTHING, array('configuration', 'sssd', 'LdapURI'));
+        $this->declareParameter('StartTls', $this->createValidator()->memberOf('', 'enabled', 'disabled'), array('configuration', 'sssd', 'StartTls'));
     }
 
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
@@ -57,8 +64,13 @@ class Index extends \Nethgui\Controller\AbstractController
     protected function onParametersSaved($changedParameters)
     {
         if ($this->parameters['Provider'] === 'ad') {
-            $this->isAuthNeeded = TRUE;
-            $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
+            $domain = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+            if($this->getPlatform()->getDatabase('NethServer::Database::Realmd')->getKey($domain)) {
+                $this->getPlatform()->signalEvent('nethserver-sssd-save &');
+            } else {
+                $this->isAuthNeeded = TRUE;
+                $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
+            }
         } elseif ($this->parameters['Provider'] === 'ldap') {
             $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
             $this->getPlatform()->signalEvent('nethserver-sssd-save &');
