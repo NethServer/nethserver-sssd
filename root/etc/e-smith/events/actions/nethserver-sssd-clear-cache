@@ -1,3 +1,69 @@
 #!/bin/bash
 
-/usr/sbin/sss_cache -E
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+EVENT=$1
+DOMAIN=$(hostname -d)
+OBJECT=${2%%@$DOMAIN}
+
+exec 1>&2
+
+function cleardiff ()
+{
+    local -a g1=("${!1}") g2=("${!2}")
+
+    for i in  "${g1[@]}"; do
+        for j in "${g2[@]}"; do
+            if [[ "$i" == "$j" ]]; then
+                continue 2
+            fi
+        done
+        echo "[NOTICE] clearing sssd cache for member $i"
+        /usr/sbin/sss_cache -u "$i" -g "$i"
+        /usr/sbin/sss_cache -u "${i%%@$DOMAIN}" -g "${i%%@$DOMAIN}"
+    done
+}
+
+
+if [[ ( $EVENT == user* || $EVENT == password-* ) && -n "${OBJECT}" ]]; then
+    echo "[NOTICE] clearing sssd cache for user $OBJECT@$DOMAIN"
+    /usr/sbin/sss_cache -u $OBJECT
+    /usr/sbin/sss_cache -u $OBJECT@$DOMAIN
+
+elif [[ $EVENT == group* && -n "${OBJECT}" ]]; then
+    echo "[NOTICE] clearing sssd cache for group $OBJECT@$DOMAIN"
+    IFS=,
+    declare -a oldmembers
+    oldmembers=($(getent group $OBJECT@$DOMAIN | cut -d : -f 4))
+
+    /usr/sbin/sss_cache -g $OBJECT
+    /usr/sbin/sss_cache -g $OBJECT@$DOMAIN
+
+    declare -a newmembers
+    newmembers=($(getent group $OBJECT@$DOMAIN | cut -d : -f 4))
+
+    cleardiff oldmembers[@] newmembers[@]
+    cleardiff newmembers[@] oldmembers[@]
+
+else
+    echo "[NOTICE] clearing sssd cache"
+    /usr/sbin/sss_cache -E
+fi
