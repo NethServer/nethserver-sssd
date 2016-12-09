@@ -63,24 +63,32 @@ class Index extends \Nethgui\Controller\AbstractController
 
     protected function onParametersSaved($changedParameters)
     {
+        $configDb = $this->getPlatform()->getDatabase('configuration');
+
         if ($this->parameters['Provider'] === 'ad') {
-            $domain = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
-            if($this->getPlatform()->getDatabase('NethServer::Database::Realmd')->getKey($domain)) {
+            if( ! in_array('Provider', $changedParameters)) {
                 $this->getPlatform()->signalEvent('nethserver-sssd-save &');
             } else {
                 $this->isAuthNeeded = TRUE;
                 $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
             }
         } elseif ($this->parameters['Provider'] === 'ldap') {
-            $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'enabled'));
+            $configDb->setProp('sssd', array('status' => 'enabled'));
             $this->getPlatform()->signalEvent('nethserver-sssd-save &');
             $this->reloadPage = TRUE;
         } else {
-            $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array('status' => 'disabled'));
-            if(array_keys($this->getPlatform()->getDatabase('NethServer::Database::Realmd')->getAll())) {
-                $this->getPlatform()->exec('/usr/bin/sudo /usr/sbin/realm leave');
-            }
-            $this->getPlatform()->signalEvent('nethserver-sssd-save &');
+            $configDb->setProp('sssd', array('status' => 'disabled'));
+            $configDb->delProp('sssd', array(
+                'BaseDN',
+                'BindDN',
+                'BindPassword',
+                'UserDN',
+                'GroupDN',
+                'LdapURI',
+                'StartTls',
+            ));
+            $this->getPlatform()->signalEvent('nethserver-sssd-save');
+            $this->getPlatform()->signalEvent('nethserver-sssd-leave &');
             $this->reloadPage = TRUE;
         }
     }

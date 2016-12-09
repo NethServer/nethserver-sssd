@@ -53,9 +53,10 @@ event_services('nethserver-sssd-save', qw(
 ));
 
 #
-# event nethserver-sssd-cleanup
+# event nethserver-sssd-leave
 #
-event_actions('nethserver-sssd-cleanup', qw(
+event_actions('nethserver-sssd-leave', qw(
+    nethserver-sssd-leave 10
     nethserver-sssd-cleanup 20
 ));
 
