@@ -104,6 +104,27 @@ class Index extends \Nethgui\Controller\AbstractController
         if($this->getRequest()->hasParameter('installSuccess')) {
             $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig'));
         }
+        
+        $view['sssd_defaults'] = array_merge(
+            array(
+                'baseDN' => '',
+                'bindDN' => '',
+                'bindPassword' => '',
+                'userDN' => '',
+                'groupDN' => '',
+                'ldapURI' => '',
+                'host' => '',
+                'port' => '',
+                'startTls'=> '',
+                'isAD' => '',
+                'isLdap' => '',
+            ),
+            json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/sssd-defaults')->getOutput(), TRUE)
+        );
+        if($view['sssd_defaults']['bindPassword']) {
+            $view['sssd_defaults'] = array_merge($view['sssd_defaults'], array('bindPassword' => '*****'));
+        }
+        
     }
 
     public function nextPath()
