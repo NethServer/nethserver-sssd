@@ -65,94 +65,12 @@ if($sssd->isLdap()) {
     %config = ( %config,
         'keyattr' => 'uid',
         'filter' => '(objectClass=shadowAccount)',
-
-        'get_expired' => sub { my $entry = shift;
-            my $shadowMax = $entry->get_value('shadowMax');
-            my $shadowLastChange = $entry->get_value('shadowLastChange');
-
-            if ($shadowMax < 99999) {
-                my $t = $shadowLastChange * 24 * 60 * 60;
-                my $expire_date = $t + ($shadowMax * 24 * 60 * 60);
-                if ($expire_date < $now) {
-                    return 1;
-                }
-            }
-
-            return 0;
-        },
-
-        'get_expires' => sub { my $entry = shift;
-            my $shadowMax = $entry->get_value('shadowMax');
-
-            if ($shadowMax < 99999) {
-                return 'yes';
-            }
-
-            return 'no';
-        },
-
-        'get_gecos' => sub { my $e = shift;
-            return $e->get_value('cn');
-        },
-
-        'get_locked' => sub { my $e = shift;
-            my $pass = $e->get_value('userPassword');
-            if($pass =~ /\{CRYPT\}\!+/) {
-                return 1;
-            }
-            return 0;
-        },
-
-        'get_new' => sub { my $e = shift;
-            if ($e->get_value('userPassword') eq '{CRYPT}!!') {
-                return 1;
-            }
-            return 0;
-        },
-
-        'get_shell' => sub { my $e = shift;
-            return $e->get_value('loginShell');
-        },
     );
 
 } elsif($sssd->isAD()) {
-    #
-    # See userAccountControl bit field codes:
-    # https://support.microsoft.com/en-us/kb/305144
-    #
     %config = ( %config,
         'keyattr' => 'sAMAccountName',
         'filter' => '(&(objectClass=user)(objectCategory=person))',
-        'get_expired' => sub { my $e = shift;
-            if(int($e->get_value('userAccountControl')) & 0x800000) { # PASSWORD_EXPIRED
-                return 1;
-            }
-            return 0;
-        },
-        'get_expires' => sub { my $e = shift;
-            if(int($e->get_value('userAccountControl')) & 0x10000) { # DONT_EXPIRE_PASSWORD
-                return 0;
-            }
-            return 1;
-        },
-        'get_gecos' => sub { my $e = shift;
-            return $e->get_value('displayName') || $e->get_value('cn');
-        },
-        'get_locked' => sub { my $e = shift;
-            if(int($e->get_value('userAccountControl')) & 0x2) { # ACCOUNTDISABLE
-                return 1;
-            }
-            return 0;
-        },
-        'get_new' => sub { my $e = shift;
-            if($e->get_value('pwdLastSet') eq '0') {
-                return 1;
-            }
-            return 0;
-        },
-        'get_shell' => sub { my $e = shift;
-            return $e->get_value('loginShell') || '/usr/libexec/openssh/sftp-server';
-        },
     );
 }
 
@@ -232,13 +150,135 @@ sub get_user_key()
 sub get_user_value()
 {
     my $e = shift;
-    return {
-        'expired' => $config{'get_expired'}->($e),
-        'expires' => $config{'get_expires'}->($e),
-        'gecos' => $config{'get_gecos'}->($e),
-        'locked' => $config{'get_locked'}->($e),
-        'new' => $config{'get_new'}->($e),
-        'shell' => $config{'get_shell'}->($e),
-        'groups' => []
-    };
+    if($sssd->isAD()) {
+        return {
+            'expired' => get_ad_expired($e),
+            'expires' => get_ad_expires($e),
+            'gecos' => get_ad_gecos($e),
+            'locked' => get_ad_locked($e),
+            'new' => get_ad_new($e),
+            'shell' => get_ad_shell($e),
+            'groups' => []
+        };
+    } elsif($sssd->isLdap()) {
+        return {
+            'expired' => get_ldap_expired($e),
+            'expires' => get_ldap_expires($e),
+            'gecos' => get_ldap_gecos($e),
+            'locked' => get_ldap_locked($e),
+            'new' => get_ldap_new($e),
+            'shell' => get_ldap_shell($e),
+            'groups' => []
+        };
+    }
+    return {};
 }
+
+
+#
+# ad functions
+#
+# See userAccountControl bit field codes:
+# https://support.microsoft.com/en-us/kb/305144
+#
+
+sub get_ad_expired {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x800000) { # PASSWORD_EXPIRED
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_expires {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x10000) { # DONT_EXPIRE_PASSWORD
+        return 0;
+    }
+    return 1;
+}
+
+sub get_ad_gecos {
+    my $e = shift;
+    return $e->get_value('displayName') || $e->get_value('cn');
+}
+
+sub get_ad_locked {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x2) { # ACCOUNTDISABLE
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_new {
+    my $e = shift;
+    if($e->get_value('pwdLastSet') eq '0') {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_shell {
+    my $e = shift;
+    return $e->get_value('loginShell') || '/usr/libexec/openssh/sftp-server';
+}
+
+#
+# ldap functions
+#
+
+sub get_ldap_expired {
+    my $entry = shift;
+    my $shadowMax = $entry->get_value('shadowMax');
+    my $shadowLastChange = $entry->get_value('shadowLastChange');
+
+    if ($shadowMax < 99999) {
+        my $t = $shadowLastChange * 24 * 60 * 60;
+        my $expire_date = $t + ($shadowMax * 24 * 60 * 60);
+        if ($expire_date < $now) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+sub get_ldap_expires {
+    my $entry = shift;
+    my $shadowMax = $entry->get_value('shadowMax');
+
+    if ($shadowMax < 99999) {
+        return 'yes';
+    }
+
+    return 'no';
+}
+
+sub get_ldap_gecos {
+    my $e = shift;
+    return $e->get_value('cn');
+}
+
+sub get_ldap_locked {
+    my $e = shift;
+    my $pass = $e->get_value('userPassword');
+    if($pass =~ /\{CRYPT\}\!+/) {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ldap_new {
+    my $e = shift;
+    if ($e->get_value('userPassword') eq '{CRYPT}!!') {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ldap_shell {
+    my $e = shift;
+    return $e->get_value('loginShell');
+}
+
