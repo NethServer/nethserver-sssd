@@ -32,10 +32,10 @@ class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
     private $platform;
     private $provider;
 
-    public function __construct(\Nethgui\System\PlatformInterface $platform)
+    public function __construct(\Nethgui\System\PlatformInterface $platform, $di)
     {
         $this->platform = $platform;
-        $this->provider = new \NethServer\Tool\UserProvider($this->platform);
+        $this->provider = call_user_func($di, new \NethServer\Tool\UserProvider($this->platform));
         parent::__construct(array($this, 'readUsers'));
     }
 
@@ -61,5 +61,11 @@ class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
        } else {
             return array('Key','gecos','Actions');
        }
+    }
+    
+    public function prepareNotifications(\Nethgui\View\ViewInterface $view)
+    {
+        $this->provider->prepareNotifications($view);
+        return $this;
     }
 }

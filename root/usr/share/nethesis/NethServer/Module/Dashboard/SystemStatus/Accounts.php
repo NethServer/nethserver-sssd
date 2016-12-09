@@ -26,16 +26,36 @@ namespace NethServer\Module\Dashboard\SystemStatus;
  *
  * @author Giacomo Sanchietti
  */
-class Accounts extends \Nethgui\Controller\AbstractController
+class Accounts extends \Nethgui\Controller\AbstractController implements \Nethgui\Component\DependencyInjectorAggregate
 {
 
     public $sortId = 40;
+
+    protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $attributes)
+    {
+        return new \NethServer\Tool\CustomModuleAttributesProvider($attributes, array('languageCatalog' => array('NethServer_Module_Dashboard_SystemStatus_Accounts', 'NethServer_Module_Account')));
+    }
+
+    private function getGroupProvider()
+    {
+        static $provider;
+        if( ! $provider) {
+            $provider = call_user_func($this->dependencyInjector, new \NethServer\Tool\GroupProvider($this->getPlatform()));
+        }
+        return $provider;
+    }
+
+    public function setDependencyInjector($di)
+    {
+        $this->dependencyInjector = $di;
+        return $this;
+    }
 
     private function readAccounts()
     {
         $accounts = array('user' => 0, 'group' => 0, 'ibay' => 0, 'pseudonym' => 0, 'ftp' => 0, 'vpn' => 0, 'machine' => 0);
 
-        $counters = json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1')->getOutput(), TRUE);
+        $counters = $this->getGroupProvider()->getAccountCounters();
         if(is_array($counters)) {
             $accounts = array_merge($accounts, $counters);
         }
@@ -60,6 +80,8 @@ class Accounts extends \Nethgui\Controller\AbstractController
         parent::prepareView($view);
         $view['provider'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
         $view['accounts'] = $this->readAccounts();
+
+        $this->getGroupProvider()->prepareNotifications($view);
     }
 
 }

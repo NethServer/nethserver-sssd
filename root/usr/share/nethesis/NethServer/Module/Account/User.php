@@ -35,7 +35,7 @@ class User extends \Nethgui\Controller\TableController
 
     public function initialize()
     {
-        $adapter = new User\UserAdapter($this->getPlatform());
+        $adapter = new User\UserAdapter($this->getPlatform(), $this->dependencyInjector);
 
         $this
             ->setTableAdapter($adapter)
@@ -52,6 +52,12 @@ class User extends \Nethgui\Controller\TableController
         }
 
         parent::initialize();
+    }
+
+    public function prepareView(\Nethgui\View\ViewInterface $view)
+    {
+        parent::prepareView($view);
+        $this->getAdapter()->prepareNotifications($view);
     }
 
     public function prepareViewForColumnKey(\Nethgui\Controller\Table\Read $action, \Nethgui\View\ViewInterface $view, $key, $values, &$rowMetadata)

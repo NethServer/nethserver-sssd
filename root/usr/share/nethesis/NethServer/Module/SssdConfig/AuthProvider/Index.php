@@ -26,7 +26,7 @@ use Nethgui\System\PlatformInterface as Validate;
  *
  * @author Davide Principi <davide.principi@nethesis.it>
  */
-class Index extends \Nethgui\Controller\AbstractController
+class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\Component\DependencyInjectorAggregate
 {
 
     protected $isAuthNeeded = FALSE;
@@ -132,7 +132,25 @@ class Index extends \Nethgui\Controller\AbstractController
         if($view['sssd_defaults']['bindPassword']) {
             $view['sssd_defaults'] = array_merge($view['sssd_defaults'], array('bindPassword' => '*****'));
         }
-        
+
+        $this->getGroupProvider()->getAccountCounters();
+        $this->getGroupProvider()->prepareNotifications($view);
+
+    }
+
+    private function getGroupProvider()
+    {
+        static $provider;
+        if( ! $provider) {
+            $provider = call_user_func($this->dependencyInjector, new \NethServer\Tool\GroupProvider($this->getPlatform()));
+        }
+        return $provider;
+    }
+
+    public function setDependencyInjector($di)
+    {
+        $this->dependencyInjector = $di;
+        return $this;
     }
 
     public function nextPath()
