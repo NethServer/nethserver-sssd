@@ -1,3 +1,74 @@
 #!/bin/bash
 
-/usr/sbin/sss_cache -E
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+EVENT=$1
+DOMAIN=$(hostname -d)
+OBJECT=${2%%@$DOMAIN}
+
+exec 1>&2
+
+#
+# check if all elements of g1 are also elements of g2
+#
+function is_subset ()
+{
+    local -a g1=("${!1}") g2=("${!2}")
+
+    for i in  "${g1[@]}"; do
+        for j in "${g2[@]}"; do
+            if [[ "$i" == "$j" ]]; then
+                continue 2 # found check next i
+            fi
+        done
+        return 1 # i not found: NOT subset
+    done
+    return 0 # all i were found: g1 IS subset of g2
+}
+
+
+if [[ ( $EVENT == user* || $EVENT == password-* ) && -n "${OBJECT}" ]]; then
+    echo "[NOTICE] clearing sssd cache for user $OBJECT@$DOMAIN"
+    /usr/sbin/sss_cache -u $OBJECT
+    /usr/sbin/sss_cache -u $OBJECT@$DOMAIN
+
+elif [[ $EVENT == group* && -n "${OBJECT}" ]]; then
+    echo "[NOTICE] clearing sssd cache for group $OBJECT@$DOMAIN"
+    IFS=,
+    declare -a oldmembers
+    oldmembers=($(getent group $OBJECT@$DOMAIN | cut -d : -f 4))
+
+    /usr/sbin/sss_cache -g $OBJECT
+    /usr/sbin/sss_cache -g $OBJECT@$DOMAIN
+
+    declare -a newmembers
+    newmembers=($(getent group $OBJECT@$DOMAIN | cut -d : -f 4))
+
+    # two sets are equal if one is subset of the other
+    if ! is_subset oldmembers[@] newmembers[@] || ! is_subset newmembers[@] oldmembers[@]; then
+        echo "[NOTICE] group members changed: clear users cache"
+        /usr/sbin/sss_cache -U
+    fi
+
+else
+    echo "[NOTICE] clearing sssd cache"
+    /usr/sbin/sss_cache -E
+fi

@@ -30,66 +30,50 @@ class GroupProvider
 
     private $listGroupsCommand = '';
     private $platform;
-    private $ad = false;
+    private $provider = false;
+    private $isLocalProvider = FALSE;
 
     public function getGroups()
     {
-        $provider = $this->platform->getDatabase('configuration')->getProp('sssd', 'Provider');
-        if ($provider != 'ad' && $provider != 'ldap') {
+        $groups = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups')->getOutput(), TRUE);
+        if( ! is_array($groups)) {
             return array();
         }
+        return $groups;
+    }
 
-        if ($this->listGroupsCommand) {
-            $groups = json_decode(exec('/usr/bin/sudo '.$this->listGroupsCommand), TRUE);
-        } else { # groups from remote server
-            $groups = $this->platform->getDatabase('NethServer::Database::Group')->getAll();
+    public function getGroupMembers($groupName)
+    {
+        $members = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members ${@}', array($groupName))->getOutput(), TRUE);
+        if( ! is_array($members)) {
+            return array();
         }
-        /*Filter out system groups*/
-        $handle = fopen('/etc/nethserver/system-groups','r');
-        $systemGroups = array();
-        if ($handle){
-            while (($line = fgets($handle)) !== false) {
-                $systemGroups[] = strtolower(trim($line));
-            }
-        }
-        fclose($handle);
-        if (!empty($groups))
-        {
-            foreach ($groups as $key => $group)
-            {
-                $tmp = explode('@',strtolower($key)); 
-                if ( in_array($tmp[0],$systemGroups) || (isset($group['gid']) && ($group['gid'] < 1000)) )
-                {
-                    /*Remove group if it's a system group*/
-                    unset($groups[$key]);
-                } 
-            }
-        }
-
-        return is_array($groups) ? $groups : array();
+        return $members;
     }
 
     public function isReadOnly()
     {
-        return (!$this->listGroupsCommand);
+        return $this->isLocalProvider === FALSE;
     }
 
     public function isAD()
     {
-        return $this->ad;
+        return $this->provider === 'ad';
     }
     
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
          $this->platform = $platform;
 
-         # Search for installed provider
-         if (file_exists('/usr/libexec/nethserver/ldap-list-groups')) {
-             $this->listGroupsCommand = '/usr/libexec/nethserver/ldap-list-groups';
-         } else if (file_exists('/usr/libexec/nethserver/ad-list-groups')) {
-             $this->listGroupsCommand = '/usr/libexec/nethserver/ad-list-groups';
-         }
+         $sssd = $platform->getDatabase('configuration')->getKey('sssd');
+         $this->provider = $sssd['Provider'];
 
-         $this->ad = $platform->getDatabase('configuration')->getProp('sssd', 'Provider') === 'ad';
+         if(   ( $this->provider === 'ldap' 
+                 && $sssd['LdapURI'] === '')
+            || ( $this->provider === 'ad' 
+                 && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')
+             ) {
+             $this->isLocalProvider = TRUE;
+         }
     }
 }

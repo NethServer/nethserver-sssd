@@ -35,23 +35,10 @@ class Accounts extends \Nethgui\Controller\AbstractController
     private function readAccounts()
     {
         $accounts = array('user' => 0, 'group' => 0, 'ibay' => 0, 'pseudonym' => 0, 'ftp' => 0, 'vpn' => 0, 'machine' => 0);
-        foreach ($this->getPlatform()->getDatabase('NethServer::Database::Passwd')->getAll() as $record) {
-            if ($record['uid'] < 1000) {
-                continue;
-            }
 
-            if (strstr($record['name'], '$@')) {
-                $accounts['machine'] += 1;
-            } else {
-                $accounts['user'] += 1;
-            }
-        }
-
-        foreach ($this->getPlatform()->getDatabase('NethServer::Database::Group')->getAll() as $record) {
-            if ($record['gid'] < 1000) {
-                continue;
-            }
-            $accounts['group'] += 1;
+        $counters = json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1 -A')->getOutput(), TRUE);
+        if(is_array($counters)) {
+            $accounts = array_merge($accounts, $counters);
         }
 
         foreach ($this->getPlatform()->getDatabase('accounts')->getAll() as $record) {

@@ -1,6 +1,17 @@
 #
 # 20_nethserver_sssd
 #
-%adm ALL=NOPASSWD: /usr/sbin/realm join *, /usr/bin/net ads search -P *, /usr/bin/net ads info, /usr/bin/net ads testjoin, /sbin/e-smith/config, /sbin/e-smith/expand-template, /usr/libexec/nethserver/password-expiration
+%adm ALL=NOPASSWD: /usr/sbin/realm join *, \
+  /usr/bin/net ads search -P *, \
+  /usr/bin/net ads info, \
+  /usr/bin/net ads testjoin, \
+  /sbin/e-smith/config, \
+  /usr/libexec/nethserver/list-users, \
+  /usr/libexec/nethserver/list-groups, \
+  /usr/libexec/nethserver/list-user-membership, \
+  /usr/libexec/nethserver/list-group-members, \
+  /usr/libexec/nethserver/count-accounts, \
+  /sbin/e-smith/expand-template
+
 
 

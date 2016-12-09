@@ -8,6 +8,8 @@
     if ($provider eq 'ldap') {
         $provider_config .= "ldap_uri = " . $sssd_object->ldapURI() . "\n";
         $provider_config .= "ldap_search_base = $suffix\n";
+        $provider_config .= "ldap_user_search_base = " . $sssd_object->userDN() . "\n";
+        $provider_config .= "ldap_group_search_base = " . $sssd_object->groupDN() . "\n";
         $provider_config .= "ldap_tls_reqcert = never\n";
     } elsif ($provider eq 'ad') {
         $provider_config .= "access_provider = ad\n";

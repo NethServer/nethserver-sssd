@@ -1,0 +1,191 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+use strict;
+use NethServer::SSSD;
+use NethServer::AccountsList;
+use NethServer::Password;
+use Sys::Hostname;
+use Net::LDAP;
+use Getopt::Std;
+use JSON;
+
+our ($opt_A, $opt_s, $opt_t);
+
+
+#
+# Invocation flags:
+#    -A      list all groups returned by LDAP server. If not specified items listed in /etc/nethserver/system-groups are hidden
+#    -s      strip the @domain suffix from users and groups
+#    -t N    timeout for each network call (default 10 seconds)
+#
+getopts('Ast:');
+
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
+my $sssd = NethServer::SSSD->new();
+my $userName = shift;
+my $al = NethServer::AccountsList->new();
+
+$userName =~ s/\@$domainName$//; #trim @domain suffix
+
+my %config = (
+    'bindDN' => $sssd->bindDN(),
+    'bindPassword' => $sssd->bindPassword(),
+);
+
+if($sssd->isLdap()) {
+    if($sssd->isLocalProvider()) {
+        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
+        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
+    }
+
+    %config = ( %config,
+        'userkeyattr' => 'uid',
+        'groupkeyattr' => 'cn',
+        'memberattr' => 'memberUid',
+        'filter' => "(&(objectClass=shadowAccount)(uid=$userName))",
+        'groupclass' => 'posixGroup',
+    );
+
+} elsif($sssd->isAD()) {
+    %config = ( %config,
+        'userkeyattr' => 'sAMAccountName',
+        'groupkeyattr' => 'sAMAccountName',
+        'memberattr' => 'member',
+        'filter' => "(&(objectClass=user)(sAMAccountName=$userName))",
+        'groupclass' => 'group',
+    );
+}
+
+my $exitCode = 0;
+my $result;
+
+my $ldap_error_handler = sub {
+    my $message = shift;
+    if($message && $message->is_error()) {
+        my $code = $message->code();
+        my $text = $message->error();
+        if($code == 4) {
+            warn "[WARNING] (code $code): $text\n";
+            $exitCode = $code;
+            return $message;
+        }
+        warn "[ERROR] (code $code): $text\n";
+        exit($code);
+    }
+    return $message;
+};
+
+my $ldap = Net::LDAP->new($sssd->ldapURI(),
+    'timeout' => $opt_t,
+    'async' => 0,
+    'onerror' => $ldap_error_handler,
+    'verify' => 'none',
+);
+
+if($sssd->startTls()) {
+    $ldap->start_tls('verify' => 'none');
+}
+
+$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+
+my $entry = $ldap->search(
+    'base' => $sssd->userDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => $opt_t,
+    'filter' => $config{'filter'},
+)->pop_entry();
+
+my @groups = ();
+
+if($entry) {
+    foreach (get_user_membership($entry)) {
+        my $groupName = lc($_->get_value($config{'groupkeyattr'}));
+        if($groupName && ! $al->is_system_group($groupName) && ! $al->is_system_group($_->get_value('objectSid'))) {
+            if($opt_s) {
+                push @groups, "$groupName";
+            } else {
+                push @groups, "$groupName\@$domainName";
+            }
+        }
+    }
+}
+
+print JSON->new()->encode(\@groups);
+
+$ldap->unbind();
+$ldap->disconnect();
+exit($exitCode);
+
+################################################################################
+################################################################################
+################################################################################
+
+sub get_user_membership()
+{
+    my $userEntry = shift;
+
+    my $memberAttrValue = undef;
+
+    if($sssd->isAD()) {
+        $memberAttrValue = $userEntry->get_value('distinguishedName');
+    } elsif($sssd->isLdap()) {
+        $memberAttrValue = $userEntry->get_value($config{'userkeyattr'});
+    } else {
+        return ();
+    }
+
+    return $ldap->search(
+        'base' => $sssd->groupDN(),
+        'scope' => 'subtree',
+        'deref' => 'never',
+        'timelimit' => $opt_t,
+        'filter' => "(&(objectClass=$config{'groupclass'})($config{'memberattr'}=$memberAttrValue))",
+    )->entries();
+}
+
+sub get_member()
+{
+    my $member = shift;
+    my $retval = undef;
+
+    my $entry = $ldap->search(
+        'base' => $member,
+        'scope' => 'base',
+        'timeout' => $opt_t,
+        'filter' => '(objectClass=*)',
+    )->pop_entry();
+
+    if( ! $entry) {
+        return undef;
+    }
+
+    if($entry->get_value('objectClass') eq $config{'groupclass'}) {
+        $retval = $entry->get_value($config{'groupkeyattr'});
+    } else {
+        $retval = $entry->get_value($config{'userkeyattr'});
+    }
+
+    return lc($retval);
+}
+

@@ -138,31 +138,52 @@ System users and groups
 -----------------------
 
 SSSD can access all users and groups from an account provider,
-but the web interface will always hide system users and groups.
+but the Server Manager hides system users and groups.
 
-The following users will not be accessible from the web interface:
+The following users will not be accessible from the Server Manager:
 
 * all users listed inside `/etc/nethserver/system-users`
-* all users with uid < 1000
-* all machine accounts from AD
+* all users in /etc/passwd
 
 The following groups will not be accessible from the web interface:
 
 * all groups listed inside `/etc/nethserver/system-groups`
-* all groups with gid < 1000
+* all groups in /etc/group
+
+The users and groups lists are retrieved by the following UI helpers:
+
+- ``/usr/libexec/nethserver/list-users``
+
+- ``/usr/libexec/nethserver/list-groups``
+
+The number of entries returned by the server is limited. For instance, AD has a 
+1000 entries search results cap.
+
+To retrieve the members of a group and the membership of a specific user:
+
+- ``/usr/libexec/nethserver/list-group-members``
+
+- ``/usr/libexec/nethserver/list-user-membership``
+
+The Dashboard account counters are provided by:
+
+- ``/usr/libexec/nethserver/count-accounts``
+
+All those helpers support the ``-A`` flag, to include hidden entries, 
+and the ``-s`` flag to return entries without ``@domain`` suffix.
 
 
 NethServer::SSSD
 ----------------
 
-NethServer::SSSD is the perl library module to retrieve current LDAP configuration. 
+NethServer::SSSD is the Perl library module to retrieve current LDAP configuration. 
 It supports both Active Directory and OpenLDAP providers.
 
 Template example: ::
 
   {
       use NethServer::SSSD;
-      my $sssd = new NethServer::SSSD();
+      my $sssd = NethServer::SSSD->new();
 
       $OUT .= "{ldap_uri, [".$sssd->ldapURI()."]}\n";
 

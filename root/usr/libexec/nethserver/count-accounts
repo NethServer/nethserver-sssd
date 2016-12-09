@@ -1,0 +1,157 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+use strict;
+use NethServer::SSSD;
+use NethServer::AccountsList;
+use NethServer::Password;
+use Sys::Hostname;
+use Net::LDAP;
+use Getopt::Std;
+use JSON;
+
+our ($opt_A, $opt_s, $opt_t);
+
+
+#
+# Invocation flags:
+#    -A      list all users returned by LDAP server. If not specified items listed in /etc/nethserver/system-users are hidden
+#    -s      strip the @domain suffix from users and groups
+#    -t N    timeout for each network call (default 10 seconds)
+#
+getopts('Ast:');
+
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
+my $now = time();
+my $sssd = NethServer::SSSD->new();
+my $al = NethServer::AccountsList->new();
+
+my %config = (
+    'bindDN' => $sssd->bindDN(),
+    'bindPassword' => $sssd->bindPassword(),
+);
+
+if($sssd->isLdap()) {
+
+    if($sssd->isLocalProvider()) {
+        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
+        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
+    }
+
+    %config = ( %config,
+        'userfilter' => '(objectClass=shadowAccount)',
+        'userkeyattr' => 'uid',
+        'groupfilter' => '(objectClass=posixGroup)',
+        'groupkeyattr' => 'cn',
+        'computerfilter' => '(objectClass=notavailable)',
+    );
+
+} elsif($sssd->isAD()) {
+    %config = ( %config,
+        'userfilter' => '(&(objectClass=user)(objectCategory=person))',
+        'userkeyattr' => 'sAMAccountName',
+        'groupfilter' => '(objectClass=group)',
+        'groupkeyattr' => 'sAMAccountName',
+        'computerfilter' => '(objectClass=computer)',
+    );
+}
+
+my $exitCode = 0;
+my $result;
+
+my $ldap_error_handler = sub {
+    my $message = shift;
+    if($message && $message->is_error()) {
+        my $code = $message->code();
+        my $text = $message->error();
+        if($code == 4) {
+            $exitCode = $code;
+            return $message;
+        }
+        warn "[ERROR] (code $code): $text\n";
+        exit($code);
+    }
+    return $message;
+};
+
+my $ldap = Net::LDAP->new($sssd->ldapURI(),
+    'timeout' => $opt_t,
+    'async' => 0,
+    'onerror' => $ldap_error_handler,
+    'verify' => 'none',
+);
+
+if($sssd->startTls()) {
+    $ldap->start_tls('verify' => 'none');
+}
+
+$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+
+my %counters = (
+    'user' => 0,
+    'group' => 0,
+    'machine' => 0,
+);
+
+$result = $ldap->search(
+    'base' => $sssd->userDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => $opt_t,
+    'filter' => $config{'userfilter'},
+);
+
+if($opt_A) {
+    $counters{'user'} = $result->count();
+} else {
+    $counters{'user'} = scalar grep { ! (($sssd->isAD() && $al->is_system_user($_->get_value('objectSid'))) || $al->is_system_user($_->get_value($config{'userkeyattr'}))) } $result->entries();
+}
+
+$result = $ldap->search(
+    'base' => $sssd->groupDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => $opt_t,
+    'filter' => $config{'groupfilter'},
+);
+
+if($opt_A) {
+    $counters{'group'} = $result->count();
+} else {
+    $counters{'group'} = scalar grep { ! (($sssd->isAD() && $al->is_system_group($_->get_value('objectSid'))) || $al->is_system_group($_->get_value($config{'userkeyattr'}))) } $result->entries();
+}
+
+$result = $ldap->search(
+    'base' => $sssd->baseDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => $opt_t,
+    'filter' => $config{'computerfilter'},
+);
+
+$counters{'machine'} = $result->count();
+
+print JSON->new->encode(\%counters);
+
+$ldap->unbind();
+$ldap->disconnect();
+exit($exitCode);

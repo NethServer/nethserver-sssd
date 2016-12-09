@@ -1,0 +1,284 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+use strict;
+use NethServer::SSSD;
+use NethServer::AccountsList;
+use NethServer::Password;
+use Sys::Hostname;
+use Net::LDAP;
+use Getopt::Std;
+use JSON;
+
+our ($opt_A, $opt_s, $opt_t);
+
+
+#
+# Invocation flags:
+#    -A      list all users returned by LDAP server. If not specified items listed in /etc/nethserver/system-users are hidden
+#    -s      strip the @domain suffix from users and groups
+#    -t N    timeout for each network call (default 10 seconds)
+#
+# If an argument is added, limit the list to the given entry only, i.e.
+#
+#    list-users -s admin
+#
+getopts('Ast:');
+
+my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
+my $now = time();
+my $sssd = NethServer::SSSD->new();
+my $al = NethServer::AccountsList->new();
+my $thisEntry = shift; $thisEntry =~ s/\@$domainName$//;
+
+my %config = (
+    'bindDN' => $sssd->bindDN(),
+    'bindPassword' => $sssd->bindPassword(),
+);
+
+if($sssd->isLdap()) {
+
+    if($sssd->isLocalProvider()) {
+        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
+        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
+    }
+
+    %config = ( %config,
+        'keyattr' => 'uid',
+        'filter' => '(objectClass=shadowAccount)',
+    );
+
+} elsif($sssd->isAD()) {
+    %config = ( %config,
+        'keyattr' => 'sAMAccountName',
+        'filter' => '(&(objectClass=user)(objectCategory=person))',
+    );
+}
+
+my $exitCode = 0;
+my $result;
+
+my $ldap_error_handler = sub {
+    my $message = shift;
+    if($message && $message->is_error()) {
+        my $code = $message->code();
+        my $text = $message->error();
+        if($code == 4) {
+            warn "[WARNING] (code $code): $text\n";
+            $exitCode = $code;
+            return $message;
+        }
+        warn "[ERROR] (code $code): $text\n";
+        exit($code);
+    }
+    return $message;
+};
+
+my $ldap = Net::LDAP->new($sssd->ldapURI(),
+    'timeout' => $opt_t,
+    'async' => 0,
+    'onerror' => $ldap_error_handler,
+    'verify' => 'none',
+);
+
+if($sssd->startTls()) {
+    $ldap->start_tls('verify' => 'none');
+}
+
+$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+
+$result = $ldap->search(
+    'base' => $sssd->userDN(),
+    'scope' => 'subtree',
+    'deref' => 'never',
+    'timelimit' => $opt_t,
+    'filter' => $thisEntry ? "(&$config{'filter'}($config{'keyattr'}=$thisEntry))" : $config{'filter'},
+);
+
+print '{';
+
+my $entry;
+my $separator = '';
+while($entry = $result->pop_entry()) {
+    my $key = get_user_key($entry);
+    if( ! $opt_A && (($sssd->isAD() && $al->is_system_user($entry->get_value('objectSid'))) || $al->is_system_user($key))) {
+        next;
+    }
+
+    print $separator;
+    print JSON->new()->allow_nonref()->encode($key . ($opt_s ? "": "\@$domainName"));
+    print ":";
+    print JSON->new()->encode(get_user_value($entry));
+    $separator = ',';
+}
+
+print '}';
+
+$ldap->unbind();
+$ldap->disconnect();
+exit($exitCode);
+
+################################################################################
+################################################################################
+################################################################################
+
+sub get_user_key()
+{
+    my $entry = shift;
+    return lc($entry->get_value($config{'keyattr'}));
+}
+
+sub get_user_value()
+{
+    my $e = shift;
+    if($sssd->isAD()) {
+        return {
+            'expired' => get_ad_expired($e),
+            'expires' => get_ad_expires($e),
+            'gecos' => get_ad_gecos($e),
+            'locked' => get_ad_locked($e),
+            'new' => get_ad_new($e),
+            'shell' => get_ad_shell($e),
+            'groups' => []
+        };
+    } elsif($sssd->isLdap()) {
+        return {
+            'expired' => get_ldap_expired($e),
+            'expires' => get_ldap_expires($e),
+            'gecos' => get_ldap_gecos($e),
+            'locked' => get_ldap_locked($e),
+            'new' => get_ldap_new($e),
+            'shell' => get_ldap_shell($e),
+            'groups' => []
+        };
+    }
+    return {};
+}
+
+
+#
+# ad functions
+#
+# See userAccountControl bit field codes:
+# https://support.microsoft.com/en-us/kb/305144
+#
+
+sub get_ad_expired {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x800000) { # PASSWORD_EXPIRED
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_expires {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x10000) { # DONT_EXPIRE_PASSWORD
+        return 0;
+    }
+    return 1;
+}
+
+sub get_ad_gecos {
+    my $e = shift;
+    return $e->get_value('displayName') || $e->get_value('cn');
+}
+
+sub get_ad_locked {
+    my $e = shift;
+    if(int($e->get_value('userAccountControl')) & 0x2) { # ACCOUNTDISABLE
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_new {
+    my $e = shift;
+    if($e->get_value('pwdLastSet') eq '0') {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ad_shell {
+    my $e = shift;
+    return $e->get_value('loginShell') || '/usr/libexec/openssh/sftp-server';
+}
+
+#
+# ldap functions
+#
+
+sub get_ldap_expired {
+    my $entry = shift;
+    my $shadowMax = $entry->get_value('shadowMax');
+    my $shadowLastChange = $entry->get_value('shadowLastChange');
+
+    if ($shadowMax < 99999) {
+        my $t = $shadowLastChange * 24 * 60 * 60;
+        my $expire_date = $t + ($shadowMax * 24 * 60 * 60);
+        if ($expire_date < $now) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+sub get_ldap_expires {
+    my $entry = shift;
+    my $shadowMax = $entry->get_value('shadowMax');
+
+    if ($shadowMax < 99999) {
+        return 'yes';
+    }
+
+    return 'no';
+}
+
+sub get_ldap_gecos {
+    my $e = shift;
+    return $e->get_value('cn');
+}
+
+sub get_ldap_locked {
+    my $e = shift;
+    my $pass = $e->get_value('userPassword');
+    if($pass =~ /\{CRYPT\}\!+/) {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ldap_new {
+    my $e = shift;
+    if ($e->get_value('userPassword') eq '{CRYPT}!!') {
+        return 1;
+    }
+    return 0;
+}
+
+sub get_ldap_shell {
+    my $e = shift;
+    return $e->get_value('loginShell');
+}
+
