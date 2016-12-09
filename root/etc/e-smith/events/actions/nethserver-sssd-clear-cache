@@ -26,20 +26,22 @@ OBJECT=${2%%@$DOMAIN}
 
 exec 1>&2
 
-function cleardiff ()
+#
+# check if all elements of g1 are also elements of g2
+#
+function is_subset ()
 {
     local -a g1=("${!1}") g2=("${!2}")
 
     for i in  "${g1[@]}"; do
         for j in "${g2[@]}"; do
             if [[ "$i" == "$j" ]]; then
-                continue 2
+                continue 2 # found check next i
             fi
         done
-        echo "[NOTICE] clearing sssd cache for member $i"
-        /usr/sbin/sss_cache -u "$i" -g "$i"
-        /usr/sbin/sss_cache -u "${i%%@$DOMAIN}" -g "${i%%@$DOMAIN}"
+        return 1 # i not found: NOT subset
     done
+    return 0 # all i were found: g1 IS subset of g2
 }
 
 
@@ -60,8 +62,11 @@ elif [[ $EVENT == group* && -n "${OBJECT}" ]]; then
     declare -a newmembers
     newmembers=($(getent group $OBJECT@$DOMAIN | cut -d : -f 4))
 
-    cleardiff oldmembers[@] newmembers[@]
-    cleardiff newmembers[@] oldmembers[@]
+    # two sets are equal if one is subset of the other
+    if ! is_subset oldmembers[@] newmembers[@] || ! is_subset newmembers[@] oldmembers[@]; then
+        echo "[NOTICE] group members changed: clear users cache"
+        /usr/sbin/sss_cache -U
+    fi
 
 else
     echo "[NOTICE] clearing sssd cache"
