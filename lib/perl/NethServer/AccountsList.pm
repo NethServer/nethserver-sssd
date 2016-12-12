@@ -48,7 +48,14 @@ sub is_system_group
 sub __sid2string
 {
     my $sid = shift;
-    my ($revision_level, $sub_authority_count, $authority, @sub_authorities) = unpack 'C C xxN V*', $sid;
+    my ($revision_level, $sub_authority_count, $authority_hi, $authority_low, @sub_authorities);
+    eval {
+       ($revision_level, $sub_authority_count, $authority_hi, $authority_low, @sub_authorities) = unpack 'C C n N V*', $sid;
+    };
+    if ($@) {
+       return undef;
+    }
+    my $authority = ($authority_hi << 32) | $authority_low;
     if($sub_authority_count != scalar @sub_authorities) {
         return undef;
     }
