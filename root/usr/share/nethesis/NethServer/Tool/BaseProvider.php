@@ -74,7 +74,7 @@ class BaseProvider implements \Nethgui\Component\DependencyConsumer, \Nethgui\Lo
 
     public function getAccountCounters()
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1 -A');
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1');
         $this->checkProcessExitCode($process);
         $counters = json_decode($process->getOutput(), TRUE);
         if( ! is_array($counters)) {
