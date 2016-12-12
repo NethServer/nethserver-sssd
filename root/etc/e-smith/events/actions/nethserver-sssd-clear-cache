@@ -72,3 +72,5 @@ else
     echo "[NOTICE] clearing sssd cache"
     /usr/sbin/sss_cache -E
 fi
+
+exit 0
