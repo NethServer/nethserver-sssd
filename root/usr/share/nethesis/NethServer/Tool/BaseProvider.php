@@ -88,12 +88,14 @@ class BaseProvider implements \Nethgui\Component\DependencyConsumer, \Nethgui\Lo
         foreach($this->getErrors() as $e) {
             $code = $e->getExitCode();
             $message = $view->translate(sprintf('AccountProvider_Error_%d', $code), array($code, $e->getErrorOutput()));
-            if($code === 4) {
+            if(in_array($code, array(4, 110))) {
                 $this->notifications->warning($message);
-                $this->getLog()->warning($message);
+                $this->getLog()->warning(sprintf("%s: %s", get_class($this), $message));
+                $this->getLog()->warning($e->getErrorOutput());
             } else {
                 $this->notifications->error($message);
-                $this->getLog()->error($message);
+                $this->getLog()->error(sprintf("%s: %s", get_class($this), $message));
+                $this->getLog()->error($e->getErrorOutput());
             }
 
         }

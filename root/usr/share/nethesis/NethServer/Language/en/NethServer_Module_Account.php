@@ -23,5 +23,7 @@ $L['NoConfig_header'] = 'Domain ${0}';
 
 $L['AccountProvider_Error_49'] = 'Account provider error: invalid credentials (${0})';
 $L['AccountProvider_Error_4'] = 'Account provider warning: size limit exceeded (${0})';
+$L['AccountProvider_Error_110'] = 'Account provider connection timed out';
+$L['AccountProvider_Error_111'] = 'Account provider connection refused';
 
 $L['valid_platform,ad-dns,srv_record,1'] = 'Does not seem an Active Directory domain controller';
