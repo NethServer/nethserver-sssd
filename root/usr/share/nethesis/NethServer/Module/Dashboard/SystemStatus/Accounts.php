@@ -36,7 +36,7 @@ class Accounts extends \Nethgui\Controller\AbstractController
     {
         $accounts = array('user' => 0, 'group' => 0, 'ibay' => 0, 'pseudonym' => 0, 'ftp' => 0, 'vpn' => 0, 'machine' => 0);
 
-        $counters = json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1 -A')->getOutput(), TRUE);
+        $counters = json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1')->getOutput(), TRUE);
         if(is_array($counters)) {
             $accounts = array_merge($accounts, $counters);
         }
