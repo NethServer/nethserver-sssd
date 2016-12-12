@@ -1,0 +1,58 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2015 Nethesis S.r.l.
+# http://www.nethesis.it - support@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import gettext
+import json
+import sys
+import re
+import subprocess
+import pwd
+
+
+try:
+    h = subprocess.Popen(['/usr/bin/hostname', '-d'], stdout=subprocess.PIPE)
+    domain, err = h.communicate()
+    domain = domain.strip();
+    p = subprocess.Popen(['/usr/libexec/nethserver/list-users', 'admin@'+domain], stdout=subprocess.PIPE)
+    users, err = p.communicate()
+except:	
+    exit(1)
+
+try:
+    j = json.loads(users)
+    new = j["admin@"+domain]['new']
+except:
+    new = 0
+
+if(new):
+    gettext.textdomain('nethserver-sssd')
+    msg = {
+        "action": {
+            "label": gettext.gettext('Enable admin user'),
+            "url": '/Account'
+        },
+        "text": gettext.gettext('Enable and set a password for the admin user.'),
+        "icon": "edit"
+    }
+    json.dump(msg, sys.stdout)
+	    
+
