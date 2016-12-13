@@ -22,18 +22,21 @@
 
 use strict;
 use NethServer::SSSD;
+use File::Temp;
 use JSON;
 use Getopt::Std;
 
 our ($opt_d, $opt_p);
 #
-# -d       ignore current DB settings, print library default
-# -p       pretty-print JSON string
+# -d <provider> ignore current DB settings, print library default for the given provider
+# -p            pretty-print JSON string
 # 
-getopts('dp');
+getopts('d:p');
 
 if($opt_d) {
-    $ENV{'ESMITH_CONFIG_DB'} = '/dev/null';
+    my ($tmp, $tmp_path) = File::Temp::tempfile('/tmp/sssd-defaults.XXXXXXX', UNLINK => 1);
+    print $tmp "sssd=service|Provider|$opt_d\n";
+    $ENV{'ESMITH_CONFIG_DB'} = $tmp_path;
 }
 
 my $o = NethServer::SSSD->new();

@@ -70,6 +70,8 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
                 $this->getPlatform()->signalEvent('nethserver-sssd-save &');
             } else {
                 $this->isAuthNeeded = TRUE;
+                // Apply new DNS configuration to prepare the realm join 
+                // operation (see Authenticate.php):
                 $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
             }
         } elseif ($this->parameters['Provider'] === 'ldap') {
@@ -127,7 +129,7 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
                 'isAD' => '',
                 'isLdap' => '',
             ),
-            json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/sssd-defaults')->getOutput(), TRUE)
+            json_decode($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/sssd-defaults -d ' . $view['Provider'])->getOutput(), TRUE)
         );
         if($view['sssd_defaults']['bindPassword']) {
             $view['sssd_defaults'] = array_merge($view['sssd_defaults'], array('bindPassword' => '*****'));
