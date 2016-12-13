@@ -33,13 +33,19 @@ our ($opt_d, $opt_p);
 # 
 getopts('d:p');
 
+my ($tmp, $tmp_path);
 if($opt_d) {
-    my ($tmp, $tmp_path) = File::Temp::tempfile('/tmp/sssd-defaults.XXXXXXX', UNLINK => 1);
-    print $tmp "sssd=service|Provider|$opt_d\n";
+    ($tmp, $tmp_path) = File::Temp::tempfile('/tmp/sssd-defaults.XXXXXXX', UNLINK => 0);
+    print $tmp "sssd=service|status|enabled|Provider|$opt_d\n";
     $ENV{'ESMITH_CONFIG_DB'} = $tmp_path;
+    close($tmp);
 }
 
 my $o = NethServer::SSSD->new();
+
+if( -f $tmp_path) {
+    unlink($tmp_path);
+}
 
 my $dump = {
     'baseDN' => $o->baseDN(),
@@ -62,3 +68,4 @@ if($opt_p) {
 } else {
     print JSON->new()->encode($dump);
 }
+
