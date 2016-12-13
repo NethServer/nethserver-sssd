@@ -135,8 +135,10 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
             $view['sssd_defaults'] = array_merge($view['sssd_defaults'], array('bindPassword' => '*****'));
         }
 
-        $this->getGroupProvider()->getAccountCounters();
-        $this->getGroupProvider()->prepareNotifications($view);
+        if($view['Provider'] !== 'none' && $this->isAuthNeeded === FALSE) {
+            $this->getGroupProvider()->getAccountCounters();
+            $this->getGroupProvider()->prepareNotifications($view);
+        }
 
     }
 
