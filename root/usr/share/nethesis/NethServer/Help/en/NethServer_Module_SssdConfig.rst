@@ -32,16 +32,15 @@ DNS server IP address
 Advanced settings
 =================
 
-Bind DN
-    If the LDAP server requires authentication, specify the DN to perform the
-    LDAP BIND operation.  The actual DN value depends on the LDAP server. For
-    instance, it could be ``uid=user,ou=People,dc=domain,dc=com``.  Active
-    Directory servers allow also NT style account names, like ``COMPANY\user``.
+LDAP or Windows user name
+    Specify the DN to perform the LDAP BIND operation.  The actual DN value
+    depends on the LDAP server. For instance, it could be
+    ``uid=user,ou=People,dc=domain,dc=com``.  Active Directory servers allow
+    also NT style account names, like ``COMPANY\user``.
 
-Bind password
-    If the LDAP server requires authentication, provide the required password.
-    It will be stored in clear-text format in the *configuration* e-smith
-    database.
+Password
+    The password for the LDAP BIND operation. It is stored in clear-text format
+    in the *configuration* e-smith database.
 
 Base DN
     Perform any LDAP search under the given DN.

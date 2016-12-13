@@ -75,6 +75,8 @@ if($sssd->isLdap()) {
         'groupclass' => 'group',
         'memberfilter' => '(objectClass=*)',
     );
+} else {
+    exit(0);
 }
 
 my $exitCode = 0;

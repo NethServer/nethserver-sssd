@@ -72,9 +72,9 @@ class BaseProvider implements \Nethgui\Component\DependencyConsumer, \Nethgui\Lo
         }
     }
 
-    public function getAccountCounters()
+    public function getAccountCounters($timeout = 5)
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t 1');
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/count-accounts -t ' . $timeout);
         $this->checkProcessExitCode($process);
         $counters = json_decode($process->getOutput(), TRUE);
         if( ! is_array($counters)) {
@@ -83,13 +83,21 @@ class BaseProvider implements \Nethgui\Component\DependencyConsumer, \Nethgui\Lo
         return $counters;
     }
 
-    public function prepareNotifications(\Nethgui\View\ViewInterface $view)
+    public function prepareNotifications(\Nethgui\View\ViewInterface $view, $showWarnings = TRUE)
     {
         foreach($this->getErrors() as $e) {
             $code = $e->getExitCode();
-            $message = $view->translate(sprintf('AccountProvider_Error_%d', $code), array($code, $e->getErrorOutput()));
+
+            if($code === 49 && strstr($e->getErrorOutput(), 'data 710') !== FALSE) {
+                $message = $view->translate('AccountProvider_Error_49_710', array($code, $e->getErrorOutput()));
+            } else {
+                $message = $view->translate(sprintf('AccountProvider_Error_%d', $code), array($code, $e->getErrorOutput()));
+            }
+
             if(in_array($code, array(4, 110))) {
-                $this->notifications->warning($message);
+                if($showWarnings) {
+                    $this->notifications->warning($message);
+                }
                 $this->getLog()->warning(sprintf("%s: %s", get_class($this), $message));
                 $this->getLog()->warning($e->getErrorOutput());
             } else {

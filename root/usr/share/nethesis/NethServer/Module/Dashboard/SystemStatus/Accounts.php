@@ -55,7 +55,7 @@ class Accounts extends \Nethgui\Controller\AbstractController implements \Nethgu
     {
         $accounts = array('user' => 0, 'group' => 0, 'ibay' => 0, 'pseudonym' => 0, 'ftp' => 0, 'vpn' => 0, 'machine' => 0);
 
-        $counters = $this->getGroupProvider()->getAccountCounters();
+        $counters = $this->getGroupProvider()->getAccountCounters(1);
         if(is_array($counters)) {
             $accounts = array_merge($accounts, $counters);
         }
@@ -81,7 +81,7 @@ class Accounts extends \Nethgui\Controller\AbstractController implements \Nethgu
         $view['provider'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
         $view['accounts'] = $this->readAccounts();
 
-        $this->getGroupProvider()->prepareNotifications($view);
+        $this->getGroupProvider()->prepareNotifications($view, FALSE);
     }
 
 }

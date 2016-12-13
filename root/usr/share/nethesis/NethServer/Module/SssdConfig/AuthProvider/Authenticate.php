@@ -65,7 +65,7 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
             if ($this->joinError === TRUE) {
                 $this->notifications->error('Invalid credentials');
             } else {
-                $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig'));
+                $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig?SssdConfig[AuthProvider][Index][joinSuccess]=1'));
             }
         } elseif ( ! $view['login']) {
             $view['login'] = 'Administrator';
