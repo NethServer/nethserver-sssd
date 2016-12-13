@@ -73,6 +73,8 @@ if($sssd->isLdap()) {
         'groupkeyattr' => 'sAMAccountName',
         'computerfilter' => '(objectClass=computer)',
     );
+} else {
+    exit(0);
 }
 
 my $exitCode = 0;

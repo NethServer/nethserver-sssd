@@ -73,6 +73,8 @@ if($sssd->isLdap()) {
         'keyattr' => 'sAMAccountName',
         'filter' => '(objectClass=group)',
     );
+} else {
+    exit(0);
 }
 
 my $exitCode = 0;
