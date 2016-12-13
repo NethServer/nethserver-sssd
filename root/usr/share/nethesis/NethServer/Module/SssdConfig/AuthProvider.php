@@ -1,6 +1,6 @@
 <?php
 
-namespace NethServer\Module\Account;
+namespace NethServer\Module\SssdConfig;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -29,7 +29,7 @@ class AuthProvider extends \Nethgui\Controller\CompositeController
     public function initialize()
     {
         parent::initialize();
-        $this->addChild(new \NethServer\Module\Account\AuthProvider\Index());
-        $this->addChild(new \NethServer\Module\Account\AuthProvider\Authenticate());
+        $this->addChild(new AuthProvider\Index());
+        $this->addChild(new AuthProvider\Authenticate());
     }
 }

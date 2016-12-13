@@ -23,6 +23,7 @@ package NethServer::SSSD;
 use strict;
 use esmith::ConfigDB;
 use NethServer::Password;
+use Sys::Hostname;
 use Carp;
 use URI;
 
@@ -333,15 +334,25 @@ sub new
 {
     my $class = shift;
 
+    my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
+    my %sssdProps = (
+        'status' => 'disabled',
+        'Provider' => 'none'
+    );
+    my %nsdcProps = (
+        'status' => 'disabled'
+    );
+
     my $db = esmith::ConfigDB->open_ro();
-    my $sssd = $db->get('sssd');
-    my $nsdc = $db->get('nsdc');
+    if($db && $db->get('sssd')) {
+        %sssdProps = (%sssdProps, $db->get('sssd')->props());
+    }
+    if($db && $db->get('nsdc')) {
+        %nsdcProps = (%nsdcProps, $db->get('nsdc')->props());
+    }
 
     my $self = {
-        'nsdc' => {
-            'status' => 'disabled',
-            $nsdc ? $nsdc->props() : ()
-        },
+        'nsdc' => \%nsdcProps,
         'AdDns' => '',
         'Provider' => 'ldap',
         'LdapURI' => '',
@@ -349,9 +360,9 @@ sub new
         'BindDN' => '',
         'BindPassword' => '',
         'UserDN' => '',
-        'Domain' => $db->get('DomainName')->value(),
+        'Domain' => $domainName,
         'StartTls' => '',
-        $sssd->props()
+        %sssdProps
     };
 
     if ($self->{'LdapURI'} eq '') {

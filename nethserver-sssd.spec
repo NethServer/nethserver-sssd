@@ -42,6 +42,8 @@ mkdir -p root/var/lib/nethserver/home
 (cd root   ; find . -depth -print | cpio -dump %{buildroot})
 %{genfilelist} %{buildroot} | sed '
 \|^%{_sysconfdir}/sudoers.d/20_nethserver_sssd$| d
+\|/var/lib/nethserver/home| d
+\|%{_nseventsdir}/password-modify| d
 ' > %{name}-%{version}-filelist
 
 %files -f %{name}-%{version}-filelist

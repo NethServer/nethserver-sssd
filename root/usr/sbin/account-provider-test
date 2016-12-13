@@ -41,8 +41,8 @@ my $dump = {
 my $cmd = shift;
 
 if($cmd eq 'dump') {
-    print JSON::to_json($dump, {utf8 => 1, pretty => 1});
-    exit(0);
+    exec('/usr/libexec/nethserver/sssd-defaults', '-p');
+    die(); # should not be reached
 }
 
 if( ! -x '/usr/bin/ldapsearch') {

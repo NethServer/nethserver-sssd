@@ -1,5 +1,5 @@
 <?php
-namespace NethServer\Module\Account\Type\Group;
+namespace NethServer\Module\Account\User;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -19,23 +19,24 @@ namespace NethServer\Module\Account\Type\Group;
  */
 
 /**
- * List groups 
+ * List users 
  *
- * @author Giacomo Sanchietti <giacomo.sanchietti@nethesis.it>
+ * @author Davide Principi <davide.principi@nethesis.it>
  */
-class GroupAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
+class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
 {
     /**
      *
      * @var \Nethgui\System\PlatformInterface
      */
     private $platform;
+    private $provider;
 
-    public function __construct(\Nethgui\System\PlatformInterface $platform)
+    public function __construct(\Nethgui\System\PlatformInterface $platform, $di)
     {
         $this->platform = $platform;
-        $this->provider = new \NethServer\Tool\GroupProvider($platform);
-        parent::__construct(array($this, 'readGroups'));
+        $this->provider = call_user_func($di, new \NethServer\Tool\UserProvider($this->platform));
+        parent::__construct(array($this, 'readUsers'));
     }
 
     public function flush()
@@ -44,11 +45,10 @@ class GroupAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
         return $this;
     }
 
-    public function readGroups()
+    public function readUsers()
     {
         $loader = new \ArrayObject();
-
-        foreach ($this->provider->getGroups() as $user => $values) {
+        foreach ($this->provider->getUsers() as $user => $values) {
             $loader[$user] = $values;
         }
         return $loader;
@@ -56,10 +56,16 @@ class GroupAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
 
     public function getColumns()
     {
-        if ($this->provider->isReadOnly()) {
-            return array('Key');
-        } else {
-            return array('Key','Actions');
-        }
+       if ($this->provider->isReadOnly()) {
+           return array('Key','gecos');
+       } else {
+            return array('Key','gecos','Actions');
+       }
+    }
+    
+    public function prepareNotifications(\Nethgui\View\ViewInterface $view)
+    {
+        $this->provider->prepareNotifications($view);
+        return $this;
     }
 }

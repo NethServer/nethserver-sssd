@@ -25,16 +25,14 @@ namespace NethServer\Tool;
  *
  * @author Giacomo Sanchietti <giacomo.sanchietti@nethesis.it>
  */
-class UserProvider
+class UserProvider extends BaseProvider
 {
-
-    private $platform;
-    private $provider = false;
-    private $isLocalProvider = FALSE;
 
     public function getUsers()
     {
-        $users = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-users')->getOutput(), TRUE);
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-users');
+        $this->checkProcessExitCode($process);
+        $users = json_decode($process->getOutput(), TRUE);
         if( ! is_array($users)) {
             return array();
         }
@@ -43,37 +41,13 @@ class UserProvider
 
     public function getUserMembership($userName)
     {
-        $groups = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-user-membership ${@}', array($userName))->getOutput(), TRUE);
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-user-membership ${@}', array($userName));
+        $this->checkProcessExitCode($process);
+        $groups = json_decode($process->getOutput(), TRUE);
         if( ! is_array($groups)) {
             return array();
         }
         return $groups;
-    }
-
-    public function isReadOnly()
-    {
-        return $this->isLocalProvider === FALSE;
-    }
-
-    public function isAD()
-    {
-        return $this->provider === 'ad';
-    }
-
-    public function __construct(\Nethgui\System\PlatformInterface $platform)
-    {
-        $this->platform = $platform;
-
-        $sssd = $platform->getDatabase('configuration')->getKey('sssd');
-        $this->provider = $sssd['Provider'];
-
-        if(   ( $this->provider === 'ldap' 
-                && $sssd['LdapURI'] === '')
-           || ( $this->provider === 'ad' 
-                && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')
-            ) {
-            $this->isLocalProvider = TRUE;
-        }
     }
 
 }

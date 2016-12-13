@@ -1,5 +1,5 @@
 <?php
-namespace NethServer\Module\Account\Type\User;
+namespace NethServer\Module\Account\Group;
 
 /*
  * Copyright (C) 2016 Nethesis Srl
@@ -19,24 +19,23 @@ namespace NethServer\Module\Account\Type\User;
  */
 
 /**
- * List users 
+ * List groups 
  *
- * @author Davide Principi <davide.principi@nethesis.it>
+ * @author Giacomo Sanchietti <giacomo.sanchietti@nethesis.it>
  */
-class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
+class GroupAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
 {
     /**
      *
      * @var \Nethgui\System\PlatformInterface
      */
     private $platform;
-    private $provider;
 
     public function __construct(\Nethgui\System\PlatformInterface $platform)
     {
         $this->platform = $platform;
-        $this->provider = new \NethServer\Tool\UserProvider($this->platform);
-        parent::__construct(array($this, 'readUsers'));
+        $this->provider = new \NethServer\Tool\GroupProvider($platform);
+        parent::__construct(array($this, 'readGroups'));
     }
 
     public function flush()
@@ -45,10 +44,11 @@ class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
         return $this;
     }
 
-    public function readUsers()
+    public function readGroups()
     {
         $loader = new \ArrayObject();
-        foreach ($this->provider->getUsers() as $user => $values) {
+
+        foreach ($this->provider->getGroups() as $user => $values) {
             $loader[$user] = $values;
         }
         return $loader;
@@ -56,10 +56,10 @@ class UserAdapter extends \Nethgui\Adapter\LazyLoaderAdapter
 
     public function getColumns()
     {
-       if ($this->provider->isReadOnly()) {
-           return array('Key','gecos');
-       } else {
-            return array('Key','gecos','Actions');
-       }
+        if ($this->provider->isReadOnly()) {
+            return array('Key');
+        } else {
+            return array('Key','Actions');
+        }
     }
 }

@@ -85,11 +85,11 @@ my $ldap_error_handler = sub {
         my $code = $message->code();
         my $text = $message->error();
         if($code == 4) {
-            warn "[WARNING] (code $code): $text\n";
+            warn "(code $code) $text\n";
             $exitCode = $code;
             return $message;
         }
-        warn "[ERROR] (code $code): $text\n";
+        warn "(code $code) $text\n";
         exit($code);
     }
     return $message;
@@ -101,6 +101,10 @@ my $ldap = Net::LDAP->new($sssd->ldapURI(),
     'onerror' => $ldap_error_handler,
     'verify' => 'none',
 );
+
+if( ! $ldap) {
+    die("$!\n");
+}
 
 if($sssd->startTls()) {
     $ldap->start_tls('verify' => 'none');

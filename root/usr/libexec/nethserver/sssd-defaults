@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2016 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+use strict;
+use NethServer::SSSD;
+use File::Temp;
+use JSON;
+use Getopt::Std;
+
+our ($opt_d, $opt_p);
+#
+# -d <provider> ignore current DB settings, print library default for the given provider
+# -p            pretty-print JSON string
+# 
+getopts('d:p');
+
+if($opt_d) {
+    my ($tmp, $tmp_path) = File::Temp::tempfile('/tmp/sssd-defaults.XXXXXXX', UNLINK => 1);
+    print $tmp "sssd=service|Provider|$opt_d\n";
+    $ENV{'ESMITH_CONFIG_DB'} = $tmp_path;
+}
+
+my $o = NethServer::SSSD->new();
+
+my $dump = {
+    'baseDN' => $o->baseDN(),
+    'bindDN' => $o->bindDN(),
+    'bindPassword' => $o->bindPassword(),
+    'userDN' => $o->userDN(),
+    'groupDN' => $o->groupDN(),
+    'ldapURI' => $o->ldapURI(),
+    'host' => $o->host(),
+    'port' => $o->port(),
+    'startTls'=> $o->startTls(),
+    'isAD' => $o->isAD(),
+    'isLdap' => $o->isLdap(),
+};
+
+my $cmd = shift;
+
+if($opt_p) {
+    print JSON->new()->pretty()->encode($dump);
+} else {
+    print JSON->new()->encode($dump);
+}

@@ -1,7 +1,5 @@
 <?php
-
 namespace NethServer\Module;
-
 /*
  * Copyright (C) 2016 Nethesis Srl
  *
@@ -20,39 +18,37 @@ namespace NethServer\Module;
  */
 
 /**
- * Description of Account
+ * Sssd configuration module
  *
  * @author Davide Principi <davide.principi@nethesis.it>
  */
-class Account extends \Nethgui\Controller\TabsController
+class SssdConfig extends \Nethgui\Controller\CompositeController
 {
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
         return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
-            'category' => 'Management')
+            'languageCatalog' => array('NethServer_Module_SssdConfig', 'NethServer_Module_Account'),
+            'category' => 'Configuration')
         );
     }
 
     public function initialize()
     {
         parent::initialize();
-        $this->addChild(new Account\User());
-        $this->addChild(new Account\Group());
-    }
-    
-    public function prepareView(\Nethgui\View\ViewInterface $view)
-    {
-        parent::prepareView($view);
-        if( ! $this->getRequest()->isValidated()) {
-            return;
-        }
-        $db = $this->getPlatform()->getDatabase('configuration');
-        $provider = $db->getProp('sssd', 'Provider');
+        $provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
 
-        if($provider === 'none') {
-            $view['domain'] = $db->getType('DomainName');
-            $view->setTemplate('NethServer\Template\Account\NoConfig');
-        } 
+        $this->loadChildrenDirectory();
+        $this->sortChildren(function ($a, $b) use ($provider) {
+            if($a->getIdentifier() === 'AuthProvider') {
+                $c = -1;
+            } elseif($b->getIdentifier() === 'AuthProvider') {
+                $c = 1;
+            } else {
+                $c = 0;
+            }
+            $k = ($provider === 'none') ? 1 : -1; 
+            return $c * $k;
+        });
     }
 
 }

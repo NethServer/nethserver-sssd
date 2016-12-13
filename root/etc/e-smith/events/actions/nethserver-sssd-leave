@@ -21,8 +21,11 @@
 #
 
 EVENT=$1
-PROVIDER=$(/sbin/e-smith/config getprop sssd Provider)
 
-if [[ "$PROVIDER" != "none" ]]; then
-    authconfig --enablesssdauth --enablemkhomedir --update
+if realm list | grep -s -F 'type: kerberos'; then
+    realm leave
+fi
+
+if systemctl -q is-active realmd; then
+    systemctl stop realmd
 fi

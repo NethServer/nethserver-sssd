@@ -25,17 +25,14 @@ namespace NethServer\Tool;
  *
  * @author Giacomo Sanchietti <giacomo.sanchietti@nethesis.it>
  */
-class GroupProvider
+class GroupProvider extends BaseProvider
 {
-
-    private $listGroupsCommand = '';
-    private $platform;
-    private $provider = false;
-    private $isLocalProvider = FALSE;
 
     public function getGroups()
     {
-        $groups = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups')->getOutput(), TRUE);
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups');
+        $this->checkProcessExitCode($process);
+        $groups = json_decode($process->getOutput(), TRUE);
         if( ! is_array($groups)) {
             return array();
         }
@@ -44,36 +41,13 @@ class GroupProvider
 
     public function getGroupMembers($groupName)
     {
-        $members = json_decode($this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members ${@}', array($groupName))->getOutput(), TRUE);
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members ${@}', array($groupName));
+        $this->checkProcessExitCode($process);
+        $members = json_decode($process->getOutput(), TRUE);
         if( ! is_array($members)) {
             return array();
         }
         return $members;
     }
 
-    public function isReadOnly()
-    {
-        return $this->isLocalProvider === FALSE;
-    }
-
-    public function isAD()
-    {
-        return $this->provider === 'ad';
-    }
-    
-    public function __construct(\Nethgui\System\PlatformInterface $platform)
-    {
-         $this->platform = $platform;
-
-         $sssd = $platform->getDatabase('configuration')->getKey('sssd');
-         $this->provider = $sssd['Provider'];
-
-         if(   ( $this->provider === 'ldap' 
-                 && $sssd['LdapURI'] === '')
-            || ( $this->provider === 'ad' 
-                 && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')
-             ) {
-             $this->isLocalProvider = TRUE;
-         }
-    }
 }
