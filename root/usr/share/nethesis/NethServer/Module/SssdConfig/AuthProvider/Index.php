@@ -26,7 +26,7 @@ use Nethgui\System\PlatformInterface as Validate;
  *
  * @author Davide Principi <davide.principi@nethesis.it>
  */
-class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\Component\DependencyInjectorAggregate
+class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\Component\DependencyInjectorAggregate, \Nethgui\Component\DependencyConsumer
 {
 
     protected $isAuthNeeded = FALSE;
@@ -113,6 +113,8 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
         }
         if($this->getRequest()->hasParameter('installSuccess')) {
             $view->getCommandList('/Main')->sendQuery($view->getModuleUrl('/SssdConfig'));
+        } elseif($this->getRequest()->hasParameter('joinSuccess')) {
+            $this->notifications->message($view->translate('Welcome on domain ${0}', array($view['domain'])));
         }
         
         $view['sssd_defaults'] = array_merge(
@@ -167,4 +169,16 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
         return parent::nextPath();
     }
 
+    public function setUserNotifications(\Nethgui\Model\UserNotifications $n)
+    {
+        $this->notifications = $n;
+        return $this;
+    }
+
+    public function getDependencySetters()
+    {
+        return array(
+            'UserNotifications' => array($this, 'setUserNotifications'),
+        );
+    }
 }
