@@ -35,10 +35,9 @@ class SssdConfig extends \Nethgui\Controller\CompositeController
     public function initialize()
     {
         parent::initialize();
-        $provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
 
         $this->loadChildrenDirectory();
-        $this->sortChildren(function ($a, $b) use ($provider) {
+        $this->sortChildren(function ($a, $b) {
             if($a->getIdentifier() === 'AuthProvider') {
                 $c = -1;
             } elseif($b->getIdentifier() === 'AuthProvider') {
@@ -46,7 +45,7 @@ class SssdConfig extends \Nethgui\Controller\CompositeController
             } else {
                 $c = 0;
             }
-            $k = ($provider === 'none') ? 1 : -1; 
+            $k = class_exists('\NethServer\Module\SssdConfig\DomainController') ? -1 : 1;
             return $c * $k;
         });
     }
