@@ -305,8 +305,10 @@ EOF
 
 =head2 bindUser
 
-Return LDAP bind user BindUser if set,
-"ldapservice" if ldap is local, machine account if is AD
+Return LDAP bind user BindUser if set, otherwise return the first value of
+the DN from bindDN(). If bindDN() returns an AD user name format, 
+like DOMAIN\sAMAccountName or the UPN string, try to extract the user identifier 
+part and returns it.
 
 =cut
 
@@ -314,15 +316,14 @@ sub bindUser {
     my $self = shift;
     return $self->{'BindUser'} if ($self->{'BindUser'});
 
-    if ($self->isLdap() && $self->isLocalProvider() ) {
-        return 'ldapservice';
-    } elsif ($self->isAD()) {
-        my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
-        chomp($machineName);
-        return substr($machineName, 0, 15) . '$';
+    my $bindUser = [split(/,/, $self->bindDN())]->[0];
+    $bindUser =~ s/^.+=//;
+    if ($self->isAD()) {
+        $bindUser =~ s/^.+\\//;
+        $bindUser =~ s/@.+$//;
     }
 
-    return '';
+    return $bindUser;
 }
 
 
