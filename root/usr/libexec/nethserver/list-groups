@@ -111,7 +111,11 @@ if($sssd->startTls()) {
     $ldap->start_tls('verify' => 'none');
 }
 
-$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+if($config{'bindDN'} && $config{'bindPassword'}) {
+    $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+} else {
+    $result = $ldap->bind();
+}
 
 $result = $ldap->search(
     'base' => $sssd->groupDN(),

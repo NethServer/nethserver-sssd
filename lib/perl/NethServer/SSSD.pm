@@ -303,6 +303,30 @@ EOF
 }
 
 
+=head2 bindUser
+
+Return LDAP bind user BindUser if set, otherwise return the first value of
+the DN from bindDN(). If bindDN() returns an AD user name format, 
+like DOMAIN\sAMAccountName or the UPN string, try to extract the user identifier 
+part and returns it.
+
+=cut
+
+sub bindUser {
+    my $self = shift;
+    return $self->{'BindUser'} if ($self->{'BindUser'});
+
+    my $bindUser = [split(/,/, $self->bindDN())]->[0];
+    $bindUser =~ s/^.+=//;
+    if ($self->isAD()) {
+        $bindUser =~ s/^.+\\//;
+        $bindUser =~ s/@.+$//;
+    }
+
+    return $bindUser;
+}
+
+
 =head2 new
 
 Create a NethServer::SSSD instance.

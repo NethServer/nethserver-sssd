@@ -1,5 +1,4 @@
 [domain/legacy]
-enumerate = False
 use_fully_qualified_names = False
 {
     $OUT = $provider_config;

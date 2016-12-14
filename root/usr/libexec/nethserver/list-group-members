@@ -114,7 +114,11 @@ if($sssd->startTls()) {
     $ldap->start_tls('verify' => 'none');
 }
 
-$result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+if($config{'bindDN'} && $config{'bindPassword'}) {
+    $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+} else {
+    $result = $ldap->bind();
+}
 
 my $entry = $ldap->search(
     'base' => $sssd->groupDN(),
@@ -186,7 +190,7 @@ sub get_member()
         $sid = $entry->get_value('objectSid');
     }
 
-    if($al->is_system_user($member) || $al->is_system_group($member) 
+    if($al->is_system_user($member) || $al->is_system_group($member)
         || $al->is_system_user($sid) || $al->is_system_group($sid) ) {
         return undef;
     }

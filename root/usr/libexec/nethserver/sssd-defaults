@@ -51,6 +51,7 @@ my $dump = {
     'baseDN' => $o->baseDN(),
     'bindDN' => $o->bindDN(),
     'bindPassword' => $o->bindPassword(),
+    'bindUser' => $o->bindUser(),
     'userDN' => $o->userDN(),
     'groupDN' => $o->groupDN(),
     'ldapURI' => $o->ldapURI(),
