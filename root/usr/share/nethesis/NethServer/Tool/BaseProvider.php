@@ -66,7 +66,7 @@ class BaseProvider implements \Nethgui\Component\DependencyConsumer, \Nethgui\Lo
         $sssd = $platform->getDatabase('configuration')->getKey('sssd');
         $this->provider = $sssd['Provider'];
 
-        if (($this->provider === 'ldap' && $sssd['LdapURI'] === '')
+        if (($this->provider === 'ldap' && $sssd['LdapURI'] === 'ldap://127.0.0.1')
            || ($this->provider === 'ad' && $platform->getDatabase('configuration')->getProp('nsdc', 'status') === 'enabled')) {
             $this->isLocalProvider = TRUE;
         }
