@@ -303,6 +303,29 @@ EOF
 }
 
 
+=head2 bindUser
+
+Return LDAP bind user BindUser if set,
+"ldapservice" if ldap is local, machine account if is AD
+
+=cut
+
+sub bindUser {
+    my $self = shift;
+    return $self->{'BindUser'} if ($self->{'BindUser'});
+
+    if ($self->isLdap() && $self->isLocalProvider() ) {
+        return 'ldapservice';
+    } elsif ($self->isAD()) {
+        my $machineName = qx(/usr/bin/testparm -s --parameter-name='netbios name' 2>/dev/null);
+        chomp($machineName);
+        return substr($machineName, 0, 15) . '$';
+    }
+
+    return '';
+}
+
+
 =head2 new
 
 Create a NethServer::SSSD instance.
