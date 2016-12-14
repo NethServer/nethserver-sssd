@@ -1,5 +1,4 @@
 [domain/{{$DomainName}}]
-enumerate = True
 use_fully_qualified_names = True
 {
     $OUT = $provider_config;
