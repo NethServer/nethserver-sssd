@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.0.8
+Version: 1.1.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -66,6 +66,15 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Dec 15 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.0-1
+- Enable LDAPs protocol on Active Directory clients - NethServer/dev#5161
+- Notify changes to NethServer::SSSD clients - NethServer/dev#5164
+- Store locally AD credentials - NethServer/dev#5165
+- Authenticated binds to a remote LDAP account provider - NethServer/dev#5158
+- Set the members of administrators group - NethServer/dev#5168
+- bindDN() returns local domain suffix - Bug NethServer/dev#5153
+- Default "admins" config DB record - NethServer/dev#5157
+
 * Wed Nov 09 2016 Davide Principi <davide.principi@nethesis.it> - 1.0.8-1
 - LDAP account with read-only privileges - NethServer/dev#5145
 
