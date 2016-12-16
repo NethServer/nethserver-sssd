@@ -24,6 +24,10 @@ source_file = root/usr/share/nethesis/NethServer/Language/en/NethServer_Module_S
 source_lang = en
 type = PHP_ALT_ARRAY
 
+[nethserver.SssdConfig]
+source_file = root/usr/share/nethesis/NethServer/Language/en/NethServer_Module_SssdConfig.php
+source_lang = en
+type = PHP_ALT_ARRAY
 
 [nethserver.User]
 source_file = root/usr/share/nethesis/NethServer/Language/en/NethServer_Module_User.php
