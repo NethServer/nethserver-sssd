@@ -15,7 +15,7 @@ provider, go to the Software center page.
 LDAP
 ====
 
-Server URI
+Server IP address
     Insert the IP address or host name of LDAP server.
 
 Active Directory
@@ -27,7 +27,8 @@ NetBIOS domain
     part of the DNS domain suffix.  It is truncated to 15 characters.
 
 DNS server IP address
-    IP address of domain controller DNS server (usually the IP of the domain controller itself)
+    IP address of the domain DNS server (usually the IP of the domain controller
+    itself).
 
 Advanced settings
 =================
