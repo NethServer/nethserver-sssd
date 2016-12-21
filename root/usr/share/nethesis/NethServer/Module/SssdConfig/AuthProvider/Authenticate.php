@@ -43,6 +43,8 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
             return;
         }
 
+        $this->getPlatform()->signalEvent('nethserver-sssd-leave');
+
         $domain = \Nethgui\array_end(\explode('.', \gethostname(), 2));
 
         $ph = popen('/usr/bin/sudo /usr/sbin/realm join ' . $domain, 'w');

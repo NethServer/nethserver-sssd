@@ -27,11 +27,14 @@ use esmith::Build::CreateLinks  qw(:all);
 # event nethserver-sssd-update event
 #
 event_templates('nethserver-sssd-update', qw(
+    /etc/sssd/sssd.conf
     /etc/openldap/ldap.conf
 ));
-
 event_actions('nethserver-sssd-update', qw(
     initialize-default-databases   00
+));
+event_services('nethserver-sssd-update', qw(
+    sssd restart
 ));
 
 #
