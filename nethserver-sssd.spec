@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.0
+Version: 1.1.1
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -66,6 +66,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Dec 22 2016 Davide Principi <davide.principi@nethesis.it> - 1.1.1-1
+- Invalid AD machine account credentials after update - Bug NethServer/dev#5177
+
 * Thu Dec 15 2016 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.0-1
 - Enable LDAPs protocol on Active Directory clients - NethServer/dev#5161
 - Notify changes to NethServer::SSSD clients - NethServer/dev#5164
