@@ -90,6 +90,7 @@ class Index extends \Nethgui\Controller\AbstractController implements \Nethgui\C
                 'StartTls',
             ));
             $this->getPlatform()->signalEvent('nethserver-sssd-save');
+            $this->getPlatform()->signalEvent('nethserver-dnsmasq-save');
             $this->getPlatform()->signalEvent('nethserver-sssd-leave &');
             $this->reloadPage = TRUE;
         }
