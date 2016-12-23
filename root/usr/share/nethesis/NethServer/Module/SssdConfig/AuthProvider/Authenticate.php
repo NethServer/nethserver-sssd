@@ -47,7 +47,7 @@ class Authenticate extends \Nethgui\Controller\AbstractController implements \Ne
 
         $domain = \Nethgui\array_end(\explode('.', \gethostname(), 2));
 
-        $ph = popen('/usr/bin/sudo /usr/sbin/realm join ' . $domain, 'w');
+        $ph = popen(sprintf('/usr/bin/sudo /usr/sbin/realm join -U %s %s', escapeshellarg($this->parameters['login']), escapeshellarg($domain)), 'w');
         fwrite($ph, $this->parameters['password'] . "\n");
         $err = pclose($ph);
 
