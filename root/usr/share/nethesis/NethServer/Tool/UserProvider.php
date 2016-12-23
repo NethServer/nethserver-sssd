@@ -36,6 +36,7 @@ class UserProvider extends BaseProvider
         if( ! is_array($users)) {
             return array();
         }
+        ksort($users, SORT_STRING | SORT_FLAG_CASE);
         return $users;
     }
 
@@ -47,6 +48,7 @@ class UserProvider extends BaseProvider
         if( ! is_array($groups)) {
             return array();
         }
+        sort($groups, SORT_STRING | SORT_FLAG_CASE);
         return $groups;
     }
 

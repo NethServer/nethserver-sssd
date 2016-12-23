@@ -36,6 +36,7 @@ class GroupProvider extends BaseProvider
         if( ! is_array($groups)) {
             return array();
         }
+        ksort($groups, SORT_STRING | SORT_FLAG_CASE);
         return $groups;
     }
 
@@ -47,6 +48,7 @@ class GroupProvider extends BaseProvider
         if( ! is_array($members)) {
             return array();
         }
+        sort($members, SORT_STRING | SORT_FLAG_CASE);
         return $members;
     }
 
