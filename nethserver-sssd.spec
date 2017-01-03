@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.1
+Version: 1.1.2
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -66,6 +66,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Jan 03 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.2-1
+- UI users and groups list items are not sorted - Bug NethServer/dev#5182
+- Join credentials not honoured - Bug NethServer/dev#5181
+
 * Thu Dec 22 2016 Davide Principi <davide.principi@nethesis.it> - 1.1.1-1
 - Invalid AD machine account credentials after update - Bug NethServer/dev#5177
 
