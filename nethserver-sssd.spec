@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.2
+Version: 1.1.3
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -66,6 +66,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Jan 10 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.3-1
+- Web interface: add missing account provider errors - NethServer/nethserver-sssd#42
+
 * Tue Jan 03 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.2-1
 - UI users and groups list items are not sorted - Bug NethServer/dev#5182
 - Join credentials not honoured - Bug NethServer/dev#5181
