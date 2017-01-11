@@ -14,6 +14,7 @@ Requires: mailx, postfix, anacron
 Requires:  samba-common-tools
 Requires: krb5-workstation
 Requires: python-tdb
+Requires: tdb-tools
 
 %description
 NethServer SSSD configuration
