@@ -28,6 +28,7 @@ use esmith::Build::CreateLinks  qw(:all);
 #
 event_templates('nethserver-sssd-update', qw(
     /etc/sssd/sssd.conf
+    /etc/samba/smb.conf
     /etc/openldap/ldap.conf
 ));
 event_actions('nethserver-sssd-update', qw(
@@ -115,4 +116,20 @@ event_actions('password-policy-update', qw(
 # actions for myhostname validator
 validator_actions('myhostname', qw(
     failifjoin 00
+));
+
+#--------------------------------------------------
+# actions for post-restore-config event
+#--------------------------------------------------
+
+event_actions('post-restore-config', qw(
+    nethserver-sssd-restore-tdb 40
+));
+
+#--------------------------------------------------
+# actions for pre-backup-config event
+#--------------------------------------------------
+
+event_actions('pre-backup-config', qw(
+    nethserver-sssd-backup-tdb 40
 ));
