@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.3
+Version: 1.1.4
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -67,6 +67,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Jan 16 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.4-1
+- DC: restore configuration fails - NethServer/dev#5188
+
 * Tue Jan 10 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.3-1
 - Web interface: add missing account provider errors - NethServer/nethserver-sssd#42
 
