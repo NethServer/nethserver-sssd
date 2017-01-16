@@ -30,6 +30,7 @@ event_templates('nethserver-sssd-update', qw(
     /etc/sssd/sssd.conf
     /etc/samba/smb.conf
     /etc/openldap/ldap.conf
+    /etc/backup-config.d/nethserver-sssd.include
 ));
 event_actions('nethserver-sssd-update', qw(
     initialize-default-databases   00
@@ -45,6 +46,7 @@ event_templates('nethserver-sssd-save', qw(
     /etc/sssd/sssd.conf
     /etc/samba/smb.conf
     /etc/openldap/ldap.conf
+    /etc/backup-config.d/nethserver-sssd.include
 ));
 event_actions('nethserver-sssd-save', qw(
     nethserver-sssd-cleanup 01
@@ -124,6 +126,7 @@ validator_actions('myhostname', qw(
 
 event_actions('post-restore-config', qw(
     nethserver-sssd-restore-tdb 40
+    nethserver-sssd-conf 50
 ));
 
 #--------------------------------------------------

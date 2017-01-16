@@ -1,0 +1,11 @@
+{
+    use esmith::ConfigDB;
+    my $configDb = esmith::ConfigDB->open_ro;
+    foreach my $service ($configDb->get_all_by_prop(type => 'service')) {
+        if( $service->prop('status') ne 'enabled' ||  ! defined $service->prop('KrbStatus') || $service->prop('KrbStatus') ne 'enabled') {
+            next;
+        }
+        my $kt_path = $service->prop('KrbKeytabPath') || sprintf('/var/lib/misc/nsrv-%s.keytab', $service->key);
+        $OUT .= "$kt_path\n";
+    }
+}
