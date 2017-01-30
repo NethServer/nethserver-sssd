@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.4
+Version: 1.1.5
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -67,6 +67,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Jan 30 2017 Davide Principi <davide.principi@nethesis.it> - 1.1.5-1
+- Domain admins members are not granted full server-manager access - Bug NethServer/dev#5209
+
 * Mon Jan 16 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.4-1
 - DC: restore configuration fails - NethServer/dev#5188
 
