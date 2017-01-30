@@ -136,3 +136,8 @@ event_actions('post-restore-config', qw(
 event_actions('pre-backup-config', qw(
     nethserver-sssd-backup-tdb 40
 ));
+
+event_templates('pre-backup-config', qw(
+    /etc/backup-config.d/nethserver-sssd.include
+));
+
