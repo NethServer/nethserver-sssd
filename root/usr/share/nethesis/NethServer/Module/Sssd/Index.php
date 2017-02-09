@@ -58,7 +58,9 @@ class Index extends \Nethgui\Controller\AbstractController
     {
         parent::prepareView($view);
         $view['domain'] = \Nethgui\array_end(explode('.', \gethostname(), 2));
-        $view['Provider'] = $this->provider;
+        if($this->provider === 'none') {
+            $view->setTemplate('NethServer\Template\Account\NoConfig');
+        }
         $view['Details'] = $this->details;
     }
 
