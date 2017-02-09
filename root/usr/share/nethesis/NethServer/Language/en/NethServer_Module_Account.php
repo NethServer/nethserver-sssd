@@ -32,3 +32,14 @@ $L['AccountProvider_Error_110'] = 'Account provider connection timed out';
 $L['AccountProvider_Error_111'] = 'Account provider connection refused';
 
 $L['valid_platform,ad-dns,srv_record,1'] = 'Does not seem an Active Directory domain controller';
+
+$L['ChooseProvider_1'] = 'Users and groups are available through an accounts provider. You can connect this server to a remote accounts provider, or install a local one.';
+$L['ChooseProvider_2'] = 'There are two kinds of accounts provider:';
+$L['ChooseProvider_3'] = 'Active Directory: ideal for Windows networks, users can access shared folders with their own credentials';
+$L['ChooseProvider_4'] = 'LDAP: easy to install and configure, shared folders are accessible without user authentication';
+$L['ChooseProvider_5'] = 'Configure a remote accounts provider';
+$L['ChooseProvider_6'] = 'Install a local accounts provider; once installed, it must not be removed';
+$L['ChooseProvider_7'] = 'Shared folders are available by installing the "File server" module.';
+$L['configureButton_label'] = 'Configure';
+$L['softwareCenterButton_label'] = 'Install';
+$L['dismissButton_label'] = 'No, thanks!';

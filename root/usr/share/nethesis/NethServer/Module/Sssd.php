@@ -27,7 +27,7 @@ class Sssd extends \Nethgui\Controller\ListComposite
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
         return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
-            'languageCatalog' => array('NethServer_Module_Sssd'),
+            'languageCatalog' => array('NethServer_Module_Sssd', 'NethServer_Module_Account'),
             'category' => 'Status')
         );
     }
