@@ -20,12 +20,15 @@
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+set 
+
+file=/var/lib/samba/private/secrets.tdb
 dest=/var/lib/nethserver/backup/secrets_tdb.dump
 
-if [[ ! -f $dest ]]; then
+if [[ ! -f $file ]]; then
     exit 0
 fi
 
 umask 077
-/usr/bin/tdbdump /var/lib/samba/private/secrets.tdb > $dest
+/usr/bin/tdbdump $file > $dest
 chmod 0600 $dest
