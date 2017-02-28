@@ -64,7 +64,7 @@ if($sssd->isLdap()) {
 
     %config = ( %config,
         'keyattr' => 'uid',
-        'filter' => '(objectClass=shadowAccount)',
+        'filter' => '(objectClass=posixAccount)',
     );
 
 } elsif($sssd->isAD()) {

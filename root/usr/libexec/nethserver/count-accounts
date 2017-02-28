@@ -58,7 +58,7 @@ if($sssd->isLdap()) {
     }
 
     %config = ( %config,
-        'userfilter' => '(objectClass=shadowAccount)',
+        'userfilter' => '(objectClass=posixAccount)',
         'userkeyattr' => 'uid',
         'groupfilter' => '(objectClass=posixGroup)',
         'groupkeyattr' => 'cn',

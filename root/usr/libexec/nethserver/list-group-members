@@ -63,7 +63,7 @@ if($sssd->isLdap()) {
         'memberattr' => 'memberUid',
         'filter' => "(&(objectClass=posixGroup)(cn=$groupName))",
         'groupclass' => 'posixGroup',
-        'memberfilter' => '(objectClass=shadowAccount)'
+        'memberfilter' => '(objectClass=posixAccount)'
     );
 
 } elsif($sssd->isAD()) {
