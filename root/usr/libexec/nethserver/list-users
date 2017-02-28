@@ -243,7 +243,7 @@ sub get_ldap_expired {
     my $shadowMax = $entry->get_value('shadowMax');
     my $shadowLastChange = $entry->get_value('shadowLastChange');
 
-    if ($shadowMax < 99999) {
+    if (defined $shadowMax && $shadowMax < 99999) {
         my $t = $shadowLastChange * 24 * 60 * 60;
         my $expire_date = $t + ($shadowMax * 24 * 60 * 60);
         if ($expire_date < $now) {
@@ -258,7 +258,7 @@ sub get_ldap_expires {
     my $entry = shift;
     my $shadowMax = $entry->get_value('shadowMax');
 
-    if ($shadowMax < 99999) {
+    if (defined $shadowMax && $shadowMax < 99999) {
         return 'yes';
     }
 
