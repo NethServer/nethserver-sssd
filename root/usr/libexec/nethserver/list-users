@@ -272,7 +272,7 @@ sub get_ldap_gecos {
 
 sub get_ldap_locked {
     my $e = shift;
-    my $pass = $e->get_value('userPassword');
+    my $pass = $e->get_value('userPassword') || '';
     if($pass =~ /\{CRYPT\}\!+/) {
         return 1;
     }
@@ -281,7 +281,8 @@ sub get_ldap_locked {
 
 sub get_ldap_new {
     my $e = shift;
-    if ($e->get_value('userPassword') eq '{CRYPT}!!') {
+    my $pass = $e->get_value('userPassword') || '';
+    if ($pass eq '{CRYPT}!!') {
         return 1;
     }
     return 0;
