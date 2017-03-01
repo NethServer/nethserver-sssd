@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.7
+Version: 1.1.8
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -68,6 +68,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Wed Mar 01 2017 Davide Principi <davide.principi@nethesis.it> - 1.1.8-1
+- Samba secrets.tdb is missing from backup set - Bug NethServer/dev#5228
+
 * Fri Feb 10 2017 Davide Principi <davide.principi@nethesis.it> - 1.1.7-1
 - Help the sysadmin on configuring the accounts provider - NethServer/dev#5215
 
