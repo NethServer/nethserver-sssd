@@ -64,7 +64,7 @@ if($sssd->isLdap()) {
 
     %config = ( %config,
         'keyattr' => 'uid',
-        'filter' => '(objectClass=shadowAccount)',
+        'filter' => '(objectClass=posixAccount)',
     );
 
 } elsif($sssd->isAD()) {
@@ -243,7 +243,7 @@ sub get_ldap_expired {
     my $shadowMax = $entry->get_value('shadowMax');
     my $shadowLastChange = $entry->get_value('shadowLastChange');
 
-    if ($shadowMax < 99999) {
+    if (defined $shadowMax && $shadowMax < 99999) {
         my $t = $shadowLastChange * 24 * 60 * 60;
         my $expire_date = $t + ($shadowMax * 24 * 60 * 60);
         if ($expire_date < $now) {
@@ -258,7 +258,7 @@ sub get_ldap_expires {
     my $entry = shift;
     my $shadowMax = $entry->get_value('shadowMax');
 
-    if ($shadowMax < 99999) {
+    if (defined $shadowMax && $shadowMax < 99999) {
         return 'yes';
     }
 
@@ -272,7 +272,7 @@ sub get_ldap_gecos {
 
 sub get_ldap_locked {
     my $e = shift;
-    my $pass = $e->get_value('userPassword');
+    my $pass = $e->get_value('userPassword') || '';
     if($pass =~ /\{CRYPT\}\!+/) {
         return 1;
     }
@@ -281,7 +281,8 @@ sub get_ldap_locked {
 
 sub get_ldap_new {
     my $e = shift;
-    if ($e->get_value('userPassword') eq '{CRYPT}!!') {
+    my $pass = $e->get_value('userPassword') || '';
+    if ($pass eq '{CRYPT}!!') {
         return 1;
     }
     return 0;
