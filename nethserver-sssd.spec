@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.8
+Version: 1.1.9
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -68,6 +68,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Mar 06 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.9-1
+- LDAP users not listed with remote accounts provider - Bug NethServer/dev#5229
+
 * Wed Mar 01 2017 Davide Principi <davide.principi@nethesis.it> - 1.1.8-1
 - Samba secrets.tdb is missing from backup set - Bug NethServer/dev#5228
 
