@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2017 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+function cleanup_leave ()
+{
+    /sbin/e-smith/config setprop sssd AdDns "" Provider none status disabled
+    /sbin/e-smith/signal-event nethserver-sssd-leave
+    /sbin/e-smith/signal-event nethserver-dnsmasq-save
+}
+
+SambaServerRole=$(/sbin/e-smith/config getprop smb ServerRole)
+SystemName=$(/sbin/e-smith/config get SystemName)
+
+IFS=",$IFS"
+read DNS1 DNS2 DNS3 <<<$(/sbin/e-smith/config getprop dns NameServers)
+
+# Check 0. Only ADS role ahead:
+if [[ "${SambaServerRole}" != 'ADS' ]]; then
+    exit 0
+fi
+
+#
+# Upgrade ADS server role to AD remote accounts provider configuration
+#
+/sbin/e-smith/config setprop sssd AdDns "${DNS1}" Provider ad status enabled
+/sbin/e-smith/config delprop smb ServerRole
+/sbin/e-smith/expand-template /etc/samba/smb.conf
+
+Workgroup=$(/usr/bin/testparm -s --parameter-name=workgroup 2>/dev/null)
+
+/sbin/e-smith/signal-event nethserver-dnsmasq-save
+
+# Check 1. Domain machine password
+python <<EOF
+import tdb, sys
+db = tdb.open("/var/lib/samba/private/secrets.tdb")
+if not "SECRETS/MACHINE_PASSWORD/${Workgroup}" in db:
+    sys.exit(1)
+EOF
+if [[ $? != 0 ]]; then
+    echo "[ERROR] Could not find machine password in secrets.tdb. Join procedure aborted."
+    cleanup_leave
+    exit 2
+fi
+
+# Check 2. The current hostname must be equal to the one in backup-config
+python <<EOF
+import tdb, sys
+db = tdb.open("/var/lib/samba/private/secrets.tdb")
+if not "SECRETS/SID/${SystemName^^}" in db:
+    sys.exit(1)
+EOF
+if [[ $? != 0 ]]; then
+    echo "[ERROR] The SystemName does not match. Join procedure aborted."
+    cleanup_leave
+    exit 3
+fi
+
+# Generate keytab:
+net ads keytab create -P
+if [[ $? != 0 ]]; then
+    echo "[ERROR] failed to generate the system keytab file"
+    cleanup_leave
+    exit 4
+fi
+
+# Configure accounts provider:
+/sbin/e-smith/signal-event nethserver-sssd-save
+if [[ $? != 0 ]]; then
+    echo "[ERROR] domain join restore procedure failed"
+    cleanup_leave
+    exit 5
+fi

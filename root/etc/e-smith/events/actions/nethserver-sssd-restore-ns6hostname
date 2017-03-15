@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2017 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+AdsRealm=$(/sbin/e-smith/config getprop smb AdsRealm | tr '[:upper:]' '[:lower:]')
+ServerRole=$(/sbin/e-smith/config getprop smb ServerRole)
+
+if [[ "${ServerRole}" != "ADS" ]]; then
+    exit 0
+fi
+
+cp -f /var/lib/nethserver/db/configuration{,.ns6ads}
+
+# Read SystemName and DomainName from raw DB file (skip dbus overlay):
+SystemName=$(/sbin/e-smith/db configuration.ns6ads get SystemName)
+DomainName=$(/sbin/e-smith/db configuration.ns6ads get DomainName)
+
+if [[ -n "${SystemName}" && -n "${AdsRealm:-$DomainName}" ]]; then
+    echo "${SystemName}.${AdsRealm:-$DomainName}" > /etc/hostname
+    echo "[NOTICE] applying hostname from ns6 (Samba role ADS) backup: " $(cat /etc/hostname)
+fi
+
+rm -f /var/lib/nethserver/db/configuration.ns6ads
+
+# Run this action before set-hostname from nethserver-base!
