@@ -15,6 +15,7 @@ Requires:  samba-common-tools
 Requires: krb5-workstation
 Requires: python-tdb
 Requires: tdb-tools
+Requires: php-cli, openldap-clients
 
 %description
 NethServer SSSD configuration

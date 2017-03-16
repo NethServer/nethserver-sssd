@@ -30,8 +30,11 @@ function cleanup_leave ()
 SambaServerRole=$(/sbin/e-smith/config getprop smb ServerRole)
 SystemName=$(/sbin/e-smith/config get SystemName)
 
+TMPIFS=$IFS
 IFS=",$IFS"
 read DNS1 DNS2 DNS3 <<<$(/sbin/e-smith/config getprop dns NameServers)
+IFS=$TMPIFS
+unset TMPIFS
 
 # Check 0. Only ADS role ahead:
 if [[ "${SambaServerRole}" != 'ADS' ]]; then
@@ -89,4 +92,27 @@ if [[ $? != 0 ]]; then
     echo "[ERROR] domain join restore procedure failed"
     cleanup_leave
     exit 5
+fi
+
+# Fix dNSHostName attribute in AD
+BaseDN=$(perl -MNethServer::SSSD -e 'print NethServer::SSSD->new()->baseDN();')
+LdapUri=$(php -r 'echo urlencode(trim($argv[1]));' -- ${BaseDN})
+KrbRealm=$(hostname -d)
+FQDN=$(hostname)
+MachineDN=$(net ads search -P "samaccountname=${SystemName^^}\$" | grep distinguishedName | cut -d ' ' -f 2)
+KRB5CCNAME=/var/lib/sss/db/ccache_${KrbRealm^^}
+if [[ -f ${KRB5CCNAME} ]]; then
+    export KRB5CCNAME
+    echo "[NOTICE] Updating LDAP ${MachineDN}: set dNSHostName=${FQDN}"
+    ldapmodify -Y GSSAPI -H "ldap:///${LdapUri}" <<EOF
+dn: ${MachineDN}
+changetype: modify
+replace: dNSHostName
+dNSHostName: ${FQDN}
+EOF
+    if [[ $? != 0 ]]; then
+        echo "[ERROR] dNSHostName update failed (LdapUri ${LdapUri})"
+    fi
+else
+    echo "[WARNING] Could not update dNSHostName attribute. Credentials cache not found."
 fi
