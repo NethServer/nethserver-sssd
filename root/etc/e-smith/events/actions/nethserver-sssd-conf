@@ -23,6 +23,6 @@
 EVENT=$1
 PROVIDER=$(/sbin/e-smith/config getprop sssd Provider)
 
-if [[ "$PROVIDER" != "none" ]]; then
+if [[ "${PROVIDER:-none}" != "none" ]]; then
     authconfig --enablesssdauth --enablemkhomedir --update
 fi
