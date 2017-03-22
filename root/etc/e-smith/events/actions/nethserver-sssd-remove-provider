@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2017 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+#
+
+# 
+# Stop and remove all local account providers, then reset sssd configuration
+#
+
+# Stop and disable all local providers
+for s in slapd nsdc
+do
+    if systemctl -q is-active $s 2>/dev/null; then
+        systemctl stop $s
+    fi
+
+    if systemctl -q is-enabled $s 2>/dev/null; then
+        systemctl disable $s
+    fi
+done
+
+# Remove nethserver-directory
+rpm -q nethserver-directory >/dev/null
+if [ $? -eq 0 ]; then
+    yum -y --disableplugin=nethserver_events remove nethserver-directory openldap-servers
+    /sbin/e-smith/config delete slapd
+    rm -rf /var/lib/ldap/
+    rm -rf /etc/openldap/slapd.d/
+fi
+
+
+# Remove nethserver-dc
+rpm -q nethserver-dc >/dev/null
+if [ $? -eq 0 ]; then
+    yum -y --disableplugin=nethserver_events remove nethserver-dc
+    /sbin/e-smith/config delete nsdc
+    rm -rf /var/lib/machines/nsdc
+fi
+
+
+# Clean up sssd configuration
+/sbin/e-smith/signal-event nethserver-sssd-leave
+
+# Reset all sssd props
+/sbin/e-smith/config set sssd service AdDns '' LdapURI '' Provider none status disabled
+
+# Propagate configuration changes
+/sbin/e-smith/signal-event nethserver-sssd-save
+/sbin/e-smith/signal-event nethserver-dnsmasq-save

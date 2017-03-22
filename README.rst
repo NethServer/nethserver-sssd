@@ -134,6 +134,18 @@ Parameters
 
   The duration of a password can be  passwordstrength{MaxPassAge}
 
+nethserver-sssd-remove-provider
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This event removes any installed local account provider and also
+wipes the configuration of any remote account provider.
+
+Before resetting the configuration, all accounts are dumped inside the
+following files in tsv format:
+
+- /var/lib/nethserver/backup/users.tsv
+- /var/lib/nethserver/backup/accounts.tsv
+
 System users and groups
 -----------------------
 

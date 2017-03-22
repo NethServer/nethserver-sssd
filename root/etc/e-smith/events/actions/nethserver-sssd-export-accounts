@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2017 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+#
+# Read users and groups from the account provider
+# and dump all accounts in a file with tsv format:
+#
+# - /var/lib/nethserver/backup/users.tsv
+# - /var/lib/nethserver/backup/groups.tsv
+#
+
+use strict;
+use warnings;
+
+use JSON;
+use NethServer::Password;
+
+my $users = decode_json(`/usr/libexec/nethserver/list-users`) or die("Can't read user list");
+my $groups = decode_json(`/usr/libexec/nethserver/list-groups`) or die("Can't read group list");
+my $generator = NethServer::Password->new('', {length => 8});
+my $base_dir = '/var/lib/nethserver/backup/';
+my $out_users = $base_dir . 'users.tsv';
+my $out_groups = $base_dir . 'groups.tsv';
+
+if ( ! -d $base_dir ) {
+    mkdir $base_dir;
+}
+
+open(my $fh, '>', $out_users) or die "Could not open file '$out_users': $!";
+foreach (keys(%$users)) {
+    my $password = $generator->generate();
+    my $key = $_;
+    $key =~ s/(@.*)//; # strip domain
+    print $fh $key."\t".$users->{$_}->{'gecos'}."\t".$password->getAscii()."\n";
+}
+close $fh;
+
+open($fh, '>', $out_groups) or die "Could not open file '$out_groups': $!";
+foreach (keys(%$groups)) {
+    my $key = $_;
+    $key =~ s/(@.*)//; # strip domain
+    my $members = decode_json(`/usr/libexec/nethserver/list-group-members '$key'`);
+    $members = [ map { s/(@.*)//; $_;} @{$members} ]; # strip domain from all members
+    print $fh $key."\t";
+    print $fh join("\t",@{$members});
+    print $fh "\n";
+}
+close $fh;
+
