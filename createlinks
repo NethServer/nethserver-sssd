@@ -146,3 +146,13 @@ event_templates('pre-backup-config', qw(
     /etc/backup-config.d/nethserver-sssd.include
 ));
 
+
+#--------------------------------------------------
+# actions for nethserver-sssd-remove-provider event
+#--------------------------------------------------
+
+event_actions('nethserver-sssd-remove-provider', qw(
+    nethserver-sssd-export-accounts 20
+    nethserver-sssd-remove-provider 40
+));
+

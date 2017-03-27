@@ -134,6 +134,18 @@ Parameters
 
   The duration of a password can be  passwordstrength{MaxPassAge}
 
+nethserver-sssd-remove-provider
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This event removes any installed local account provider and also
+wipes the configuration of any remote account provider.
+
+Before resetting the configuration, all accounts are dumped inside the
+following files in tsv format:
+
+- /var/lib/nethserver/backup/users.tsv
+- /var/lib/nethserver/backup/accounts.tsv
+
 System users and groups
 -----------------------
 
@@ -317,6 +329,22 @@ Sample invocation: ::
 Alternative separator character: ::
 
   import_users users.csv ','
+
+import_groups
+^^^^^^^^^^^^^
+
+It is possible to create groups from a TSV (Tab Separated Values) file with the following format: ::
+
+  groupname <TAB> member1 <TAB> ... <TAB> memberN <NEWLINE>
+
+Sample invocation: ::
+
+  import_users groups.tsv
+
+Alternative separator character: ::
+
+  import_groups groups.csv ','
+
 
 
 import_emails
