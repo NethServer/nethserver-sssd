@@ -23,7 +23,7 @@
 EVENT=$1
 
 if realm list | grep -s -F 'type: kerberos'; then
-    realm leave
+    realm leave $(/sbin/e-smith/config getprop sssd Realm)
 fi
 
 if systemctl -q is-active realmd; then
