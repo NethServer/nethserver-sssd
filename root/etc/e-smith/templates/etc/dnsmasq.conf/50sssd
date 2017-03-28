@@ -6,6 +6,6 @@
         && $sssd{'AdDns'};
     '';
 }
-{ $sssdEnabled ? '' : '# '}server=/{lc($DomainName)}/{$sssd{'AdDns'}}
+{ $sssdEnabled ? '' : '# '}server=/{lc($sssd{'Realm'})}/{$sssd{'AdDns'}}
 
 
