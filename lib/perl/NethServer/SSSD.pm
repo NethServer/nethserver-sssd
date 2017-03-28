@@ -368,6 +368,9 @@ sub new
         %sssdProps
     };
 
+    if($self->{'Provider'} eq 'ad') {
+            $self->{'Domain'} = lc($db->get_prop('sssd','Realm'));
+    }
     if ($self->{'LdapURI'} eq '') {
         my $host = '127.0.0.1';
         my $proto = 'ldap';
