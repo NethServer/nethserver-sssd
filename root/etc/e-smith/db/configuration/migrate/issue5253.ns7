@@ -1,0 +1,14 @@
+{
+  #
+  # issue 5253 -- migrate Workgroup prop from smb to sssd key
+  #
+
+  my $workgroup = $DB->get_prop_and_delete('smb','Workgroup');
+  if ( !defined($workgroup) ) {
+      return ''
+  }
+  
+  $DB->set_prop('sssd', 'Workgroup', $workgroup);
+
+  '';   
+}
