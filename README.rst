@@ -243,7 +243,8 @@ Leave and Re-Join Active Directory
 
 To leave a remote AD go to the :guilabel:`Accounts provider` page. For local AD
 provider, this is the **manual leave procedure** ::
-    
+
+    config setprop sssd Realm '' Workgroup '' Provider none
     signal-event nethserver-sssd-leave
 
 If the machine password or system keytab get corrputed, joining again the DC can fix them: ::
