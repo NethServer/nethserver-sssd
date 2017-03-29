@@ -4,11 +4,10 @@
   #
 
   my $workgroup = $DB->get_prop_and_delete('smb','Workgroup');
-  if ( !defined($workgroup) ) {
-      return ''
-  }
   
-  $DB->set_prop('sssd', 'Workgroup', $workgroup);
+  if( ! $DB->get_prop('sssd', 'Workgroup')) {
+      $DB->set_prop('sssd', 'Workgroup', $workgroup || '');
+  }
 
   '';   
 }
