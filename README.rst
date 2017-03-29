@@ -25,6 +25,17 @@ The implementation can work in two modes:
 * read-only: if users and groups are read from a remote source, the system will
   be able to consume them only using passwd database
 
+Realm and workgroup
+-------------------
+
+When the system is configured to use an Active Directory provider (``Provider=ad``),
+make sure to correctly set both ``Realm`` and ``Workgroup`` properties:
+
+- Realm: this is the Kerberos realm and it's case sensitive, but it's usually configured in upper case
+  as best practice.
+  When the realm is used for DNS queries, it's automatically forced to lower case.
+
+- Workgroup: Samba NetBIOS name, maximum length is 15 characters. It's usually the first part of the Realm in upper case
 
 Events
 ------
