@@ -26,4 +26,6 @@ if [[ $(/sbin/e-smith/config getprop sssd Provider) != "ad" ]]; then
     exit 0
 fi
 
+/sbin/e-smith/expand-template /etc/backup-config.d/nethserver-sssd.include
+
 exec ${smbads} initkeytab
