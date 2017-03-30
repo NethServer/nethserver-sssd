@@ -22,6 +22,8 @@
 
 use strict;
 use JSON;
+use Net::LDAP;
+use File::Temp qw/ tempfile /;
 use NethServer::SSSD;
 
 my $o = NethServer::SSSD->new();
@@ -43,6 +45,86 @@ my $cmd = shift;
 if($cmd eq 'dump') {
     exec('/usr/libexec/nethserver/sssd-defaults', '-p');
     die(); # should not be reached
+}
+
+if ($cmd eq 'probead') {
+    my ($fh_smb, $smb) = tempfile( UNLINK => 1 );
+    my ($fh_keytab, $keytab) = tempfile( UNLINK => 1 );
+    print $fh_smb "[global]\nrealm = ".$o->{'Domain'}."\nkerberos method = dedicated keytab\ndedicated keytab file = $keytab.";
+    close $fh_smb;
+    my $workgroup = `net ads -s $smb workgroup`;
+    $workgroup =~ s/.*://;
+    $workgroup =~ s/\s+$//; #right trim
+    $workgroup =~ s/^\s+//; #left trim
+    print encode_json({'Workgroup' =>  $workgroup});
+    exit 0;
+}
+
+if ($cmd eq 'probeldap') {
+    my $timeout = 1;
+    my $server = shift || die('No LDAP server specified');
+    my %attrs = (
+        BaseDN => '',
+        LdapURI => '',
+        StartTls => '',
+        'error' => ''
+    );
+
+    # first shot: ldap secure
+    my $ldap = Net::LDAP->new("ldaps://$server", timeout => $timeout);
+        
+    # try with start tls
+    if (!$ldap) {
+        $ldap = Net::LDAP->new("ldap://$server", timeout => $timeout);
+        if ($ldap) { # if reachable, try with start_tls
+            $ldap->start_tls(verify => 'none');
+            $attrs{'StartTls'} = 1;
+        }
+    }
+
+    # try with plain connection
+    if (!$ldap) {
+        $ldap = Net::LDAP->new("ldap://$server", timeout => $timeout);
+    }
+
+    if (!$ldap) {
+        $attrs{'error'} = "Connection refused ($server)"; 
+        print encode_json(\%attrs);
+        exit 1;
+    }
+   
+    $attrs{'LdapURI'} = $ldap->{'net_ldap_uri'};
+    my $dse = $ldap->root_dse(); 
+    my @contexts = $dse->get_value('namingContexts');
+
+    # set the baseDN
+    if (defined($contexts[0])) {
+        $attrs{'BaseDN'} = $contexts[0];
+    }
+
+    # this is a NethServer
+    if (lc($attrs{'BaseDN'}) =~ /dc=directory,dc=nh/) {
+        $attrs{'UserDN'} = "ou=People,dc=directory,dc=nh";
+        $attrs{'GroupDN'} = "ou=Groups,dc=directory,dc=nh";
+    } else { # check if this is AD
+        my $config_base = 'cn=schema,cn=configuration,'.lc($attrs{'BaseDN'});
+        foreach (@contexts) {
+            # this is an Active Directory, guess userDN and groupDN
+            if (lc($_) eq $config_base) {
+                $attrs{'UserDN'} = "CN=Users,".$attrs{'BaseDN'};
+                $attrs{'GroupDN'} = "CN=Users,".$attrs{'BaseDN'};
+            }
+        }
+    }
+
+    # fallback set user and group dns equals to base dn
+    if ( (!$attrs{'UserDN'} || !$attrs{'GroupDN'}) && $attrs{'BaseDN'}) {
+        $attrs{'UserDN'} =  $attrs{'BaseDN'};
+        $attrs{'GroupDN'} =  $attrs{'BaseDN'};
+    }
+
+    print encode_json(\%attrs);
+    exit(0);
 }
 
 if( ! -x '/usr/bin/ldapsearch') {
