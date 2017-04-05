@@ -202,7 +202,7 @@ sub baseDN {
     my $self = shift;
     return $self->{'BaseDN'} if ($self->{'BaseDN'});
 
-    return ($self->isLocalProvider() && $self->isLdap()) ? __builtinSuffix() : __domain2suffix($self->{'Domain'});
+    return ($self->isLocalProvider() && $self->isLdap()) ? __builtinSuffix() : __domain2suffix(lc($self->{'Realm'}));
 }
 
 =head2 bindDN
@@ -346,7 +346,13 @@ sub bindUser {
 
 =head2 new
 
-Create a NethServer::SSSD instance.
+Create a NethServer::SSSD instance. The new() method accepts a list of 
+key => value pairs that override default values and sssd props values from DB.
+
+Example:
+
+    my $settings = NethServer::SSSD->new();
+    my $settings_probe = NethServer::SSSD->new('Provider' => 'ldap', 'LdapURI' => 'ldap://1.2.3.4');
 
 =cut
 
@@ -374,25 +380,27 @@ sub new
     my $self = {
         'nsdc' => \%nsdcProps,
         'AdDns' => '',
-        'Provider' => 'ldap',
+        'Provider' => '',
         'LdapURI' => '',
         'BaseDN' => '',
         'BindDN' => '',
         'BindPassword' => '',
         'UserDN' => '',
-        'Domain' => $domainName,
+        'Realm' => '',
         'StartTls' => '',
-        %sssdProps
+        %sssdProps,
+        @_
     };
 
-    if($self->{'Provider'} eq 'ad') {
-            $self->{'Domain'} = lc($db->get_prop('sssd','Realm'));
+    if($self->{'Realm'} eq '') {
+        $self->{'Realm'} = uc($domainName);
     }
+
     if ($self->{'LdapURI'} eq '') {
         my $host = '127.0.0.1';
         my $proto = 'ldap';
         if($self->{'Provider'} eq 'ad') {
-            $host = $self->{'Domain'};
+            $host = lc($self->{'Realm'});
             $proto = 'ldaps'; # Require encryption by default
         }
         $self->{'LdapURI'} = "$proto://$host";
