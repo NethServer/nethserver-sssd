@@ -27,22 +27,26 @@ use NethServer::SSSD;
 my $o = NethServer::SSSD->new();
 
 my $dump = {
-    'BaseDN' => $o->baseDN(),
-    'BindDN' => $o->bindDN(),
-    'BindPassword' => $o->bindPassword(),
-    'UserDN' => $o->userDN(),
-    'GroupDN' => $o->groupDN(),
-    'LdapURI' => $o->ldapURI(),
+    'baseDN' => $o->baseDN(),
+    'bindDN' => $o->bindDN(),
+    'bindPassword' => $o->bindPassword(),
+    'bindUser' => $o->bindUser(),
+    'userDN' => $o->userDN(),
+    'groupDN' => $o->groupDN(),
+    'ldapURI' => $o->ldapURI(),
     'host' => $o->host(),
     'port' => $o->port(),
-    'startTls'=> $o->startTls()
+    'startTls'=> $o->startTls(),
+    'isAD' => $o->isAD(),
+    'isLdap' => $o->isLdap(),
 };
+
 
 my $cmd = shift;
 
 if($cmd eq 'dump') {
-    exec('/usr/libexec/nethserver/sssd-defaults', '-p');
-    die(); # should not be reached
+    print JSON->new()->pretty()->encode($dump);
+    exit(0);
 }
 
 if( ! -x '/usr/bin/ldapsearch') {

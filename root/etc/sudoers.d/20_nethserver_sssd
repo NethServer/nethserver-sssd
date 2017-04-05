@@ -11,7 +11,6 @@
   /usr/libexec/nethserver/list-user-membership, \
   /usr/libexec/nethserver/list-group-members, \
   /usr/libexec/nethserver/count-accounts, \
-  /usr/libexec/nethserver/sssd-defaults, \
   /sbin/e-smith/expand-template
 
 
