@@ -144,6 +144,23 @@ sub ldapURI {
     return $self->{'LdapURI'};
 }
 
+=head2 ldapUriDn
+
+Return LDAP URI, with DNS SRV records resolution. This is required for GSSAPI
+LDAP bind.
+
+=cut
+
+sub ldapUriDn {
+    my $self = shift;
+    my $dn = __domain2suffix(lc($self->{'Realm'}));
+    
+    $dn =~ s/,/%2C/g;
+    $dn =~ s/=/%3D/g;
+    
+    return 'ldap:///' . $dn;
+}
+
 =head2 port
 
 Return LDAP port if set, 
