@@ -81,43 +81,57 @@ my %counters = (
     'machine' => 0,
 );
 
-$result = $ldap->search(
+$result = NethServer::LdapCli::paged_search($sssd, $ldap,
     'base' => $sssd->userDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'userfilter'},
+    'callback' => \&_cb_user_counter,
 );
 
-if($opt_A) {
-    $counters{'user'} = $result->count();
-} else {
-    $counters{'user'} = scalar grep { ! (($sssd->isAD() && $al->is_system_user($_->get_value('objectSid'))) || $al->is_system_user($_->get_value($config{'userkeyattr'}))) } $result->entries();
+sub _cb_user_counter
+{
+    my $message = shift;
+    my $entry = shift;
+
+    if($opt_A || (! (($sssd->isAD() && $al->is_system_user($entry->get_value('objectSid'))) || $al->is_system_user($entry->get_value($config{'userkeyattr'}))))) {
+        $counters{'user'} ++;
+    }
 }
 
-$result = $ldap->search(
+$result = NethServer::LdapCli::paged_search($sssd, $ldap,
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'groupfilter'},
+    'callback' => \&_cb_group_counter,
 );
 
-if($opt_A) {
-    $counters{'group'} = $result->count();
-} else {
-    $counters{'group'} = scalar grep { ! (($sssd->isAD() && $al->is_system_group($_->get_value('objectSid'))) || $al->is_system_group($_->get_value($config{'userkeyattr'}))) } $result->entries();
+sub _cb_group_counter
+{
+    my $message = shift;
+    my $entry = shift;
+
+    if($opt_A || ( ! (($sssd->isAD() && $al->is_system_group($entry->get_value('objectSid'))) || $al->is_system_group($entry->get_value($config{'userkeyattr'}))) )) {
+        $counters{'group'} ++;
+    }
 }
 
-$result = $ldap->search(
+$result = NethServer::LdapCli::paged_search($sssd, $ldap,
     'base' => $sssd->baseDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'computerfilter'},
+    'callback' => \&_cb_computer_counter,
 );
 
-$counters{'machine'} = $result->count();
+sub _cb_computer_counter
+{
+    $counters{'machine'} ++;
+}
 
 print JSON->new->encode(\%counters);
 

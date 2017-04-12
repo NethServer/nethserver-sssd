@@ -75,20 +75,27 @@ if( ! $ldap) {
     die("$!: $@\n");
 }
 
-$result = $ldap->search(
+print '{';
+my $separator = '';
+
+$result = NethServer::LdapCli::paged_search($sssd, $ldap,
     'base' => $sssd->userDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $thisEntry ? "(&$config{'filter'}($config{'keyattr'}=$thisEntry))" : $config{'filter'},
+    'callback' => \&_cb_user_print
 );
 
-print '{';
+print '}';
 
-my $entry;
-my $separator = '';
-while($entry = $result->pop_entry()) {
-    my $key = get_user_key($entry);
+
+sub _cb_user_print
+{
+    my $message = shift;
+    my $entry = shift;
+
+    my $key = lc($entry->get_value($config{'keyattr'}));
     if( ! $opt_A && (($sssd->isAD() && $al->is_system_user($entry->get_value('objectSid'))) || $al->is_system_user($key))) {
         next;
     }
@@ -98,9 +105,8 @@ while($entry = $result->pop_entry()) {
     print ":";
     print JSON->new()->encode(get_user_value($entry));
     $separator = ',';
-}
 
-print '}';
+}
 
 $ldap->unbind();
 $ldap->disconnect();
@@ -108,12 +114,6 @@ $ldap->disconnect();
 ################################################################################
 ################################################################################
 ################################################################################
-
-sub get_user_key()
-{
-    my $entry = shift;
-    return lc($entry->get_value($config{'keyattr'}));
-}
 
 sub get_user_value()
 {

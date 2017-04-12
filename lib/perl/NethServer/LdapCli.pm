@@ -23,6 +23,7 @@ use NethServer::SSSD;
 use Net::LDAP;
 use Net::LDAP::Extra qw(AD);
 use Net::LDAP::Control::Paged;
+use Net::LDAP::Constant qw( LDAP_CONTROL_PAGED );
 use Net::DNS;
 use Authen::SASL qw(Perl);
 use Sys::Hostname;
@@ -126,6 +127,103 @@ sub connect
     return $ldap;
 }
 
+=head2 paged_search
+
+Repeatedly executes Net::LDAP::search(), issuing "pagedResultsControl" as
+specified by RFC2696.
+
+Arguments:
+
+=over 4
+
+=item
+
+$sssd, L<NethServer::SSSD|NethServer::SSSD> object instance
+
+=cut
+
+=item
+
+$ldap, L<Net::LDAP|Net::LDAP> object instance
+
+=cut
+
+=back
+
+Any other argument is passed as-is to Net::LDAP::search().
+
+For each returned Net::LDAP::Entry object, the given callback function is
+invoked.
+
+Sample invocation:
+
+    $result = NethServer::LdapCli::paged_search($sssd, $ldap,
+        'base' => $sssd->userDN(),
+        'scope' => 'subtree',
+        'deref' => 'never',
+        'timelimit' => $opt_t,
+        'filter' => $config{'userfilter'},
+        'callback' => \&_cb_user_counter,
+    );
+
+
+=cut
+
+sub paged_search
+{
+    my $sssd = shift;
+    my $ldap = shift;
+    my %args = @_;
+    my $callback = $args{'callback'};
+    $args{'callback'} = sub {
+        my $message = shift;
+        my $entry = shift;
+
+        if(! defined $entry || ref($entry) ne 'Net::LDAP::Entry') {
+            return;
+        }
+
+        $callback->($message, $entry);
+
+        $message->pop_entry();
+    };
+
+    my $page = Net::LDAP::Control::Paged->new('size' => ($sssd->{'LdapPageSize'} || '1000'));
+
+    my $cookie;
+
+    $args{'control'} = [ $page ];
+
+    while(1) {
+        my $message = $ldap->search(%args);
+
+        # exit loop on error
+        if($message->code()) {
+            last;
+        }
+
+        my $control = $message->control(Net::LDAP::Constant::LDAP_CONTROL_PAGED) or last;
+        $cookie = $control->cookie;
+
+        # exit loop if
+        if( ! defined($cookie) || ! length($cookie)) {
+            last;
+        }
+
+        $page->cookie($cookie);
+    }
+
+    # clean up on abnormal loop exit.
+    if (defined($cookie) && length($cookie)) {
+        # We had an abnormal exit, so let the server know we do not want any more
+
+        $page->cookie($cookie);
+        $page->size(0);
+        $ldap->search( %args );
+    }
+
+}
+
 ### internals
 
 sub _get_ldap_hosts
@@ -147,7 +245,7 @@ sub _init_kerberos
     my $sssd = shift;
     $ENV{'KRB5CCNAME'} = sprintf("/tmp/krb5cc_%d", $<);
     my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
-    
+
     system(qw(/usr/bin/klist -s));
     if($? != 0) {
         system(qw(/usr/bin/kinit -k), sprintf('%s$@%s', uc($systemName), uc($sssd->{'Realm'} || $sssd->{'Domain'})));

@@ -77,52 +77,39 @@ if( ! $ldap) {
     die("$!: $@\n");
 }
 
-$result = $ldap->search(
+my $separator = '';
+print '{';
+
+$result = NethServer::LdapCli::paged_search($sssd, $ldap,
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $thisEntry ? "(&$config{'filter'}($config{'keyattr'}=$thisEntry))" : $config{'filter'},
+    'callback' => \&_cb_group_print
 );
 
-print '{';
+print '}';
 
-my $entry;
-my $separator = '';
-while($entry = $result->pop_entry()) {
-    my $key = get_group_key($entry);
+
+sub _cb_group_print
+{
+    my $message = shift;
+    my $entry = shift;
+
+    my $key = lc($entry->get_value($config{'keyattr'}));
     if( ! $opt_A && (($sssd->isAD() && $al->is_system_group($entry->get_value('objectSid')))
         || $al->is_system_group($key))) {
-        next;
+        return;
     }
 
     print $separator;
     print JSON->new()->allow_nonref()->encode($key . ($opt_s ? "" : "\@$domainName"));
-    print ":";
-    print JSON->new()->encode(get_user_value($entry));
+    print ':{"members":[]}';
     $separator = ',';
-}
 
-print '}';
+}
 
 $ldap->unbind();
 $ldap->disconnect();
 
-
-################################################################################
-################################################################################
-################################################################################
-
-sub get_group_key()
-{
-    my $entry = shift;
-    return lc($entry->get_value($config{'keyattr'}));
-}
-
-sub get_user_value()
-{
-    my $e = shift;
-    return {
-        members => []
-    };
-}
