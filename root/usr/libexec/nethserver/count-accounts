@@ -23,7 +23,7 @@
 use strict;
 use NethServer::SSSD;
 use NethServer::AccountsList;
-use NethServer::Password;
+use NethServer::LdapClient;
 use Sys::Hostname;
 use Net::LDAP;
 use Getopt::Std;
@@ -44,19 +44,9 @@ my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $now = time();
 my $sssd = NethServer::SSSD->new();
 my $al = NethServer::AccountsList->new();
-
-my %config = (
-    'bindDN' => $sssd->bindDN(),
-    'bindPassword' => $sssd->bindPassword(),
-);
+my %config = ();
 
 if($sssd->isLdap()) {
-
-    if($sssd->isLocalProvider()) {
-        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
-        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
-    }
-
     %config = ( %config,
         'userfilter' => '(objectClass=posixAccount)',
         'userkeyattr' => 'uid',
@@ -77,43 +67,12 @@ if($sssd->isLdap()) {
     exit(0);
 }
 
-my $exitCode = 0;
 my $result;
 
-my $ldap_error_handler = sub {
-    my $message = shift;
-    if($message && $message->is_error()) {
-        my $code = $message->code();
-        my $text = $message->error();
-        if($code == 4) {
-            $exitCode = $code;
-            return $message;
-        }
-        warn "($code) $text\n";
-        exit($code);
-    }
-    return $message;
-};
-
-my $ldap = Net::LDAP->new($sssd->ldapURI(),
-    'timeout' => $opt_t,
-    'async' => 0,
-    'onerror' => $ldap_error_handler,
-    'verify' => 'none',
-);
+my $ldap = NethServer::LdapClient::connect($sssd, 'timeout' => $opt_t);
 
 if( ! $ldap) {
-    die("$!\n");
-}
-
-if($sssd->startTls()) {
-    $ldap->start_tls('verify' => 'none');
-}
-
-if($config{'bindDN'} && $config{'bindPassword'}) {
-    $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
-} else {
-    $result = $ldap->bind();
+    die("$!: $@\n");
 }
 
 my %counters = (
@@ -122,46 +81,59 @@ my %counters = (
     'machine' => 0,
 );
 
-$result = $ldap->search(
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->userDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'userfilter'},
+    'callback' => \&_cb_user_counter,
 );
 
-if($opt_A) {
-    $counters{'user'} = $result->count();
-} else {
-    $counters{'user'} = scalar grep { ! (($sssd->isAD() && $al->is_system_user($_->get_value('objectSid'))) || $al->is_system_user($_->get_value($config{'userkeyattr'}))) } $result->entries();
+sub _cb_user_counter
+{
+    my $message = shift;
+    my $entry = shift;
+
+    if($opt_A || (! (($sssd->isAD() && $al->is_system_user($entry->get_value('objectSid'))) || $al->is_system_user($entry->get_value($config{'userkeyattr'}))))) {
+        $counters{'user'} ++;
+    }
 }
 
-$result = $ldap->search(
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'groupfilter'},
+    'callback' => \&_cb_group_counter,
 );
 
-if($opt_A) {
-    $counters{'group'} = $result->count();
-} else {
-    $counters{'group'} = scalar grep { ! (($sssd->isAD() && $al->is_system_group($_->get_value('objectSid'))) || $al->is_system_group($_->get_value($config{'userkeyattr'}))) } $result->entries();
+sub _cb_group_counter
+{
+    my $message = shift;
+    my $entry = shift;
+
+    if($opt_A || ( ! (($sssd->isAD() && $al->is_system_group($entry->get_value('objectSid'))) || $al->is_system_group($entry->get_value($config{'userkeyattr'}))) )) {
+        $counters{'group'} ++;
+    }
 }
 
-$result = $ldap->search(
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->baseDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $config{'computerfilter'},
+    'callback' => \&_cb_computer_counter,
 );
 
-$counters{'machine'} = $result->count();
+sub _cb_computer_counter
+{
+    $counters{'machine'} ++;
+}
 
 print JSON->new->encode(\%counters);
 
 $ldap->unbind();
 $ldap->disconnect();
-exit($exitCode);

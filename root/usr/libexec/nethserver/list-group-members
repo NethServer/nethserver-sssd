@@ -23,7 +23,7 @@
 use strict;
 use NethServer::SSSD;
 use NethServer::AccountsList;
-use NethServer::Password;
+use NethServer::LdapClient;
 use Sys::Hostname;
 use Net::LDAP;
 use Getopt::Std;
@@ -46,17 +46,9 @@ my $groupName = shift;
 
 $groupName =~ s/\@$domainName$//; #trim @domain suffix
 
-my %config = (
-    'bindDN' => $sssd->bindDN(),
-    'bindPassword' => $sssd->bindPassword(),
-);
+my %config = ();
 
 if($sssd->isLdap()) {
-    if($sssd->isLocalProvider()) {
-        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
-        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
-    }
-
     %config = ( %config,
         'userkeyattr' => 'uid',
         'groupkeyattr' => 'cn',
@@ -79,45 +71,12 @@ if($sssd->isLdap()) {
     exit(0);
 }
 
-my $exitCode = 0;
 my $result;
 
-my $ldap_error_handler = sub {
-    my $message = shift;
-    if($message && $message->is_error()) {
-        my $code = $message->code();
-        my $text = $message->error();
-        if($code == 4) {
-            warn "($code) $text\n";
-            $exitCode = $code;
-            return $message;
-        }
-        warn "($code) $text\n";
-        exit($code);
-    }
-    return $message;
-};
-
-
-my $ldap = Net::LDAP->new($sssd->ldapURI(),
-    'timeout' => $opt_t,
-    'async' => 0,
-    'onerror' => $ldap_error_handler,
-    'verify' => 'none',
-);
+my $ldap = NethServer::LdapClient::connect($sssd, 'timeout' => $opt_t);
 
 if( ! $ldap) {
-    die("$!\n");
-}
-
-if($sssd->startTls()) {
-    $ldap->start_tls('verify' => 'none');
-}
-
-if($config{'bindDN'} && $config{'bindPassword'}) {
-    $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
-} else {
-    $result = $ldap->bind();
+    die("$!: $@\n");
 }
 
 my $entry = $ldap->search(
@@ -150,7 +109,6 @@ print JSON->new()->encode(\@members);
 
 $ldap->unbind();
 $ldap->disconnect();
-exit($exitCode);
 
 ################################################################################
 ################################################################################

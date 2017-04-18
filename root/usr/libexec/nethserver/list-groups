@@ -23,7 +23,7 @@
 use strict;
 use NethServer::SSSD;
 use NethServer::AccountsList;
-use NethServer::Password;
+use NethServer::LdapClient;
 use Sys::Hostname;
 use Net::LDAP;
 use Getopt::Std;
@@ -52,17 +52,9 @@ if( ! $opt_t) {
     $opt_t = 10;
 }
 
-my %config = (
-    'bindDN' => $sssd->bindDN(),
-    'bindPassword' => $sssd->bindPassword(),
-);
+my %config = ();
 
 if($sssd->isLdap()) {
-    if($sssd->isLocalProvider()) {
-        $config{'bindDN'} = 'cn=libuser,dc=directory,dc=nh';
-        $config{'bindPassword'} = NethServer::Password->new('libuser')->getAscii();
-    }
-
     %config = ( %config,
         'keyattr' => 'cn',
         'filter' => '(objectClass=posixGroup)',
@@ -77,92 +69,47 @@ if($sssd->isLdap()) {
     exit(0);
 }
 
-my $exitCode = 0;
 my $result;
 
-my $ldap_error_handler = sub {
-    my $message = shift;
-    if($message && $message->is_error()) {
-        my $code = $message->code();
-        my $text = $message->error();
-        if($code == 4) {
-            warn "[WARNING] (code $code): $text\n";
-            $exitCode = $code;
-            return $message;
-        }
-        warn "(code $code) $text\n";
-        exit($code);
-    }
-    return $message;
-};
-
-my $ldap = Net::LDAP->new($sssd->ldapURI(),
-    'timeout' => $opt_t,
-    'async' => 0,
-    'onerror' => $ldap_error_handler,
-    'verify' => 'none',
-);
+my $ldap = NethServer::LdapClient::connect($sssd, 'timeout' => $opt_t);
 
 if( ! $ldap) {
-    die("$!\n");
+    die("$!: $@\n");
 }
 
-if($sssd->startTls()) {
-    $ldap->start_tls('verify' => 'none');
-}
+my $separator = '';
+print '{';
 
-if($config{'bindDN'} && $config{'bindPassword'}) {
-    $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
-} else {
-    $result = $ldap->bind();
-}
-
-$result = $ldap->search(
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
     'timelimit' => $opt_t,
     'filter' => $thisEntry ? "(&$config{'filter'}($config{'keyattr'}=$thisEntry))" : $config{'filter'},
+    'callback' => \&_cb_group_print
 );
 
-print '{';
+print '}';
 
-my $entry;
-my $separator = '';
-while($entry = $result->pop_entry()) {
-    my $key = get_group_key($entry);
+
+sub _cb_group_print
+{
+    my $message = shift;
+    my $entry = shift;
+
+    my $key = lc($entry->get_value($config{'keyattr'}));
     if( ! $opt_A && (($sssd->isAD() && $al->is_system_group($entry->get_value('objectSid')))
         || $al->is_system_group($key))) {
-        next;
+        return;
     }
 
     print $separator;
     print JSON->new()->allow_nonref()->encode($key . ($opt_s ? "" : "\@$domainName"));
-    print ":";
-    print JSON->new()->encode(get_user_value($entry));
+    print ':{"members":[]}';
     $separator = ',';
-}
 
-print '}';
+}
 
 $ldap->unbind();
 $ldap->disconnect();
-exit($exitCode);
 
-################################################################################
-################################################################################
-################################################################################
-
-sub get_group_key()
-{
-    my $entry = shift;
-    return lc($entry->get_value($config{'keyattr'}));
-}
-
-sub get_user_value()
-{
-    my $e = shift;
-    return {
-        members => []
-    };
-}
