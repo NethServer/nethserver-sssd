@@ -28,11 +28,11 @@ use Net::DNS;
 use Authen::SASL qw(Perl);
 use Sys::Hostname;
 
-package NethServer::LdapCli;
+package NethServer::LdapClient;
 
 =head1 NAME
 
-NethServer::LdapCli -- connect to the accounts provider LDAP server
+NethServer::LdapClient -- connect to the accounts provider LDAP server
 
 =cut
 
@@ -45,10 +45,10 @@ See the connect() function
 =head1 USAGE
 
  use NethServer::SSSD;
- use NethServer::LdapCli;
+ use NethServer::LdapClient;
 
  $sssd = NethServer::SSSD->new();
- $ldap = NethServer::LdapCli($sssd);
+ $ldap = NethServer::LdapClient($sssd);
 
  # $ldap is a Net::LDAP object instance connected to the LDAP accounts provider
 
@@ -157,7 +157,7 @@ invoked.
 
 Sample invocation:
 
-    $result = NethServer::LdapCli::paged_search($sssd, $ldap,
+    $result = NethServer::LdapClient::paged_search($sssd, $ldap,
         'base' => $sssd->userDN(),
         'scope' => 'subtree',
         'deref' => 'never',

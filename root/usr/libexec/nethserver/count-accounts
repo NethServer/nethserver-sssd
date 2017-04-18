@@ -23,7 +23,7 @@
 use strict;
 use NethServer::SSSD;
 use NethServer::AccountsList;
-use NethServer::LdapCli;
+use NethServer::LdapClient;
 use Sys::Hostname;
 use Net::LDAP;
 use Getopt::Std;
@@ -69,7 +69,7 @@ if($sssd->isLdap()) {
 
 my $result;
 
-my $ldap = NethServer::LdapCli::connect($sssd, 'timeout' => $opt_t);
+my $ldap = NethServer::LdapClient::connect($sssd, 'timeout' => $opt_t);
 
 if( ! $ldap) {
     die("$!: $@\n");
@@ -81,7 +81,7 @@ my %counters = (
     'machine' => 0,
 );
 
-$result = NethServer::LdapCli::paged_search($sssd, $ldap,
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->userDN(),
     'scope' => 'subtree',
     'deref' => 'never',
@@ -100,7 +100,7 @@ sub _cb_user_counter
     }
 }
 
-$result = NethServer::LdapCli::paged_search($sssd, $ldap,
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->groupDN(),
     'scope' => 'subtree',
     'deref' => 'never',
@@ -119,7 +119,7 @@ sub _cb_group_counter
     }
 }
 
-$result = NethServer::LdapCli::paged_search($sssd, $ldap,
+$result = NethServer::LdapClient::paged_search($sssd, $ldap,
     'base' => $sssd->baseDN(),
     'scope' => 'subtree',
     'deref' => 'never',
