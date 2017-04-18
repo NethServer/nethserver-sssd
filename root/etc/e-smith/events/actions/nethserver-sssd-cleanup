@@ -29,3 +29,6 @@ fi
 echo "[NOTICE] wipe out sssd databases and configuration"
 find /var/lib/sss/ -name '*.ldb' -delete
 > /etc/sssd/sssd.conf
+
+# Clean up NethServer::LdapClient kerberos ticket
+rm -f /tmp/krb5cc_*
