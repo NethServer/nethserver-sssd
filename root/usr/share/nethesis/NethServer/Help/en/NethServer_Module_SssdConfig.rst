@@ -1,47 +1,35 @@
-
-.. raw:: html
-
-   {{{INCLUDE NethServer_Module_SssdConfig_*.html}}}
-
-
 =================
-Account providers
+Accounts provider
 =================
 
-Is possible to connect this system to a **remote** LDAP or Active Directory
-account provider.  To install a **local** LDAP or Active Directory account
-provider, go to the Software center page.
+An accounts provider can be implemented by an LDAP server (RFC2307 schema only)
+or by an Active Directory domain.
 
-LDAP
-====
+It is possible to connect this system to a **remote** accounts provider or
+to install a **local** one.
 
-Server IP address
-    Insert the IP address or host name of LDAP server.
+Remote LDAP
+===========
 
-Active Directory
-================
+To bind a **remote** ldap accounts provider the following fields are displayed.
 
-NetBIOS domain
-    This value also known as "workgroup" could be required to access SMB
-    resources, like *Shared folders*.  It is set automatically to the leftmost
-    part of the DNS domain suffix.  It is truncated to 15 characters.
+Host name or IP
+    Insert the IP address or host name of the LDAP server.
 
-DNS server IP address
-    IP address of the domain DNS server (usually the IP of the domain controller
-    itself).
+TCP port
+    Required only if the service uses a non-standard TCP port.
 
-Advanced settings
-=================
+A connection is attempted to the given IP/TCP port. If the connection succeeds,
+review and complete the configuration of the additional form.
 
-LDAP or Windows user name
-    Specify the DN to perform the LDAP BIND operation.  The actual DN value
-    depends on the LDAP server. For instance, it could be
-    ``uid=user,ou=People,dc=domain,dc=com``.  Active Directory servers allow
-    also NT style account names, like ``COMPANY\user``.
+LDAP server URI
+    Use ``ldaps://`` scheme to enable SSL encryption. Specify non-standard TCP
+    port by appending ``:portnumber``, after the host name. For instance:
+    ``ldap://myhost.domain:3389``.
 
-Password
-    The password for the LDAP BIND operation. It is stored in clear-text format
-    in the *configuration* e-smith database.
+STARTTLS
+    Enable or disable TLS encryption. By default it is always enabled if an
+    authenticated bind is configured.
 
 Base DN
     Perform any LDAP search under the given DN.
@@ -54,13 +42,76 @@ Group DN
     If specified, perform group LDAP searches under the given DN, otherwise fall
     back to :guilabel:`Base DN`.
 
-LDAP connection URI
-    The URI syntax is ``ldap://`` or ``ldaps://`` as scheme, the ``hostname`` or
-    ``IP address`` and optionally the port number suffix (``:389``, for
-    instance).
+Anonymous bind
+    If the LDAP server allows to browse the LDAP tree under :guilabel:`Base DN`
+    anonymously, this is the preferred choice.
+
+Authenticated bind
+    Provide the bind credentials by filling :guilabel:`Bind DN` and
+    :guilabel:`Bind Password` fields. These credentials are used also by
+    additional modules that require a direct and read-only connection with the
+    LDAP server, like NextCloud, WebTop, SOGo and ejabberd.
+
+
+Join a remote Active Directory domain
+=====================================
+
+To join a **remote** Active Directory accounts provider the following fields are displayed.
+
+DNS domain name
+    Name of the Active Directory domain, also known as *long* domain name.
+
+AD DNS server
+    IP address of the domain DNS server (usually the IP of a domain controller).
+
+Credentials for joining the domain
+    Provide the :guilabel:`User name` and :guilabel:`Password` of an AD account
+    with the privilege of *joining a computer to the domain*. Note that the
+    default **administrator** account could be disabled.
+
+If the join operation is successful, review and complete the configuration of
+the additional form.
+
+LDAP server URI
+    Use ``ldaps://`` scheme to enable SSL encryption. Specify non-standard TCP
+    port by appending ``:portnumber``, after the host name. For instance:
+    ``ldap://myhost.domain:3389``.
 
 STARTTLS
-    By default for LDAP providers, if a BIND operation is required and the
-    connection is not protected by SSL, the STARTTLS command is attempted.  The
-    yes/no value override this behavior.
+    Enable or disable TLS encryption. By default it is always enabled if an
+    authenticated bind is configured.
 
+Base DN
+    Perform any LDAP search under the given DN.
+
+User DN
+    If specified, perform user LDAP searches under the given DN, otherwise fall
+    back to :guilabel:`Base DN`.
+
+Group DN
+    If specified, perform group LDAP searches under the given DN, otherwise fall
+    back to :guilabel:`Base DN`.
+
+Read-only bind credentials
+    Provide the bind credentials by filling :guilabel:`Bind DN` and
+    :guilabel:`Bind Password` fields. These credentials are used by additional
+    modules that require a direct and read-only connection with the LDAP server
+    and do not support GSSAPI authentication, like NextCloud, WebTop, SOGo and
+    ejabberd.
+
+
+New Local Active directory domain
+=================================
+
+DNS domain name
+    Name of the Active Directory domain, also known as *long* domain name.
+
+NetBIOS domain name
+    This value also known as "workgroup" could be required to access SMB
+    resources, like *Shared folders*.  It is usually the leftmost
+    part of the DNS domain suffix and must be up to 15 characters long.
+
+Domain Controller IP address
+    Provide an unused IP address from a green network range. It is allocated to
+    ``nsdc``, the Linux Container that runs the Samba Active Directory domain
+    controller.
