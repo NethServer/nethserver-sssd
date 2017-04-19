@@ -5,14 +5,9 @@
   /usr/bin/net ads search -P *, \
   /usr/bin/net ads info, \
   /usr/bin/net ads testjoin, \
-  /sbin/e-smith/config, \
   /usr/libexec/nethserver/list-users, \
   /usr/libexec/nethserver/list-groups, \
   /usr/libexec/nethserver/list-user-membership, \
   /usr/libexec/nethserver/list-group-members, \
-  /usr/libexec/nethserver/count-accounts, \
-  /usr/libexec/nethserver/sssd-defaults, \
-  /sbin/e-smith/expand-template
-
-
+  /usr/libexec/nethserver/count-accounts
 

@@ -35,19 +35,37 @@ class SssdConfig extends \Nethgui\Controller\CompositeController
     public function initialize()
     {
         parent::initialize();
-
         $this->loadChildrenDirectory();
-        $this->sortChildren(function ($a, $b) {
-            if($a->getIdentifier() === 'AuthProvider') {
+    }
+
+    public function bind(\Nethgui\Controller\RequestInterface $request)
+    {
+        $provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
+
+        $firstModuleIdentifier = 'Wizard';
+        if(file_exists('/etc/e-smith/db/configuration/defaults/slapd/type')) {
+            $firstModuleIdentifier = 'LocalLdapProvider';
+        } elseif(file_exists('/etc/e-smith/db/configuration/defaults/nsdc/type')) {
+            $firstModuleIdentifier = 'LocalAdProvider';
+        } elseif ($provider === 'ldap') {
+            $firstModuleIdentifier = 'RemoteLdapProvider';
+        } elseif($provider === 'ad') {
+            $firstModuleIdentifier = 'RemoteAdProvider';
+        }
+
+        // Sort children so that if the Provider prop is "none", it starts the Wizard:
+        $this->sortChildren(function ($a, $b) use ($firstModuleIdentifier) {
+            if($a->getIdentifier() === $firstModuleIdentifier) {
                 $c = -1;
-            } elseif($b->getIdentifier() === 'AuthProvider') {
+            } elseif($b->getIdentifier() === $firstModuleIdentifier) {
                 $c = 1;
             } else {
                 $c = 0;
             }
-            $k = class_exists('\NethServer\Module\SssdConfig\DomainController') ? -1 : 1;
-            return $c * $k;
+            return $c;
         });
+
+        parent::bind($request);
     }
 
 }

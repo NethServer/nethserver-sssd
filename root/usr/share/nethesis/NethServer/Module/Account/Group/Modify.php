@@ -94,7 +94,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             array('groupname', $groupNameValidator, Table::KEY),
             array('members', Validate::ANYTHING, array($this, 'readMembers')),
         );
-        
+
         $this->setSchema($parameterSchema);
 
         parent::initialize();

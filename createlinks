@@ -156,3 +156,10 @@ event_actions('nethserver-sssd-remove-provider', qw(
     nethserver-sssd-remove-provider 40
 ));
 
+#
+# dcipaddr validator
+#
+validator_actions('dcipaddr', qw(
+    ipgreenandbridged 20
+));
+
