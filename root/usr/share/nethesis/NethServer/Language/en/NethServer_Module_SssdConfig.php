@@ -117,8 +117,8 @@ $L['CreateDomain_label'] = 'Create domain';
 
 $L['installSuccessAd_notification'] = 'Active Directory local accounts provider was installed correctly';
 $L['LocalAdProvider_header'] = 'Active Directory local accounts provider for ${0}';
-$L['LocalAdUpdate_label'] = 'Install DC update';
+$L['LocalAdUpdate_label'] = 'Update DC';
 $L['LocalAdProviderUninstall_label'] = 'Uninstall';
 $L['sambaUpdateIsAvailable_notification'] = "An update to the Domain Controller package is available";
-$L['LocalAdUpdate_header'] = 'Install DC update';
+$L['LocalAdUpdate_header'] = 'Update DC';
 $L['LocalAdUpdate_message'] = 'This operation might require the download of additional packages. The Domain Controller will be restarted after the software has been updated';
