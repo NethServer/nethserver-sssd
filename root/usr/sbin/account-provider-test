@@ -140,13 +140,13 @@ if($cmd eq 'dump') {
     my %attrs = ();
     my $response;
 
-    my $ldap = Net::LDAP->new("ldap://$server" . ($port ? ":$port" : ""), timeout => $timeout)
-        || Net::LDAP->new("ldaps://$server" . ($port ? ":$port" : ""), timeout => $timeout, verify => 'none')
+    my $ldap = Net::LDAP->new("ldaps://$server" . ($port ? ":$port" : ""), timeout => $timeout, verify => 'none')
+        || Net::LDAP->new("ldap://$server" . ($port ? ":$port" : ""), timeout => $timeout)
     ;
 
     if ( ! $ldap) {
         warn "Connection failed to LDAP server $server $port\n";
-        $attrs{'LdapURI'} = "ldap://$server";
+        exit(1);
     } else {
         $attrs{'LdapURI'} = $ldap->{'net_ldap_uri'};
         my $dse = $ldap->root_dse();

@@ -76,4 +76,11 @@ class LdapRemoteIp extends \Nethgui\Controller\AbstractController {
         return FALSE;
     }
 
+    public function validate(\Nethgui\Controller\ValidationReportInterface $report)
+    {
+        $this->getValidator('LdapRemoteIpAddress')
+            ->platform('ldap-probe', $this->parameters['LdapRemoteIpAddress'], $this->parameters['LdapRemoteTcpPort']);
+        parent::validate($report);
+    }
+
 }
