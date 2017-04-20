@@ -55,6 +55,15 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
         $view['LocalAdProviderUninstall'] = $view->getModuleUrl('../LocalProviderUninstall');
         $view['LocalAdUpdate'] = $view->getModuleUrl('../LocalAdUpdate');
+        $view['AdRealm'] = $this->getPlatform()->getDatabase('sssd')->getType('Realm');
+        if ( !$view['AdRealm'] ) { # only if upgraded from old SSSD implementation
+            $view['AdRealm'] = $view['domain'];
+        }
+        $view['AdWorkgroup'] = $this->getPlatform()->getDatabase('smb')->getType('Workgroup');
+        if ( !$view['AdWorkgroup'] ) {
+            $tmp = explode('.',$view['AdRealm']);
+            $view['AdWorkgroup'] = strtoupper($tmp[0]);
+        }
         $this->notifications->defineTemplate('adminTodo', \NethServer\Module\AdminTodo::TEMPLATE, 'bg-yellow');
         if($this->getRequest()->hasParameter('installSuccess')) {
             $this->notifications->message($view->translate('installSuccessAd_notification'));
