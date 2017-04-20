@@ -163,3 +163,10 @@ validator_actions('dcipaddr', qw(
     ipgreenandbridged 20
 ));
 
+
+#
+# ldap probe validator
+#
+validator_actions('ldap-probe', qw(
+    ldap-check-connect 20
+));

@@ -52,6 +52,7 @@ $L['LdapRemoteTcpPort_label'] = 'TCP port';
 $L['LdapRemoteIp_header'] = 'Bind to a remote LDAP server';
 $L['LdapRemoteBind_label'] = 'Check configuration';
 $L['probeLdapSuccess_warning'] = 'Review and save the LDAP settings to finish the configuration';
+$L['valid_platform,ldap-probe,ldap-check-connect,1'] = 'Server connection error or invalid service port';
 
 $L['BindType_anonymous_label'] = 'Anonymous bind';
 $L['BindType_authenticated_label'] = 'Authenticated bind';
