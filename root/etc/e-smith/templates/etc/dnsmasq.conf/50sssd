@@ -2,7 +2,7 @@
 # 50sssd -- the Samba Domain controller is
 # the authoritative DNS for our realm/domain
 # {
-    our $sssdEnabled = $sssd{'Provider'} eq 'ad'
+    our $sssdEnabled = ($sssd{'Provider'} || '') eq 'ad'
         && $sssd{'AdDns'};
     '';
 }
