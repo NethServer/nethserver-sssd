@@ -171,3 +171,10 @@ validator_actions('dcipaddr', qw(
 validator_actions('ldap-probe', qw(
     ldap-check-connect 20
 ));
+
+#
+# migration-import event
+#
+event_actions('migration-import', qw(
+      nethserver-sssd-migrate 20
+));
