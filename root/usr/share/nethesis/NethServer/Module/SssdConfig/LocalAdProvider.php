@@ -33,9 +33,14 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
     public function initialize()
     {
         parent::initialize();
+        $confDb = $this->getPlatform()->getDatabase('configuration');
         $this->declareParameter('AdIpAddress', FALSE, array('configuration', 'nsdc', 'IpAddress'));
-        $this->declareParameter('AdRealm', FALSE, array('configuration', 'sssd', 'Realm'));
-        $this->declareParameter('AdWorkgroup', FALSE, array('configuration', 'sssd', 'Workgroup'));
+        $this->declareParameter('AdRealm', FALSE, function () use ($confDb) {
+            return strtolower($confDb->getProp('sssd', 'Realm'));
+        });
+        $this->declareParameter('AdWorkgroup', FALSE, function () use ($confDb) {
+            return strtoupper($confDb->getProp('sssd', 'Workgroup'));
+        });
     }
 
     public function isSambaUpdateAvailable()
