@@ -2,7 +2,7 @@
 #
 # 10base
 #
-workgroup = { $sssd{'Workgroup'} }
+workgroup = { $sssd{'Workgroup'} || 'WORKGROUP' }
 server string = NethServer {$sysconfig{'Version'} . ' ' . $sysconfig{'Release'}} (Samba %v)
 security = { $sssd{'Provider'} eq 'ad' ? 'ADS' : 'user' }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }realm = { $sssd{'Realm'} }
