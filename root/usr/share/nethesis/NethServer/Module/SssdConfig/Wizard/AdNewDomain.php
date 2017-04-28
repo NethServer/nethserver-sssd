@@ -86,7 +86,7 @@ class AdNewDomain extends \Nethgui\Controller\AbstractController {
                 $view['AdRealm'] = $realm;
                 $view['AdWorkgroup'] = $nbdomain;
             }
-        } else {
+
             $elements = json_decode($this->getPlatform()->exec('/usr/libexec/nethserver/trusted-networks')->getOutput(), TRUE);
             $greenList = array();
             if(is_array($elements)) {

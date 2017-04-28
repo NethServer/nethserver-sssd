@@ -13,7 +13,7 @@ $labelOpenTag = "<label for='$AdIpAddressId'>";
 $help = '<div class="dcalert notification bg-yellow">
   <p>' . $labelOpenTag . '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' . htmlspecialchars($T('AdIpAddress_help1')) . '</label></p>
   <ul>
-    <li>' . $labelOpenTag . htmlspecialchars($T('AdIpAddress_help2', array($view['greenList']))) . '</label></li>
+    <li>' . $labelOpenTag . $view->textLabel('greenList')->setAttribute('template', $T('AdIpAddress_help2')) . '</label></li>
     <li>' . $labelOpenTag . htmlspecialchars($T('AdIpAddress_help3')) . '</label></li>
   </ul>
 </div>';
