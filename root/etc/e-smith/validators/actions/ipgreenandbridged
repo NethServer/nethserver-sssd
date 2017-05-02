@@ -23,6 +23,7 @@
 use strict;
 use esmith::NetworksDB;
 use esmith::util;
+use IO::Socket::INET;
 
 my $ip = shift || die("Missing IP argument");
 
@@ -67,6 +68,17 @@ sub is_local_ip
     return 0;
 }
 
+sub probe_tcp_port
+{
+    my $port = shift;
+    my $socket = IO::Socket::INET->new('PeerHost' => $ip, 'PeerPort' => $port, 'Proto' => 'tcp');
+    if( ! $socket ) {
+        return 0;
+    }
+    $socket->close();
+    return 1;
+}
+
 sub is_free
 {
     my $ip = shift;
@@ -74,10 +86,13 @@ sub is_free
     # Redirect ping output to /dev/null
     open(my $oldout, '>&STDOUT') || die('Could not dup STDOUT: $!');
     open(STDOUT, '>', '/dev/null');
-    my $free = system('/bin/ping', '-c', '1', '-w', '2', $ip);
+    my $ping = system('/bin/ping', '-c', '1', '-w', '2', $ip);
     open(STDOUT, '>&', $oldout);
 
-    return $free;
+    if($ping == 0 || probe_tcp_port(135) || probe_tcp_port(445)) {
+        return 0; # is_free=false
+    }
+    return 1; # is_free=true
 }
 
 # Fail, if ip is reserved or is not in local networks
