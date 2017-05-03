@@ -1,6 +1,0 @@
-[domain/legacy]
-use_fully_qualified_names = False
-{
-    $OUT = $provider_config;
-}
-
