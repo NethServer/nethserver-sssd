@@ -52,6 +52,18 @@ sub is_local_ip
 {
     my $localip = shift;
 
+    if(_lookup_green($localip)) {
+        return 1;
+    }
+
+    # Not OK. The IP is not on any of our green networks.
+    return 0;
+}
+
+sub _lookup_green
+{
+    my $localip = shift;
+
     # Make sure the IP is local
     my @interfaces = $ndb->green();
 
@@ -60,24 +72,22 @@ sub is_local_ip
         my $ipaddr = $i->prop('ipaddr') || next;
         my $mask = $i->prop('netmask') || next;
         if (Net::IPv4Addr::ipv4_in_network(esmith::util::computeLocalNetworkShortSpec($ipaddr,$mask), $localip)) {
-            return 1;
+            return $i->key;
         }
     }
-    # Not OK. The IP is not on any of our green networks.
-    return 0;
+    return '';
 }
 
 sub is_free
 {
     my $ip = shift;
 
-    # Redirect ping output to /dev/null
-    open(my $oldout, '>&STDOUT') || die('Could not dup STDOUT: $!');
-    open(STDOUT, '>', '/dev/null');
-    my $free = system('/bin/ping', '-c', '1', '-w', '2', $ip);
-    open(STDOUT, '>&', $oldout);
+    my $arping = system(qw(/sbin/arping -q -c 2 -w 3 -D -I), _lookup_green($ip), $ip);
 
-    return $free;
+    if($arping == 0) {
+        return 1; # is_free=true
+    }
+    return 0; # is_free=false
 }
 
 # Fail, if ip is reserved or is not in local networks
