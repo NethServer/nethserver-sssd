@@ -37,25 +37,40 @@ class AdNewDomain extends \Nethgui\Controller\AbstractController {
         $realmValidator = $this->createValidator(Validate::HOSTNAME_FQDN);
         $ipAddressValidator = $this->createValidator(Validate::IP)->platform('dcipaddr');
 
-        $this->declareParameter('AdRealm', $realmValidator, array('configuration', 'sssd', 'Realm'));
-        $this->declareParameter('AdWorkgroup', $workgroupValidator, array('configuration', 'sssd', 'Workgroup'));
+        $this->declareParameter('AdRealm', $realmValidator);
+        $this->declareParameter('AdWorkgroup', $workgroupValidator);
         $this->declareParameter('AdIpAddress', $ipAddressValidator);
     }
 
-    public function readAdWorkgroup($value)
+    public function bind(\Nethgui\Controller\RequestInterface $request)
     {
-        return $value;
-    }
+        parent::bind($request);
+        if( ! $this->getRequest()->isMutation()) {
+            $db = $this->getPlatform()->getDatabase('configuration');
+            $this->parameters['AdRealm'] = strtolower($db->getProp('sssd', 'Realm'));
+            $this->parameters['AdWorkgroup'] = strtoupper($db->getProp('sssd', 'Workgroup'));
 
-    public function writeAdWorkgroup($value)
-    {
-        return array(strtoupper($value));
+            $defaultRealm = $db->getType('DomainName');
+
+            if( ! $this->parameters['AdRealm']) {
+                $this->parameters['AdRealm'] = 'ad.' . $defaultRealm;
+            }
+
+            if( ! $this->parameters['AdWorkgroup']) {
+                $nbdomain = substr(\Nethgui\array_head(explode('.', $defaultRealm)), 0, 15);
+                $this->parameters['AdWorkgroup'] = strtoupper($nbdomain);
+            }
+        }
     }
 
     public function process()
     {
         parent::process();
         if($this->getRequest()->isMutation()) {
+            $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array(
+                'Workgroup' => strtoupper($this->parameters['AdWorkgroup']),
+                'Realm' => strtoupper($this->parameters['AdRealm']),
+            ));
             $this->getPlatform()->getDatabase('configuration')->setKey('nsdc', 'service', array('status' => 'enabled', 'IpAddress' => $this->parameters['AdIpAddress']));
             $this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/pkgaction --install @nethserver-dc', array(), TRUE);
         }
@@ -79,14 +94,8 @@ class AdNewDomain extends \Nethgui\Controller\AbstractController {
                         'url' => $view->getModuleUrl('/SssdConfig/LocalAdProvider?installFailure&taskId={taskId}'),
                         'freeze' => TRUE,
                 )));
-            } else {
-                // Fill the form with default values
-                $realm = strtolower($this->getPlatform()->getDatabase('configuration')->getType('DomainName'));
-                $nbdomain = strtoupper(substr(\Nethgui\array_head(explode('.', $realm)), 0, 15));
-                $view['AdRealm'] = $realm;
-                $view['AdWorkgroup'] = $nbdomain;
             }
-        } else {
+
             $elements = json_decode($this->getPlatform()->exec('/usr/libexec/nethserver/trusted-networks')->getOutput(), TRUE);
             $greenList = array();
             if(is_array($elements)) {

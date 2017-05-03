@@ -5,19 +5,25 @@
   #  - calculate Realm prop from Domain
   #
 
-  my $workgroup = $DB->get_prop_and_delete('smb','Workgroup');
-  
-  if( ! $DB->get_prop('sssd', 'Realm')) {
+  my $provider = $DB->get_prop('sssd', 'Provider') || 'none';
+
+  if($provider eq 'none') {
+      return '';
+  }
+
+  if($provider eq 'ad' && ! $DB->get_prop('sssd', 'Realm')) {
       $DB->set_prop('sssd', 'Realm', uc($DomainName));
   }
 
+  my $workgroup = $DB->get_prop_and_delete('smb','Workgroup');
+
   if( ! $DB->get_prop('sssd', 'Workgroup')) {
-      if ( ! $workgroup ) {
+      if ($provider eq 'ad' && ! $workgroup ) {
           $workgroup =  uc((split('\.', $DomainName))[0]);
           $workgroup = substr($workgroup, 0, 15);
       }
       $DB->set_prop('sssd', 'Workgroup', $workgroup);
   }
 
-  '';   
+  '';
 }
