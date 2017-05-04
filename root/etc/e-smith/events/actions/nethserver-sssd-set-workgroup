@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2017 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+#
+# Set Workgroup on NS 6 upgrade
+#
+
+use strict;
+use esmith::ConfigDB;
+
+my $db = esmith::ConfigDB->open() || die("Can't open ConfigDB");
+
+my $workgroup = uc($db->get_prop_and_delete('smb','Workgroup'));
+my $role = $db->get_prop('smb','ServerRole');
+
+if ($role eq 'ADS') {
+    exit 0;
+}
+
+# this condition should be true only when upgrading from NS 6
+if( !$db->get_prop('sssd', 'Workgroup') ) {
+
+    # workgroup must be calcualted
+    if ($workgroup eq '') {
+        # force to legacy default workgroup name if the machine wasn't PDC
+        if ($role eq 'WS') {
+            $workgroup =  'WORKGROUP';
+        } elsif ($role eq 'PDC') {
+            $workgroup =  uc((split('\.', $db->get_value('DomainName')))[0]);
+        }
+        $workgroup = substr($workgroup, 0, 15);
+    }
+
+    my $sssd = $db->get('sssd') || $db->new_record('sssd', { type => 'service' });
+    $sssd->set_prop('Workgroup', $workgroup);
+}
