@@ -29,7 +29,7 @@ use esmith::ConfigDB;
 
 my $db = esmith::ConfigDB->open() || die("Can't open ConfigDB");
 
-my $workgroup = $db->get_prop_and_delete('smb','Workgroup');
+my $workgroup = uc($db->get_prop_and_delete('smb','Workgroup'));
 my $role = $db->get_prop('smb','ServerRole');
 
 if ($role eq 'ADS') {
