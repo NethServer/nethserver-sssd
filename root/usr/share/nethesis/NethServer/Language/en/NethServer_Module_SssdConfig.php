@@ -85,6 +85,7 @@ $L['LocalLdapProviderUpgrade_label'] = 'Upgrade to Active Directory';
 $L['LocalLdapUpgrade_header'] = 'Upgrade to Active Directory';
 $L['LocalLdapUpgrade_message'] = 'This operation is not reversible! The local LDAP database supports the Samba schema and can be upgraded to a local Active Directory accounts provider, preserving users, passwords, groups and computer accounts.';
 $L['LdapUpgradeButton_label'] = 'Upgrade';
+$L['canUpgradeToSamba_notification'] = 'The local LDAP accounts provider can be upgraded to Samba Active Directory';
 
 $L['AdJoinMember_header'] = 'Join Active Directory as new member';
 $L['AdDns_label'] = 'AD DNS server';
