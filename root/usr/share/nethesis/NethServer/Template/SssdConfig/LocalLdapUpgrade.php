@@ -8,7 +8,7 @@ echo $view->header()->setAttribute('template', $T('LocalLdapUpgrade_header'));
 echo sprintf('<div class="information"><p>%s</p></div>', htmlspecialchars($T('LocalLdapUpgrade_message')));
 
 echo $view->textInput('AdRealm');
-echo $view->textInput('AdWorkgroup', $disabledFlags);
+echo $view->textInput('AdWorkgroup', $view->getModule()->canChangeWorkgroup() ? 0 : $disabledFlags);
 
 $AdIpAddressId = $view->getUniqueId('AdIpAddress');
 

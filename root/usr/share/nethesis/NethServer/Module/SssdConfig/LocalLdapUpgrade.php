@@ -35,18 +35,37 @@ class LocalLdapUpgrade extends \Nethgui\Controller\AbstractController {
         parent::initialize();
         $realmValidator = $this->createValidator(Validate::HOSTNAME_FQDN);
         $ipAddressValidator = $this->createValidator(Validate::IP)->platform('dcipaddr');
+        $workgroupValidator = FALSE;
+        if($this->canChangeWorkgroup()) {
+            $workgroupValidator = $this->createValidator(Validate::HOSTNAME_SIMPLE)->maxLength(15);
+        }
 
         $this->declareParameter('AdRealm', $realmValidator);
-        $this->declareParameter('AdWorkgroup', FALSE, array('configuration', 'sssd', 'Workgroup'));
+        $this->declareParameter('AdWorkgroup', $workgroupValidator);
         $this->declareParameter('AdIpAddress', $ipAddressValidator);
+    }
+
+    public function canChangeWorkgroup()
+    {
+        $db = $this->getPlatform()->getDatabase('configuration');
+        if($db->getProp('smb', 'ServerRole') === 'PDC') {
+            return FALSE;
+        }
+        return TRUE;
     }
 
     public function bind(\Nethgui\Controller\RequestInterface $request)
     {
         parent::bind($request);
-        if( ! $this->getRequest()->isMutation()) {
-            $db = $this->getPlatform()->getDatabase('configuration');
+        $db = $this->getPlatform()->getDatabase('configuration');
+        if($request->isMutation()) {
+            # The form can be disabled: establish the default value
+            if( ! $request->hasParameter('AdWorkgroup')) {
+                $this->parameters['AdWorkgroup'] = strtoupper($db->getProp('sssd', 'Workgroup'));
+            }
+        } else {
             $this->parameters['AdRealm'] = strtolower($db->getProp('sssd', 'Realm'));
+            $this->parameters['AdWorkgroup'] = strtoupper($db->getProp('sssd', 'Workgroup'));
             if( ! $this->parameters['AdRealm']) {
                 $this->parameters['AdRealm'] = 'ad.' . $db->getType('DomainName');
             }
@@ -57,9 +76,15 @@ class LocalLdapUpgrade extends \Nethgui\Controller\AbstractController {
     {
         parent::process();
         if($this->getRequest()->isMutation()) {
-            $this->getPlatform()->getDatabase('configuration')->setProp('sssd', array(
+            $db = $this->getPlatform()->getDatabase('configuration');
+            $db->setProp('sssd', array(
                 'Realm' => strtoupper($this->parameters['AdRealm']),
             ));
+            if($this->canChangeWorkgroup() && $this->getRequest()->hasParameter('AdWorkgroup')) {
+                $db->setProp('sssd', array(
+                    'Workgroup' => strtoupper($this->parameters['AdWorkgroup']),
+                ));
+            }
             $this->getPlatform()->getDatabase('configuration')->setKey('nsdc', 'service', array('IpAddress' => $this->parameters['AdIpAddress']));
             $this->getPlatform()->signalEvent('nethserver-directory-ns6upgrade &');
         }
