@@ -23,7 +23,7 @@
 event=$1
 sourceDir=$2
 
-workgroup=$(/sbin/e-smith/db ${sourceDir}/home/e-smith/db/configuration getprop smb Workgroup)
+workgroup=$(/sbin/e-smith/db ${sourceDir}/home/e-smith/db/configuration getprop smb Workgroup | tr '[:lower:]' '[:upper:]')
 
 if [[ -n "${workgroup}" ]]; then
     echo "[NOTICE] Migrate the workgroup name ${workgroup}"
