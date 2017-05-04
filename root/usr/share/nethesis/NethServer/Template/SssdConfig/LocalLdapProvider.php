@@ -8,7 +8,7 @@ $alert = '';
 $buttons = $view->buttonList($view::BUTTON_HELP);
 
 if($view->getModule()->canUpgradeToSamba()) {
-    $alert = '<div style="max-width: 500px" class="dcalert notification bg-yellow"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' . htmlspecialchars($view->translate('canUpgradeToSamba_notification')) . '</div>';
+    $alert = '<div class="dcalert notification bg-yellow"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' . htmlspecialchars($view->translate('canUpgradeToSamba_notification')) . '</div>';
     $buttons->insert($view->button('LocalLdapProviderUpgrade', $view::BUTTON_LINK));
 }
 

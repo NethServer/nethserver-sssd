@@ -5,7 +5,18 @@ $disabledFlags = $view::STATE_READONLY | $view::STATE_DISABLED;
 /* @var $view \Nethgui\Renderer\Xhtml */
 echo $view->header()->setAttribute('template', $T('LocalLdapUpgrade_header'));
 
-echo sprintf('<div class="information"><p>%s</p></div>', htmlspecialchars($T('LocalLdapUpgrade_message')));
+$informationText = sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_message1')));
+
+if($view->getModule()->canChangeWorkgroup()) {
+    $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_WS_message1')));
+    $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_WS_message2')));
+} else {
+    $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_PDC_message1'))) ;
+}
+
+
+
+echo sprintf('<div class="information">%s</div>', $informationText);
 
 echo $view->textInput('AdRealm');
 echo $view->textInput('AdWorkgroup', $view->getModule()->canChangeWorkgroup() ? 0 : $disabledFlags);
@@ -34,5 +45,9 @@ $view->includeCss('
     font-size: 1.2em;
     max-width: 505px;
     margin-bottom: 1em;
+}
+
+#SssdConfig_LocalLdapUpgrade .information p {
+    margin-bottom: 0.5em;
 }
 ');

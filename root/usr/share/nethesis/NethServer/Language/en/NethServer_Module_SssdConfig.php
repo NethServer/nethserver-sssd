@@ -83,7 +83,10 @@ $L['unbindSuccess_notification'] = 'The remote accounts provider was succesfully
 
 $L['LocalLdapProviderUpgrade_label'] = 'Upgrade to Active Directory';
 $L['LocalLdapUpgrade_header'] = 'Upgrade to Active Directory';
-$L['LocalLdapUpgrade_message'] = 'This operation is not reversible! The local LDAP database supports the Samba schema and can be upgraded to a local Active Directory accounts provider, preserving users, passwords, groups and computer accounts.';
+$L['LocalLdapUpgrade_message1'] = 'This operation is not reversible! The LDAP database can be upgraded to a local Active Directory accounts provider.';
+$L['LocalLdapUpgrade_PDC_message1'] = 'Users, passwords, groups and computer accounts are preserved.';
+$L['LocalLdapUpgrade_WS_message1'] = 'Users, passwords and groups are preserved; however shared folder connections require different credentials!';
+$L['LocalLdapUpgrade_WS_message2'] = 'When connecting to a shared folder, the NetBIOS domain name must be either prefixed to the user name (i.e. "MYDOMAIN\username"), or provided by other means.';
 $L['LdapUpgradeButton_label'] = 'Upgrade';
 $L['canUpgradeToSamba_notification'] = 'The local LDAP accounts provider can be upgraded to Samba Active Directory';
 
