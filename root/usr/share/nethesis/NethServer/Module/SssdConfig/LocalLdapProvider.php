@@ -40,6 +40,11 @@ class LocalLdapProvider extends \Nethgui\Controller\AbstractController implement
         if(isset($result)) {
             return $result;
         }
+        if( ! $this->isFirstChild()) {
+            $result = FALSE;
+            return FALSE;
+        }
+
         $process = $this->getPlatform()->exec("ldapsearch -LLL -H ldapi:/// -x -w '' -D '' -b dc=directory,dc=nh objectClass=sambaDomain 2>/dev/null | grep -q '^sambaDomainName: '");
         if($process->getExitCode() === 0) {
             $result = TRUE;
@@ -47,6 +52,11 @@ class LocalLdapProvider extends \Nethgui\Controller\AbstractController implement
             $result = FALSE;
         }
         return $result;
+    }
+
+    protected function isFirstChild()
+    {
+        return $this === \Nethgui\array_head($this->getParent()->getChildren());
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
