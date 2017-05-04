@@ -24,8 +24,11 @@ event=$1
 sourceDir=$2
 
 workgroup=$(/sbin/e-smith/db ${sourceDir}/home/e-smith/db/configuration getprop smb Workgroup | tr '[:lower:]' '[:upper:]')
+serverRole=$(/sbin/e-smith/db ${sourceDir}/home/e-smith/db/configuration getprop smb ServerRole)
 
-if [[ -n "${workgroup}" ]]; then
-    echo "[NOTICE] Migrate the workgroup name ${workgroup}"
+if [[ -n "${workgroup}" && "${serverRole}" == "PDC" ]]; then
+    echo "[NOTICE] Forcibly migrate the PDC workgroup name ${workgroup}"
     /sbin/e-smith/config setprop sssd Workgroup "${workgroup}"
+else
+    echo "[NOTICE] ServerRole is ${serverRole}, workgroup name not migrated"
 fi
