@@ -12,6 +12,7 @@ if($view->getModule()->canChangeWorkgroup()) {
     $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_WS_message2')));
 } else {
     $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_PDC_message1'))) ;
+    $informationText .= sprintf('<p>%s</p>', htmlspecialchars($T('LocalLdapUpgrade_PDC_message2'))) ;
 }
 
 
