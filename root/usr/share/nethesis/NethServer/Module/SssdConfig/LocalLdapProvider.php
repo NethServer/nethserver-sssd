@@ -46,7 +46,7 @@ class LocalLdapProvider extends \Nethgui\Controller\AbstractController implement
         }
 
         $process = $this->getPlatform()->exec("ldapsearch -LLL -H ldapi:/// -x -w '' -D '' -b dc=directory,dc=nh objectClass=sambaDomain 2>/dev/null | grep -q '^sambaDomainName: '");
-        if($process->getExitCode() === 0) {
+        if($process->getExitCode() === 0 && !file_exists("/var/run/.nethserver-fixnetwork")) {
             $result = TRUE;
         } else {
             $result = FALSE;

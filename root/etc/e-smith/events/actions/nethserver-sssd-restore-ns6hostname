@@ -20,12 +20,13 @@
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Execute only if this is an upgrade from NS6 to NS 7
+if [[ $(/sbin/e-smith/config get sssd) ]]; then
+   exit 0
+fi
+
 AdsRealm=$(/sbin/e-smith/config getprop smb AdsRealm | tr '[:upper:]' '[:lower:]')
 ServerRole=$(/sbin/e-smith/config getprop smb ServerRole)
-
-if [[ "${ServerRole}" != "ADS" ]]; then
-    exit 0
-fi
 
 cp -f /var/lib/nethserver/db/configuration{,.ns6ads}
 
