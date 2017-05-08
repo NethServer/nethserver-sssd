@@ -36,7 +36,7 @@ DomainName=$(/sbin/e-smith/db configuration.ns6ads get DomainName)
 
 if [[ -n "${SystemName}" && -n "${AdsRealm:-$DomainName}" ]]; then
     echo "${SystemName}.${AdsRealm:-$DomainName}" > /etc/hostname
-    echo "[NOTICE] applying hostname from ns6 (Samba role ADS) backup: " $(cat /etc/hostname)
+    echo "[NOTICE] applying hostname from ns6 backup: " $(cat /etc/hostname)
 fi
 
 rm -f /var/lib/nethserver/db/configuration.ns6ads
