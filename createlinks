@@ -133,7 +133,6 @@ event_actions('post-restore-config', qw(
     nethserver-sssd-conf 50
     nethserver-sssd-set-workgroup 50
     nethserver-sssd-clear-cache 71
-    nethserver-sssd-restore-ns6ads 80
 ));
 
 #--------------------------------------------------
