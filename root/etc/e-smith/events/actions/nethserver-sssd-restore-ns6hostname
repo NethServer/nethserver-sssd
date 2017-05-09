@@ -20,25 +20,20 @@
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# NOTE: Run this action before set-hostname from nethserver-base!
+
+configDb='/var/run/.nethserver-upgrade-configdb'
+
 # Execute only if this is an upgrade from NS6 to NS 7
-if [[ $(/sbin/e-smith/config get sssd) ]]; then
-   exit 0
-fi
-
-AdsRealm=$(/sbin/e-smith/config getprop smb AdsRealm | tr '[:upper:]' '[:lower:]')
-ServerRole=$(/sbin/e-smith/config getprop smb ServerRole)
-
-cp -f /var/lib/nethserver/db/configuration{,.ns6ads}
+if ( ! -f $configDb) {
+    exit(0);
+}
 
 # Read SystemName and DomainName from raw DB file (skip dbus overlay):
-SystemName=$(/sbin/e-smith/db configuration.ns6ads get SystemName)
-DomainName=$(/sbin/e-smith/db configuration.ns6ads get DomainName)
+SystemName=$(/sbin/e-smith/db $configDb get SystemName)
+DomainName=$(/sbin/e-smith/db $configDb get DomainName)
 
-if [[ -n "${SystemName}" && -n "${AdsRealm:-$DomainName}" ]]; then
-    echo "${SystemName}.${AdsRealm:-$DomainName}" > /etc/hostname
+if [[ -n "${SystemName}" && -n "${DomainName}" ]]; then
+    echo "${SystemName}.${DomainName}" > /etc/hostname
     echo "[NOTICE] applying hostname from ns6 backup: " $(cat /etc/hostname)
 fi
-
-rm -f /var/lib/nethserver/db/configuration.ns6ads
-
-# Run this action before set-hostname from nethserver-base!
