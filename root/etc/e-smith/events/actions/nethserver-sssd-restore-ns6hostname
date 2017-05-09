@@ -25,9 +25,9 @@
 configDb='/var/run/.nethserver-upgrade-configdb'
 
 # Execute only if this is an upgrade from NS6 to NS 7
-if ( ! -f $configDb) {
-    exit(0);
-}
+if [[ ! -f $configDb ]]; then
+    exit 0
+fi
 
 # Read SystemName and DomainName from raw DB file (skip dbus overlay):
 SystemName=$(/sbin/e-smith/db $configDb get SystemName)
