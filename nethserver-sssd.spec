@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.1.9
+Version: 1.2.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,11 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Wed May 10 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.0-1
+- Account provider: allow reset of local providers - NethServer/dev#5252
+- Accounts provider guided configuration - NethServer/dev#5253
+- Upgrade from NS 6 via backup and restore - NethServer/dev#5234
+
 * Mon Mar 06 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.9-1
 - LDAP users not listed with remote accounts provider - Bug NethServer/dev#5229
 
