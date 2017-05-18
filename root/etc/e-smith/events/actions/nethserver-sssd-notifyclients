@@ -20,10 +20,14 @@
 # along with NethServer.  If not, see COPYING.
 #
 
+# Signal *-update events on packages that include NethServer::SSSD library
+# Exclude nethserver-sssd itself and local accounts providers.
+
 ERRORS=0
 
 for SUBEVENT in $(grep -l -R -F NethServer::SSSD /etc/e-smith/events/actions/ /etc/e-smith/templates/ \
-    | xargs -- rpm -qf --queryformat '%{NAME}-update\n' | sort | uniq); do
+    | xargs -- rpm -qf --queryformat '%{NAME}-update\n' | sort | uniq \
+    | grep -v -E 'nethserver-(dc|sssd|directory)-update'); do
     /sbin/e-smith/signal-event $SUBEVENT || (( ERRORS ++ ))
 done
 
