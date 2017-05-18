@@ -86,6 +86,8 @@ sub connect
     my @ldap_hosts;
     if($sssd->isAD()) {
         @ldap_hosts =  _get_ldap_hosts(lc($sssd->{'Realm'}) || $sssd->{'Domain'});
+    } elsif ($sssd->isLdap() && $sssd->isLocalProvider()) {
+        @ldap_hosts = ("ldapi://");
     } else {
         @ldap_hosts = ($sssd->ldapURI());
     };
@@ -104,6 +106,8 @@ sub connect
             local ($SIG{__DIE__});
             Authen::SASL->new(mechanism => 'GSSAPI')->client_new('ldap', $ldap->{'net_ldap_host'});
         };
+    } elsif ($sssd->isLdap() && $sssd->isLocalProvider()) {
+        $sasl = Authen::SASL->new(mechanism => 'EXTERNAL');
     } elsif($sssd->startTls()) {
         $ldap->start_tls('verify' => 'none');
     }
