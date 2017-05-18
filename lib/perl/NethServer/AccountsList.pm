@@ -136,7 +136,7 @@ sub new
 {
     my $class = shift;
 
-    my $sssd = NethServer::SSSD->new();
+    my $sssd = shift || NethServer::SSSD->new();
     my $self = {
         'users' => '/etc/nethserver/system-users',
         'groups' => '/etc/nethserver/system-groups',

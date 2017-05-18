@@ -81,7 +81,6 @@ sub connect
     my $sssd = shift;
     my @ldap_params = @_;
 
-    my %config = ();
     my $sasl;
 
     my @ldap_hosts;
@@ -113,8 +112,8 @@ sub connect
 
     if($sasl) {
         $result = $ldap->bind('', 'sasl' => $sasl);
-    } elsif ($config{'bindDN'} && $config{'bindPassword'}) {
-        $result = $ldap->bind($config{'bindDN'}, 'password' => $config{'bindPassword'});
+    } elsif ($sssd->bindDN() && $sssd->bindPassword()) {
+        $result = $ldap->bind($sssd->bindDN(), 'password' => $sssd->bindPassword());
     } else {
         $result = $ldap->bind();
     }
