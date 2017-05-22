@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.2.0
+Version: 1.2.1
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon May 22 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.1-1
+- Default userPrincipalName is not an email address - Bug NethServer/dev#5284
+
 * Wed May 10 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.0-1
 - Account provider: allow reset of local providers - NethServer/dev#5252
 - Accounts provider guided configuration - NethServer/dev#5253
