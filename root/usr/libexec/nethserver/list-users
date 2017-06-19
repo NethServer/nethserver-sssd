@@ -161,9 +161,9 @@ sub get_ad_expired {
 sub get_ad_expires {
     my $e = shift;
     if(int($e->get_value('userAccountControl')) & 0x10000) { # DONT_EXPIRE_PASSWORD
-        return 0;
+        return 'no';
     }
-    return 1;
+    return 'yes';
 }
 
 sub get_ad_gecos {
