@@ -34,7 +34,7 @@ class AdNewDomain extends \Nethgui\Controller\AbstractController {
     {
         parent::initialize();
         $workgroupValidator = $this->createValidator(Validate::HOSTNAME_SIMPLE)->maxLength(15);
-        $realmValidator = $this->createValidator(Validate::HOSTNAME_FQDN);
+        $realmValidator = $this->createValidator(Validate::HOSTNAME_FQDN)->platform('dcrealm');
         $ipAddressValidator = $this->createValidator(Validate::IP)->platform('dcipaddr');
 
         $this->declareParameter('AdRealm', $realmValidator);
