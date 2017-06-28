@@ -10,7 +10,6 @@ echo $view->panel()
                 ->setAttribute('label', $T('Maximum password age (${0})')))
         ->insert($view->slider('MinPassAge', $view::SLIDER_ENUMERATIVE | $view::LABEL_ABOVE)
                 ->setAttribute('label', $T('Minimum password age (${0})')))
-        ->insert($view->slider('PassWarning', $view::SLIDER_ENUMERATIVE | $view::LABEL_ABOVE)
-                ->setAttribute('label', $T('Number of days to sent a warning (${0})')));
+;
 
 echo $view->buttonList($view::BUTTON_SUBMIT | $view::BUTTON_HELP);

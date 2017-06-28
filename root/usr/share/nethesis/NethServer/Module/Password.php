@@ -44,19 +44,12 @@ class Password extends \Nethgui\Controller\AbstractController
         }
     }
 
-    public function setDefaultValues($parameterName, $value)
-    {
-        $this->defaultValues[$parameterName] = $value;
-        return $this;
-    }
-
     public function initialize()
     {
         $this->declareParameter('Users', $this->createValidator()->memberOf('none', 'strong'), array('configuration', 'passwordstrength', 'Users'));
         $this->declareParameter('MaxPassAge', Validate::POSITIVE_INTEGER, array('configuration', 'passwordstrength', 'MaxPassAge'));
         $this->declareParameter('MinPassAge', $this->createValidator()->memberOf('0', '30', '60', '90', '180', '365'), array('configuration', 'passwordstrength', 'MinPassAge'));
         $this->declareParameter('PassExpires', $this->createValidator()->memberOf('yes', 'no'), array('configuration', 'passwordstrength', 'PassExpires'));
-        $this->declareParameter('PassWarning', Validate::POSITIVE_INTEGER, array('configuration', 'passwordstrength', 'PassWarning'));
 
         parent::initialize();
     }
@@ -90,19 +83,8 @@ class Password extends \Nethgui\Controller\AbstractController
         }
         \ksort($minPassAgeDatasource);
 
-        $passWarningDatasource = array(
-            '7' => $view->translate('${0} days', array(7)),
-            '15' => $view->translate('${0} days', array(15)),
-            '30' => $view->translate('${0} days', array(30)),
-        );
-        if(!isset($passWarningDatasource[$this->parameters['PassWarning']])) {
-            $passWarningDatasource[$this->parameters['PassWarning']] = $view->translate('${0} days', array($this->parameters['PassWarning']));
-        }
-        \ksort($passWarningDatasource);
-
         $view['MaxPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($maxPassAgeDatasource);
         $view['MinPassAgeDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($minPassAgeDatasource);
-        $view['PassWarningDatasource'] = \Nethgui\Renderer\AbstractRenderer::hashToDatasource($passWarningDatasource);
     }
 
     protected function onParametersSaved($changes)
