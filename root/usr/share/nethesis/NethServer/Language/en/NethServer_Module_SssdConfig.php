@@ -113,6 +113,7 @@ $L['bindAdSuccess_notification'] = 'Active Directory domain ${0} was joined succ
 $L['valid_platform,dcipaddr,ipgreenandbridged,3'] = 'Must be different from 127.0.0.1 or any other IP address used by the server';
 $L['valid_platform,dcipaddr,ipgreenandbridged,4'] = 'Must be part of a green network';
 $L['valid_platform,dcipaddr,ipgreenandbridged,5'] = 'Must be a free IP address';
+$L['valid_platform,dcrealm,differhostname,3'] = 'Must differ from the host FQDN';
 $L['valid_starttls_urischeme'] = 'Conflicts with "ldaps://" URI scheme';
 $L['AdIpAddress_help1'] = 'The chosen IP address must satisfy all of the below conditions:';
 $L['AdIpAddress_help2'] = 'the IP address must be in the same subnet range of a green network: ${0}';

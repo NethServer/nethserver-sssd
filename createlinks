@@ -178,3 +178,8 @@ validator_actions('ldap-probe', qw(
 event_actions('migration-import', qw(
       nethserver-sssd-migrate 20
 ));
+
+
+validator_actions('dcrealm', qw(
+    differhostname 20
+));
