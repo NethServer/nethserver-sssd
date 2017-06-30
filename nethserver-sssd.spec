@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.2.1
+Version: 1.2.2
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,11 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Fri Jun 30 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.2-1
+- AD account provider: web interface doesn't correctly display users with password expiration - Bug NethServer/dev#5318
+- Remove Password warning slider
+- New validator: AD Realm must be different from host FQDN
+
 * Mon May 22 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.1-1
 - Default userPrincipalName is not an email address - Bug NethServer/dev#5284
 
