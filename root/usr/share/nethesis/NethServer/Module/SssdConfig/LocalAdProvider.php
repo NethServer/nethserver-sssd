@@ -34,7 +34,7 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
     {
         parent::initialize();
         $confDb = $this->getPlatform()->getDatabase('configuration');
-        $this->declareParameter('AdIpAddress', FALSE, array('configuration', 'nsdc', 'IpAddress'));
+        $this->declareParameter('AdIpAddress', $this->createValidator(Validate::IP)->platform('dcipaddr'), array('configuration', 'nsdc', 'IpAddress'));
         $this->declareParameter('AdRealm', FALSE, function () use ($confDb) {
             return strtolower($confDb->getProp('sssd', 'Realm'));
         });
@@ -52,6 +52,14 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
             return FALSE;
         }
         return TRUE;
+    }
+
+    public function process()
+    {
+        parent::process();
+        if($this->getRequest()->isMutation()) {
+            $this->getPlatform()->signalEvent('nethserver-dc-change-ip', array($this->parameters['AdIpAddress']));
+        }
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
@@ -76,6 +84,17 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         if($this->isSambaUpdateAvailable()) {
             $this->notifications->warning($view->translate('sambaUpdateIsAvailable_notification'));
         }
+
+        $elements = json_decode($this->getPlatform()->exec('/usr/libexec/nethserver/trusted-networks')->getOutput(), TRUE);
+        $greenList = array();
+        if(is_array($elements)) {
+            foreach($elements as $elem) {
+                if($elem['provider'] === 'green') {
+                    $greenList[] = $elem['cidr'];
+                }
+            }
+        }
+        $view['greenList'] = implode(', ', array_unique($greenList));
 
     }
 
