@@ -131,6 +131,5 @@ $L['LocalAdUpdate_message'] = 'This operation might require the download of addi
 $L['LocalAdProviderDcChangeIp_header'] = 'Change IP address of Domain Controller';
 $L['LocalAdProviderDcChangeIp_label'] = 'Change IP';
 $L['ChangeIPButton_label'] = 'Change IP';
-$L['LocalAdProviderDcChangeIp_message1'] = 'Before applying this procedure, read carefully the NethServer manual and the official Samba wiki page.';
-$L['LocalAdProviderDcChangeIp_message2'] = 'Changing the DC IP address can cause problems with your Active Directory (AD).';
+$L['LocalAdProviderDcChangeIp_message1'] = 'Changing the Domain Controller IP address can cause problems to Active Directory clients. If they use an external DNS server, update it to use the new IP address.';
 $L['dcChangeIpSuccess_notification'] = 'Domain Controller IP address successfully changed';
