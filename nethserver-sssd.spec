@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.2.2
+Version: 1.3.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Jul 20 2017 Davide Principi <davide.principi@nethesis.it> - 1.3.0-1
+- Web interface for changing nsdc IP address - NethServer/dev#5330
+
 * Fri Jun 30 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.2-1
 - AD account provider: web interface doesn't correctly display users with password expiration - Bug NethServer/dev#5318
 - Remove Password warning slider
