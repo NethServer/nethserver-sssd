@@ -11,6 +11,7 @@ echo $view->textInput('AdWorkgroup', $disabledFlags);
 echo $view->textInput('AdIpAddress', $disabledFlags);
 
 $buttons = $view->buttonList($view::BUTTON_HELP)
+        ->insert($view->button('LocalAdProviderDcChangeIp', $view::BUTTON_LINK))
         ->insert($view->button('LocalAdProviderUninstall', $view::BUTTON_LINK));
 
 if($view->getModule()->isSambaUpdateAvailable()) {

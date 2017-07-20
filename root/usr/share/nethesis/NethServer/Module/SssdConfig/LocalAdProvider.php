@@ -58,10 +58,18 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
     {
         parent::prepareView($view);
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+        $view['LocalAdProviderDcChangeIp'] = $view->getModuleUrl('../LocalAdProviderDcChangeIp');
         $view['LocalAdProviderUninstall'] = $view->getModuleUrl('../LocalProviderUninstall');
         $view['LocalAdUpdate'] = $view->getModuleUrl('../LocalAdUpdate');
         $this->notifications->defineTemplate('adminTodo', \NethServer\Module\AdminTodo::TEMPLATE, 'bg-yellow');
-        if($this->getRequest()->hasParameter('installSuccess')) {
+        if($this->getRequest()->hasParameter('dcChangeIpSuccess')) {
+            $this->notifications->message($view->translate('dcChangeIpSuccess_notification'));
+            $view->getCommandList()->show();
+        } elseif ($this->getRequest()->hasParameter('dcChangeIpFailure')) {
+            $taskStatus = $this->systemTasks->getTaskStatus($this->getRequest()->getParameter('taskId'));
+            $data = \Nethgui\Module\Tracker::findFailures($taskStatus);
+            $this->notifications->trackerError($data);
+        } elseif($this->getRequest()->hasParameter('installSuccess')) {
             $this->notifications->message($view->translate('installSuccessAd_notification'));
             $view->getCommandList()->show();
             $view->getCommandList()->sendQuery($view->getModuleUrl('/AdminTodo?notifications'));
@@ -76,7 +84,6 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         if($this->isSambaUpdateAvailable()) {
             $this->notifications->warning($view->translate('sambaUpdateIsAvailable_notification'));
         }
-
     }
 
 
