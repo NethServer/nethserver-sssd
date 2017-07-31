@@ -70,9 +70,6 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
     private function enumerateMembers()
     {
-        if($this->getGroupProvider()->isAD()) {
-            return array_unique(array_merge($this->getUsers(), $this->getGroups()));
-        }
         return $this->getUsers();
     }
 
