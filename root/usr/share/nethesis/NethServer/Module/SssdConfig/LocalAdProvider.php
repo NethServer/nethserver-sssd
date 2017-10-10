@@ -42,17 +42,6 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
             return strtoupper($confDb->getProp('sssd', 'Workgroup'));
         });
     }
-
-    public function isSambaUpdateAvailable()
-    {
-        if( ! file_exists('/etc/e-smith/db/configuration/defaults/nsdc/type')) {
-            return FALSE;
-        }
-        if($this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/check-samba-update')->getExitCode() === 0) {
-            return FALSE;
-        }
-        return TRUE;
-    }
     
     private function readNsSambaRpmVersion()
     {
@@ -86,10 +75,6 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
             $this->notifications->trackerError($data);
         } elseif($this->getRequest()->isValidated()) {
             $view->getCommandList()->show();
-        }
-
-        if($this->isSambaUpdateAvailable()) {
-            $this->notifications->warning($view->translate('sambaUpdateIsAvailable_notification'));
         }
     }
 

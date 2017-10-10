@@ -15,8 +15,4 @@ $buttons = $view->buttonList($view::BUTTON_HELP)
         ->insert($view->button('LocalAdProviderDcChangeIp', $view::BUTTON_LINK))
         ->insert($view->button('LocalAdProviderUninstall', $view::BUTTON_LINK));
 
-if($view->getModule()->isSambaUpdateAvailable()) {
-    $buttons->insert($view->button('LocalAdUpdate', $view::BUTTON_LINK));
-}
-
 echo $buttons;
