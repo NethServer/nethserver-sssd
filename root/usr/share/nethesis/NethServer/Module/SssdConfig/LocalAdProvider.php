@@ -53,6 +53,12 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         }
         return TRUE;
     }
+    
+    private function readNsSambaRpmVersion()
+    {
+        $version = $this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/read-nssamba-version')->getOutput();
+        return trim($version);
+    }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
@@ -61,6 +67,7 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         $view['LocalAdProviderDcChangeIp'] = $view->getModuleUrl('../LocalAdProviderDcChangeIp');
         $view['LocalAdProviderUninstall'] = $view->getModuleUrl('../LocalProviderUninstall');
         $view['LocalAdUpdate'] = $view->getModuleUrl('../LocalAdUpdate');
+        $view['AdNsSambaRpmVersion'] = $this->readNsSambaRpmVersion();
         $this->notifications->defineTemplate('adminTodo', \NethServer\Module\AdminTodo::TEMPLATE, 'bg-yellow');
         if($this->getRequest()->hasParameter('dcChangeIpSuccess')) {
             $this->notifications->message($view->translate('dcChangeIpSuccess_notification'));

@@ -133,3 +133,4 @@ $L['LocalAdProviderDcChangeIp_label'] = 'Change IP';
 $L['ChangeIPButton_label'] = 'Change IP';
 $L['LocalAdProviderDcChangeIp_message1'] = 'Changing the Domain Controller IP address can cause problems to Active Directory clients. If they use an external DNS server, update it to use the new IP address.';
 $L['dcChangeIpSuccess_notification'] = 'Domain Controller IP address successfully changed';
+$L['AdNsSambaRpmVersion_label'] = 'Samba DC version';

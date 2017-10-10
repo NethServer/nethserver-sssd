@@ -6,6 +6,7 @@ $disabledFlags = $view::STATE_READONLY | $view::STATE_DISABLED;
 
 echo $view->header('domain')->setAttribute('template', $T('LocalAdProvider_header'));
 
+echo $view->textInput('AdNsSambaRpmVersion', $disabledFlags);
 echo $view->textInput('AdRealm', $disabledFlags);
 echo $view->textInput('AdWorkgroup', $disabledFlags);
 echo $view->textInput('AdIpAddress', $disabledFlags);
