@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.1
+Version: 1.3.2
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Oct 16 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.2-1
+- Cosmetic: add translation for AccountProvider_Error_1
+
 * Mon Oct 16 2017 Davide Principi <davide.principi@nethesis.it> - 1.3.1-1
 - Samba automatic updates - NethServer/dev#5360
 
