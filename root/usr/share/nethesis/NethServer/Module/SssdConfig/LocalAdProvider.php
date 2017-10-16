@@ -45,6 +45,10 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
     
     private function readNsSambaRpmVersion()
     {
+        $provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
+        if($provider !== 'ad') {
+            return '';
+        }
         $version = $this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/read-nssamba-version')->getOutput();
         return trim($version);
     }
