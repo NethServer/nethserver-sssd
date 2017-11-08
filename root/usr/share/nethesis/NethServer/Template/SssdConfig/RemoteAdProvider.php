@@ -7,10 +7,8 @@ echo $view->header('domain')->setAttribute('template', $T('RemoteAdProvider_head
 echo $view->panel()
     ->insert($view->columns()
       ->insert($view->textInput('LdapUri'))
-      ->insert($view->selector('StartTls', $view::SELECTOR_DROPDOWN)->setAttribute('choices', \Nethgui\Widget\XhtmlWidget::hashToDatasource(array(
-        '' => $T('starttls_auto'),
-        'enabled' => $T('starttls_enabled'),
-        'disabled' => $T('starttls_disabled'))))))
+      ->insert($view->selector('StartTls', $view::SELECTOR_DROPDOWN))
+    )
     ->insert($view->textInput('BaseDN'))
     ->insert($view->textInput('UserDN'))
     ->insert($view->textInput('GroupDN'))

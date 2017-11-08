@@ -86,7 +86,7 @@ class AdJoinMember extends \Nethgui\Controller\AbstractController  implements \N
             'AdDns' => $addns,
             'Provider' => 'ad',
             'LdapURI' => $probead['LdapURI'],
-            'StartTls' => '',
+            'StartTls' => $probead['StartTls'] ? 'enabled' : 'disabled',
             'UserDN' => $probead['UserDN'],
             'GroupDN' => $probead['GroupDN'],
             'BaseDN' => $probead['BaseDN'],

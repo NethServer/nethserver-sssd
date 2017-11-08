@@ -199,6 +199,16 @@ if($cmd eq 'dump') {
         my $dse = $ldap->root_dse(attrs => ['defaultNamingContext']);
         my $defaultNamingContext = $dse->get_value('defaultNamingContext');
 
+        # Probe the STARTTLS support
+        if(defined $dse && $attrs{'LdapURI'} !~ /^ldaps:/) {
+            my $response = $ldap->start_tls('verify' => 'none');
+            if($response->is_error()) {
+                $attrs{'StartTls'} = 'disabled';
+            } else {
+                $attrs{'StartTls'} = 'enabled';
+            }
+        }
+
         if ($defaultNamingContext) {
             $attrs{'Provider'} = 'ad';
             $attrs{'Realm'} = uc(join('.', grep { $_ } split(/,?dc=/i, $defaultNamingContext)));
