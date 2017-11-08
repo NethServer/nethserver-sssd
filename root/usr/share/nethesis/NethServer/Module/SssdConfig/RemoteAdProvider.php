@@ -75,6 +75,17 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
 
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
         $view['RemoteProviderUnbind'] = array($view->getModuleUrl('../RemoteProviderUnbind'), $view->translate('RemoteProviderUnbind_label', array($view['domain'])));
+
+        $starttlsChoices = array(
+            array('disabled', $view->translate('starttls_disabled')),
+            array('enabled', $view->translate('starttls_enabled')),
+        );
+        // Display StartTls "default" value for backword compatibility
+        if ($this->parameters['StartTls'] === '') {
+            $starttlsChoices[] = array('', $view->translate('starttls_auto'));
+        }
+        $view['StartTlsDatasource'] = $starttlsChoices;
+
         if($this->getRequest()->isValidated()) {
             $view->getCommandList()->show();
             if($this->getRequest()->hasParameter('bindSuccess')) {
