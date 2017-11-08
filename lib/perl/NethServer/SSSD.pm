@@ -122,7 +122,7 @@ sub startTls {
     if($self->{'StartTls'} eq 'enabled') {
         return '1';
     } elsif($self->{'StartTls'} eq 'disabled') {
-        return '';
+        return '0';
     }
 
     return $self->bindDN()
