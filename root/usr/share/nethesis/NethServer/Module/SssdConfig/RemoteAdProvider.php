@@ -57,6 +57,16 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
         $this->declareParameter('StartTls', $this->createValidator()->memberOf('', 'enabled', 'disabled'), array('configuration', 'sssd', 'StartTls'));
     }
 
+    public function process()
+    {
+        parent::process();
+        if( ! $this->getRequest()->isMutation()) {
+            return;
+        }
+
+        $this->getPlatform()->signalEvent('nethserver-sssd-save &');
+    }
+
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
         parent::validate($report);
