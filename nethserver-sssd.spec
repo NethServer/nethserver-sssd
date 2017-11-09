@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.2
+Version: 1.3.3
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Nov 09 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.3-1
+- SSSD: changes to remote AD account provider aren't applied - Bug NethServer/dev#5377
+- Accounts Provider: probe AD for SSL/TLS support - NethServer/dev#5365
+
 * Mon Oct 16 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.2-1
 - Cosmetic: add translation for AccountProvider_Error_1
 
