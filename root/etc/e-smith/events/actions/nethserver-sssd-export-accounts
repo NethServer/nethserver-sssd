@@ -45,7 +45,7 @@ if ( ! -d $base_dir ) {
     mkdir $base_dir;
 }
 
-open(my $fh, '>', $out_users) or die "Could not open file '$out_users': $!";
+open(my $fh, '>:utf8', $out_users) or die "Could not open file '$out_users': $!";
 foreach (keys(%$users)) {
     my $password = $generator->generate();
     my $key = $_;
@@ -54,7 +54,7 @@ foreach (keys(%$users)) {
 }
 close $fh;
 
-open($fh, '>', $out_groups) or die "Could not open file '$out_groups': $!";
+open($fh, '>:utf8', $out_groups) or die "Could not open file '$out_groups': $!";
 foreach (keys(%$groups)) {
     my $key = $_;
     $key =~ s/(@.*)//; # strip domain
