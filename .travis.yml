@@ -1,0 +1,65 @@
+---
+language: python
+
+env:
+   global:
+     - KEYCIPHER=${KEYCIPHER:-aes-256-cbc}
+     - DOCKER_IMAGE=nethserver/makerpms
+     - UPLOAD_DEST=${UPLOAD_DEST:-travisbot@packages.nethserver.org:nscom}
+
+services:
+    - docker
+
+install:
+    - |
+        set -e
+        set -x
+        declare -A "REPOBRANCH=(${BRELEASE_PACK})"
+        REPO_RELEASE=${REPOBRANCH[${TRAVIS_PULL_REQUEST_BRANCH:-master}]}
+        NSVER=${REPO_RELEASE:0:1}
+        DOCKER_IMAGE=${DOCKER_IMAGE}:${NSVER}
+        if [[ -n "${TRAVIS_TAG}" ]]; then
+            REPO_NAME=updates
+            DIST=.ns${NSVER}
+        elif [[ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]]; then
+            REPO_NAME=testing
+            DIST=.g${TRAVIS_COMMIT:0:7}.ns${NSVER}
+        else
+            REPO_NAME=autobuild
+            DIST=.pr${TRAVIS_PULL_REQUEST}.g${TRAVIS_COMMIT:0:7}.ns${NSVER}
+        fi
+
+    - docker pull ${DOCKER_IMAGE}
+
+script:
+    - |
+        docker run --hostname packages.nethserver.org \
+            --name=builder --privileged=true \
+            -e "DIST=${DIST:-.nsX}" \
+            -v $PWD:/srv/makerpms/src:ro ${DOCKER_IMAGE} \
+            makerpms -s *.spec
+        docker cp builder:/srv/makerpms/rpmbuild/SRPMS .
+        docker cp builder:/srv/makerpms/rpmbuild/RPMS .
+        mkdir upload/
+        find {S,}RPMS/ -name *.rpm | xargs -I FILES -- cp FILES upload/
+        curl -s "${SECRET_URL}" | openssl ${KEYCIPHER} -a -d -pass "pass:${SECRET}" > upload/identity
+
+
+deploy:
+    skip_cleanup: true
+    provider: script
+    script: |
+        docker run --name=uploader --privileged=true \
+            -v upload:/srv/makerpms/src/upload:ro ${DOCKER_IMAGE} \
+            uploadrpms ${UPLOAD_DEST}/${REPO_RELEASE}/${REPO_NAME} upload/*.rpm
+    on:
+        tags: true
+        all_branches: true
+
+after_deploy:
+    - |
+        echo "in nethserver-${PKG_REPO} v${NS_DIST}:" > comment
+        for RPM in upload/*.rpm; do
+            echo "- http://packages.nethserver.org/nethserver/${REPO_RELEASE}/${REPO_NAME}/x86_64/Packages/$(basename ${RPM})" >> comment
+        done
+        cat comment
