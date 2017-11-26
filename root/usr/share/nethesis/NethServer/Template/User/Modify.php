@@ -4,9 +4,6 @@
 if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Update user `${0}`');
     $username = (string)$view->textInput('username', $view::STATE_DISABLED | $view::STATE_READONLY );
-    if ($view['isAD']) {
-        $shellStyle = $view::STATE_DISABLED;
-    }
 } else {
     $headerText = $T('Create a new user');
     $shellStyle = 0;
