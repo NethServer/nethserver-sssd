@@ -1,50 +1,38 @@
 ---
-env:
-   global:
-     - KEYCIPHER=${KEYCIPHER:-aes-256-cbc}
-     - DOCKER_IMAGE=nethserver/makerpms
-     - UPLOAD_DEST=${UPLOAD_DEST:-travisbot@packages.nethserver.org:nscom}
-
+language: ruby
 services:
     - docker
+branches:
+    only:
+        - master
+env:
+   global:
+    - DEST_ID=core
+    - NSVER=7
+    - DOCKER_IMAGE=nethserver/makerpms:${NSVER}
+    - >
+        EVARS="
+        -e DEST_ID
+        -e TRAVIS_BRANCH
+        -e TRAVIS_BUILD_ID
+        -e TRAVIS_PULL_REQUEST_BRANCH
+        -e TRAVIS_PULL_REQUEST
+        -e TRAVIS_REPO_SLUG
+        -e TRAVIS_TAG
+        -e NSVER
+        -e VERSIONS_PACK
+        -e STAGES_PACK
+        -e UPLOAD_DEST
+        "
 
-install:
-    - |
-        set -e
-        set -x
-        declare -A "REPOBRANCH=(${BRELEASE_PACK})"
-        REPO_RELEASE=${REPOBRANCH[${TRAVIS_BRANCH:-master}]}
-        NSVER=${REPO_RELEASE:0:1}
-        DOCKER_IMAGE=${DOCKER_IMAGE}:${NSVER}
-        DOCKER_USER=$(id -u):$(id -g)
-        if [[ -n "${TRAVIS_TAG}" ]]; then
-            REPO_NAME=updates
-            DIST=.ns${NSVER}
-        elif [[ -z "${TRAVIS_PULL_REQUEST_BRANCH}" && "${TRAVIS_BRANCH}" == "master" ]]; then
-            REPO_NAME=testing
-            DIST=.g${TRAVIS_COMMIT:0:7}.ns${NSVER}
-        else
-            REPO_NAME=autobuild
-            DIST=.pr${TRAVIS_PULL_REQUEST}.g${TRAVIS_COMMIT:0:7}.ns${NSVER}
-        fi
-        set +x
-
-    - docker pull ${DOCKER_IMAGE}
-    - |
-        docker run -dt \
-            --user 0:0 \
-            --hostname build${TRAVIS_BUILD_NUMBER}.nethserver.org \
-            --name=builder \
-            -e "GITHUB_TOKEN=${NETHBOT_GITHUB_TOKEN}" \
-            -e "DIST=${DIST:-.nsX}" \
-            -v $PWD:/srv/makerpms/src:ro \
-            ${DOCKER_IMAGE}
-
-        curl -s "${SECRET_URL}" | \
-            openssl ${KEYCIPHER} -a -d -pass "pass:${SECRET}" | \
-            docker exec -i -u $DOCKER_USER builder bash -c 'cat - > /srv/makerpms/.ssh/id_rsa'
-
-script: docker exec -u $DOCKER_USER builder makerpms -s *.spec
-
-after_success: |
-    docker exec -u $DOCKER_USER builder uploadrpms -v ${UPLOAD_DEST}/${REPO_RELEASE}/${REPO_NAME}
+script: >
+    docker run -ti --name makerpms ${EVARS}
+    --hostname b${TRAVIS_BUILD_NUMBER}.nethserver.org
+    --volume $PWD:/srv/makerpms/src:ro ${DOCKER_IMAGE} makerpms-travis -s *.spec
+    && docker commit makerpms nethserver/build
+    && docker run -ti ${EVARS}
+    -e SECRET
+    -e SECRET_URL
+    -e AUTOBUILD_SECRET
+    -e AUTOBUILD_SECRET_URL
+    nethserver/build uploadrpms-travis
