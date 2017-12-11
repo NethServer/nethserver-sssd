@@ -61,6 +61,8 @@ class LocalAdProvider extends \Nethgui\Controller\AbstractController implements 
         $view['LocalAdProviderUninstall'] = $view->getModuleUrl('../LocalProviderUninstall');
         $view['LocalAdUpdate'] = $view->getModuleUrl('../LocalAdUpdate');
         $view['AdNsSambaRpmVersion'] = $this->readNsSambaRpmVersion();
+        $view['BindDN'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'BindDN');
+        $view['BindPassword'] = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'BindPassword');
         $this->notifications->defineTemplate('adminTodo', \NethServer\Module\AdminTodo::TEMPLATE, 'bg-yellow');
         if($this->getRequest()->hasParameter('dcChangeIpSuccess')) {
             $this->notifications->message($view->translate('dcChangeIpSuccess_notification'));
