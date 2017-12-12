@@ -235,7 +235,7 @@ if($cmd eq 'dump') {
     }
     my $dump = getDefaults();
     exec('/usr/bin/ldapsearch',
-        ($dump->{'startTls'} ? '-ZZ' : ()),
+        ($dump->{'StartTls'} ? '-ZZ' : ()),
         '-H', $dump->{'LdapURI'},
         '-x', '-D', $dump->{'BindDN'}, '-w', $dump->{'BindPassword'},
         '-s', 'base', '-b', $dump->{'BaseDN'},
