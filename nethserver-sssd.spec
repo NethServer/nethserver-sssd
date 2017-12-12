@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.3
+Version: 1.3.4
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Dec 12 2017 Davide Principi <davide.principi@nethesis.it> - 1.3.4-1
+- Change the shell access after the user creation with SAMBA4 AD -- NethServer/dev#5391
+- Use UTF-8 for tsv files -- NethServer/nethserver-sssd#83
+
 * Thu Nov 09 2017 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.3-1
 - SSSD: changes to remote AD account provider aren't applied - Bug NethServer/dev#5377
 - Accounts Provider: probe AD for SSL/TLS support - NethServer/dev#5365
