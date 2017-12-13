@@ -25,13 +25,21 @@
 
 ERRORS=0
 
+tmp_patterns=$(mktemp)
+trap 'rm -f ${tmp_patterns}' EXIT
+
+# Prepare the list of excluded events:
+find /etc/e-smith/events/nethserver-sssd-save/ -type f -o -type l | xargs -- rpm -qf --queryformat '%{NAME}-update\n' \
+    | sort | uniq >$tmp_patterns
+
 for SUBEVENT in $(grep -l -R -F NethServer::SSSD /etc/e-smith/events/actions/ /etc/e-smith/templates/ \
-    | xargs -- rpm -qf --queryformat '%{NAME}-update\n' | sort | uniq \
-    | grep -v -E 'nethserver-(dc|sssd|directory)-update'); do
+    | xargs -- rpm -qf --queryformat '%{NAME}-update\n' \
+    | grep -v -E 'nethserver-(dc|sssd|directory)-update' \
+    | grep -v -F -f ${tmp_patterns} | sort | uniq ); do
+    echo "[WARNING] DEPRECATED! Package ${SUBEVENT%-update} must subscribe nethserver-sssd-save event explicitly"
     /sbin/e-smith/signal-event $SUBEVENT || (( ERRORS ++ ))
 done
 
 if (( ERRORS > 0 )); then
     exit 1
 fi
-
