@@ -92,7 +92,7 @@ Group DN
     If specified, perform group LDAP searches under the given DN, otherwise fall
     back to :guilabel:`Base DN`.
 
-Read-only bind credentials
+Authentication credentials for LDAP applications
     Provide the bind credentials by filling :guilabel:`Bind DN` and
     :guilabel:`Bind Password` fields. These credentials are used by additional
     modules that require a direct and read-only connection with the LDAP server
