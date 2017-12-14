@@ -183,3 +183,8 @@ event_actions('migration-import', qw(
 validator_actions('dcrealm', qw(
     differhostname 20
 ));
+
+# actions for group-create validator
+validator_actions('ldap-credentials', qw(
+    ldaptestbind 20
+));

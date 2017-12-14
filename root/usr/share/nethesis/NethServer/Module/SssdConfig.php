@@ -24,6 +24,8 @@ namespace NethServer\Module;
  */
 class SssdConfig extends \Nethgui\Controller\CompositeController
 {
+    protected $firstModuleIdentifier;
+    
     protected function initializeAttributes(\Nethgui\Module\ModuleAttributesInterface $base)
     {
         return new \NethServer\Tool\CustomModuleAttributesProvider($base, array(
@@ -52,6 +54,7 @@ class SssdConfig extends \Nethgui\Controller\CompositeController
         } elseif($provider === 'ad') {
             $firstModuleIdentifier = 'RemoteAdProvider';
         }
+        $this->firstModuleIdentifier = $firstModuleIdentifier;
 
         // Sort children so that if the Provider prop is "none", it starts the Wizard:
         $this->sortChildren(function ($a, $b) use ($firstModuleIdentifier) {
@@ -66,6 +69,21 @@ class SssdConfig extends \Nethgui\Controller\CompositeController
         });
 
         parent::bind($request);
+        if (is_null($this->currentAction)) {
+            $action = $this->getAction($firstModuleIdentifier);
+            $action->bind($request->spawnRequest($firstModuleIdentifier));
+        }
+    }
+
+    public function validate(\Nethgui\Controller\ValidationReportInterface $report)
+    {
+        if (is_null($this->currentAction)) {
+            $action = $this->getAction($this->firstModuleIdentifier);
+            if ($action instanceof \Nethgui\Controller\RequestHandlerInterface) {
+                $action->validate($report);
+            }
+        }
+        parent::validate($report);
     }
 
 }

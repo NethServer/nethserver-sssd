@@ -34,10 +34,10 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
     {
         $self = $this;
         $bindTypeValueProvider = $this->getPlatform()->getMapAdapter(function () use ($self) {
-            if($self->parameters['BindDN']) {
+            if($self->parameters['BindDN'] || $this->isAuthRequired()) {
                 return 'authenticated';
             }
-            return 'anonymous';
+            return '';
         }, function ($value) use ($self) {
             if($value === '') {
                 $self->parameters['BindDN'] = '';
@@ -70,18 +70,34 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
     public function validate(\Nethgui\Controller\ValidationReportInterface $report)
     {
         parent::validate($report);
+        if( ! $this->getRequest()->isMutation()) {
+            return;
+        }
         if($this->parameters['StartTls'] === 'enabled' && substr($this->parameters['LdapUri'], 0, 6) === 'ldaps:') {
             $report->addValidationErrorMessage($this, 'StartTls', 'valid_starttls_urischeme');
         }
+        if($this->parameters['BindDN']) {
+            $credentialsValidator = $this->getPlatform()->createValidator()->platform('ldap-credentials', $this->parameters['BaseDN'], $this->parameters['LdapUri'], $this->parameters['StartTls'] ? '1' : '', $this->parameters['BindDN']);
+            if( ! $credentialsValidator->evaluate($this->parameters['BindPassword'])) {
+                $report->addValidationError($this, 'BindType', $credentialsValidator);
+            }
+        } elseif($this->isAuthRequired()) {
+            $report->addValidationErrorMessage($this, 'BindType', 'valid_adldapcredentials_required');
+        }
+    }
+
+    public function isAuthRequired()
+    {
+        static $response;
+        if( ! isset($response)) {
+            $response = $this->getPlatform()->exec('/usr/libexec/nethserver/ldap-credentials-optional')->getExitCode() == 2;
+        }
+        return $response;
     }
 
     public function prepareView(\Nethgui\View\ViewInterface $view)
     {
         parent::prepareView($view);
-
-        if( ! $view['BindType']) {
-            $view['BindType'] = $view['BindDN'] ? 'simple' : '';
-        }
 
         $view['domain'] = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
         $view['RemoteProviderUnbind'] = array($view->getModuleUrl('../RemoteProviderUnbind'), $view->translate('RemoteProviderUnbind_label', array($view['domain'])));
@@ -101,6 +117,9 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
             if($this->getRequest()->hasParameter('bindSuccess')) {
                 $realm = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Realm');
                 $this->notifications->message($view->translate('bindAdSuccess_notification', array(strtolower($realm))));
+            }
+            if( ! $this->parameters['BindDN'] && $this->isAuthRequired()) {
+                $this->notifications->warning($view->translate('valid_adldapcredentials_required'));
             }
         }
     }
