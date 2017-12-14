@@ -90,7 +90,7 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
     {
         static $response;
         if( ! isset($response)) {
-            $response = $this->getPlatform()->exec('/usr/libexec/nethserver/find-sssd-deps')->getExitCode() == 0;
+            $response = $this->getPlatform()->exec('/usr/libexec/nethserver/ldap-credentials-optional')->getExitCode() == 2;
         }
         return $response;
     }
@@ -118,7 +118,7 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
                 $realm = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Realm');
                 $this->notifications->message($view->translate('bindAdSuccess_notification', array(strtolower($realm))));
             }
-            if( ! $this->parameters['BindDN']) {
+            if( ! $this->parameters['BindDN'] && $this->isAuthRequired()) {
                 $this->notifications->warning($view->translate('valid_adldapcredentials_required'));
             }
         }
