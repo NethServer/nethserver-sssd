@@ -108,6 +108,7 @@ class AdJoinMember extends \Nethgui\Controller\AbstractController  implements \N
             $this->getLog()->error('Workgroup probe failed!');
         }
 
+        $this->getPlatform()->signalEvent('nethserver-sssd-leave');
         $descriptors = array(array('pipe', 'r'), array('pipe', 'w'));
         $pipes = array();
         $ph = proc_open(sprintf('/usr/bin/sudo /usr/sbin/realm join --server-software=active-directory -v -U %s %s 2>&1', escapeshellarg($this->parameters['AdUsername']), escapeshellarg($realm)), $descriptors, $pipes);
