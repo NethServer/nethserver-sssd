@@ -86,7 +86,7 @@ class RemoteLdapProvider extends \Nethgui\Controller\AbstractController implemen
         if($this->parameters['StartTls'] === 'enabled' && substr($this->parameters['LdapUri'], 0, 6) === 'ldaps:') {
             $report->addValidationErrorMessage($this, 'StartTls', 'valid_starttls_urischeme');
         }
-        $credentialsValidator = $this->getPlatform()->createValidator()->platform('ldap-credentials', $this->parameters['BaseDN'], $this->parameters['LdapUri'], $this->parameters['StartTls'] ? '1' : '', $this->parameters['BindDN']);
+        $credentialsValidator = $this->getPlatform()->createValidator()->platform('ldap-credentials', $this->parameters['BaseDN'], $this->parameters['LdapUri'], $this->parameters['StartTls'] === 'enabled' ? '1' : '', $this->parameters['BindDN']);
         if( ! $credentialsValidator->evaluate($this->parameters['BindPassword'])) {
             $report->addValidationError($this, 'BindType', $credentialsValidator);
         }
