@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.4
+Version: 1.3.5
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Wed Jan 10 2018 Davide Principi <davide.principi@nethesis.it> - 1.3.5-1
+- AD join fails after changing server name - Bug NethServer/dev#5399
+- AD access for LDAP simple auth applications - NethServer/dev#5396
+
 * Tue Dec 12 2017 Davide Principi <davide.principi@nethesis.it> - 1.3.4-1
 - Change the shell access after the user creation with SAMBA4 AD -- NethServer/dev#5391
 - Use UTF-8 for tsv files -- NethServer/nethserver-sssd#83
