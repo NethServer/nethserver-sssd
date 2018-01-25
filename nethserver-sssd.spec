@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.5
+Version: 1.3.6
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Jan 25 2018 Davide Principi <davide.principi@nethesis.it> - 1.3.6-1
+- LDAP connection error with remote MS AD - Bug NethServer/dev#5415
+
 * Wed Jan 10 2018 Davide Principi <davide.principi@nethesis.it> - 1.3.5-1
 - AD join fails after changing server name - Bug NethServer/dev#5399
 - AD access for LDAP simple auth applications - NethServer/dev#5396
