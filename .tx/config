@@ -1,8 +1,8 @@
 [main]
 host = https://www.transifex.com
 
-[nethserver.nethserver-directorypot]
-source_file = locale/nethserver-directory.pot
+[nethserver.nethserver-sssdpot]
+source_file = locale/nethserver-sssd.pot
 source_lang = en
 type = PO
 
