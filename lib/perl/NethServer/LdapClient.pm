@@ -79,13 +79,18 @@ undef if an error occurs.
 sub connect
 {
     my $sssd = shift;
-    my @ldap_params = @_;
+    my %ldap_params = @_;
 
     my $sasl;
 
     my @ldap_hosts;
     if($sssd->isAD()) {
-        @ldap_hosts =  _get_ldap_hosts(lc($sssd->{'Realm'}) || $sssd->{'Domain'});
+        my $ad_domain = lc($sssd->{'Realm'}) || $sssd->{'Domain'};
+        @ldap_hosts =  _get_ldap_hosts($ad_domain, %ldap_params);
+        if( ! @ldap_hosts ) {
+            warn("Could not resolve domain $ad_domain\n");
+            exit(1);
+        }
     } elsif ($sssd->isLdap() && $sssd->isLocalProvider()) {
         @ldap_hosts = ("ldapi://");
     } else {
@@ -93,7 +98,7 @@ sub connect
     };
 
     # \@ldap_hosts
-    my $ldap = Net::LDAP->new($ldap_hosts[0],  @ldap_params);
+    my $ldap = Net::LDAP->new($ldap_hosts[0],  %ldap_params);
 
     if( ! $ldap) {
         warn("($!): $@\n");
@@ -232,11 +237,14 @@ sub paged_search
 sub _get_ldap_hosts
 {
     my $domain = shift;
+    my %params = @_;
     my $resolver = Net::DNS::Resolver->new();
+    $resolver->tcp_timeout($params{'timeout'} || 10);
+    $resolver->udp_timeout($params{'timeout'} || 10);
 
     my $packet = $resolver->query('_ldap._tcp.dc._msdcs.' . $domain, 'SRV');
     if( ! $packet) {
-        return undef;
+        return ();
     }
 
     return map { $_->type eq 'SRV' ? ($_->target . ':' . $_->port) : () } Net::DNS::rrsort("SRV", "priority", $packet->answer);
