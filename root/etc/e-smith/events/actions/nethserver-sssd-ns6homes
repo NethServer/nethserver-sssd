@@ -1,0 +1,50 @@
+#!/usr/bin/bash
+
+#
+# Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+if [[ ! -f /var/run/.nethserver-upgrade-configdb ]]; then
+    exit 0
+fi
+
+provider=$(/sbin/e-smith/config getprop sssd Provider)
+
+if [[ ${provider} != "ad" ]]; then
+    exit 0
+fi
+
+
+if ! getent group 'domain users'; then
+    echo "[ERROR] could not find 'domain users' group" 1>&2
+    exit 1
+fi
+
+echo "[NOTICE] Upgrading home directories permissions for AD account provider"
+shopt -s nullglob
+for D in /var/lib/nethserver/home/*; do
+    chown -R "$(basename "${D}")":'domain users' "$D" || ((++errors));
+done
+
+if (( errors > 0 )); then
+    echo "[ERROR] Failed to chown permissions on home directories"
+    exit 1
+fi
+
+exit 0

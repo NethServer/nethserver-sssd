@@ -188,3 +188,11 @@ validator_actions('dcrealm', qw(
 validator_actions('ldap-credentials', qw(
     ldaptestbind 20
 ));
+
+
+#
+# post-restore-data event
+#
+event_actions('post-restore-data', qw(
+    nethserver-sssd-ns6homes 60
+));
