@@ -20,30 +20,53 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-if [[ ! -f /var/run/.nethserver-upgrade-configdb ]]; then
+#
+# Supported ns6 upgrade paths:
+# - WS/PDC to local AD,
+# - ADS to remote AD,
+# - NONE/WS to local LDAP
+#
+# Methods:
+# - restore from ns6 backup
+# - rsync-upgrade
+#
+
+event=$1
+ns6upgrade_flag=/var/run/.nethserver-upgrade-configdb
+
+if [[ "${event}" == "nethserver-directory-ns6upgrade" ]]; then
+    if [[ -f ${ns6upgrade_flag} ]]; then
+        # We will run lately, in post-restore-data event
+        exit 0
+    fi
+elif [[ ! -f ${ns6upgrade_flag} ]]; then
+    # No flag set, nothing to do
     exit 0
 fi
 
 provider=$(/sbin/e-smith/config getprop sssd Provider)
 
-if [[ ${provider} != "ad" ]]; then
+if [[ ${provider} == "ad" ]]; then
+    primary_group='domain users'
+elif [[ ${provider} == "ldap" ]]; then
+    primary_group='locals'
+else
     exit 0
 fi
 
-
-if ! getent group 'domain users'; then
-    echo "[ERROR] could not find 'domain users' group" 1>&2
+if ! getent group "${primary_group}"; then
+    echo "[ERROR] could not find ${primary_group} group" 1>&2
     exit 1
 fi
 
-echo "[NOTICE] Upgrading home directories permissions for AD account provider"
+echo "[NOTICE] Upgrading home directories permissions for ${provider^^} account provider"
 shopt -s nullglob
 for D in /var/lib/nethserver/home/*; do
-    chown -R "$(basename "${D}")":'domain users' "$D" || ((++errors));
+    chown -R "$(basename "${D}")":"${primary_group}" "$D" || ((++errors));
 done
 
 if (( errors > 0 )); then
-    echo "[ERROR] Failed to chown permissions on home directories"
+    echo "[ERROR] Failed to chown permissions on home directories" 1>&2
     exit 1
 fi
 

@@ -196,3 +196,10 @@ validator_actions('ldap-credentials', qw(
 event_actions('post-restore-data', qw(
     nethserver-sssd-ns6homes 60
 ));
+
+#
+# nethserver-directory-ns6upgrade
+#
+event_actions('nethserver-directory-ns6upgrade', qw(
+    nethserver-sssd-ns6homes 40
+));
