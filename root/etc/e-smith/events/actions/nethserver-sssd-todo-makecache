@@ -20,6 +20,8 @@
 # along with NethServer.  If not, see COPYING.
 #
 
+flag_path=/var/cache/nethserver-adcredsrequired
+
 #
 # Find NethServer::SSSD Perl module usages in actions and templates then
 # print the list of update events of dependant packages.
@@ -35,7 +37,9 @@ event_watchers=$(find /etc/e-smith/events/nethserver-sssd-save/ -type f -o -type
 # Credentials are optional if no package subscribed nethserver-sssd-save event 
 # or requires NethServer::SSSD
 if [[ -z "$module_usages" && -z "$event_watchers" ]]; then
-    exit 0
+    rm -f ${flag_path}
+else
+    touch ${flag_path}
 fi
 
-exit 2
+

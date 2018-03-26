@@ -90,7 +90,7 @@ class RemoteAdProvider extends \Nethgui\Controller\AbstractController  implement
     {
         static $response;
         if( ! isset($response)) {
-            $response = $this->getPlatform()->exec('/usr/libexec/nethserver/ldap-credentials-optional')->getExitCode() == 2;
+            $response = @file_exists('/var/cache/nethserver-adcredsrequired');
         }
         return $response;
     }
