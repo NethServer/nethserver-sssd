@@ -36,17 +36,11 @@ class Index extends \Nethgui\Controller\AbstractController
         $this->provider = $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'Provider');
         if ($this->getRequest()->isValidated()) {
             if ($this->provider === 'ad') {
-                $workgroup = trim($this->getPlatform()->exec('testparm -s -d 0 --parameter-name=workgroup 2>/dev/null')->getOutput());
-                $this->details .= "NetBIOS domain name: ${workgroup}\n";
-                $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads info 2>&1')->getOutput() . "\n\n";
-                $this->details .= $this->getPlatform()->exec('/usr/bin/sudo /usr/bin/net ads testjoin 2>&1')->getOutput() . "\n";
-
-                $netbiosname = substr($this->getPlatform()->getDatabase('configuration')->getType('SystemName'), 0, 15) . '$';
-                $searchCmd = $this->getPlatform()->exec("/usr/bin/sudo net ads search -P '(&(sAMAccountName=${netbiosname})(objectCategory=computer))' name sAMAccountName distinguishedName servicePrincipalName objectSid dNSHostName pwdLastSet lastLogon whenCreated whenChanged accountExpires 2>&1");
-                if($searchCmd->getExitCode() === 0) {
-                    $this->details .= implode("\n", array_slice($searchCmd->getOutputArray(), 3));
+                $adsInfo = $this->getPlatform()->exec('/usr/bin/sudo /usr/libexec/nethserver/net-ads-info 2>&1');
+                if($adsInfo->getExitCode() == 0) {
+                    $this->details = $adsInfo->getOutput();
                 } else {
-                    $this->details .= $searchCmd->getOutput();
+                    $this->details = "Could not connect to accounts provider!";
                 }
             } elseif ($this->provider === 'ldap') {
                 $this->details = 'LDAP URI: ' . $this->getPlatform()->getDatabase('configuration')->getProp('sssd', 'LdapURI');
