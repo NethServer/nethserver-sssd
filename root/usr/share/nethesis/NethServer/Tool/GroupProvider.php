@@ -30,7 +30,7 @@ class GroupProvider extends BaseProvider
 
     public function getGroups()
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups');
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-groups -t 5');
         $this->checkProcessExitCode($process);
         $groups = json_decode($process->getOutput(), TRUE);
         if( ! is_array($groups)) {
@@ -42,7 +42,7 @@ class GroupProvider extends BaseProvider
 
     public function getGroupMembers($groupName)
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members ${@}', array($groupName));
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-group-members -t 5 ${@}', array($groupName));
         $this->checkProcessExitCode($process);
         $members = json_decode($process->getOutput(), TRUE);
         if( ! is_array($members)) {

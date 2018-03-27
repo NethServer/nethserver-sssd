@@ -30,7 +30,7 @@ class UserProvider extends BaseProvider
 
     public function getUsers()
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-users');
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-users -t 5');
         $this->checkProcessExitCode($process);
         $users = json_decode($process->getOutput(), TRUE);
         if( ! is_array($users)) {
@@ -42,7 +42,7 @@ class UserProvider extends BaseProvider
 
     public function getUserMembership($userName)
     {
-        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-user-membership ${@}', array($userName));
+        $process = $this->platform->exec('/usr/bin/sudo /usr/libexec/nethserver/list-user-membership -t 5 ${@}', array($userName));
         $this->checkProcessExitCode($process);
         $groups = json_decode($process->getOutput(), TRUE);
         if( ! is_array($groups)) {
