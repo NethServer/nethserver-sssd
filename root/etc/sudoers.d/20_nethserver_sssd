@@ -2,9 +2,7 @@
 # 20_nethserver_sssd
 #
 %adm ALL=NOPASSWD: /usr/sbin/realm join *, \
-  /usr/bin/net ads search -P *, \
-  /usr/bin/net ads info, \
-  /usr/bin/net ads testjoin, \
+  /usr/libexec/nethserver/net-ads-info, \
   /usr/libexec/nethserver/list-users, \
   /usr/libexec/nethserver/list-groups, \
   /usr/libexec/nethserver/list-user-membership, \
