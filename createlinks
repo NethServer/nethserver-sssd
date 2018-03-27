@@ -203,3 +203,10 @@ event_actions('post-restore-data', qw(
 event_actions('nethserver-directory-ns6upgrade', qw(
     nethserver-sssd-ns6homes 40
 ));
+
+#
+# event runlevel-adjust
+#
+event_actions('runlevel-adjust', qw(
+    nethserver-sssd-todo-makecache 50
+));
