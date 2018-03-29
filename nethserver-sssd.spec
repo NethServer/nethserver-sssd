@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.6
+Version: 1.3.7
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,10 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Mar 29 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.7-1
+- Bad home directory owner after ns6 rsync-upgrade - Bug NethServer/dev#5432
+- Dashboard hangs after hotsync-restore and restore-config - Bug NethServer/dev#5434
+
 * Thu Jan 25 2018 Davide Principi <davide.principi@nethesis.it> - 1.3.6-1
 - LDAP connection error with remote MS AD - Bug NethServer/dev#5415
 
