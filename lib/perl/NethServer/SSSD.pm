@@ -333,7 +333,7 @@ sub bindUser {
     my $self = shift;
     return $self->{'BindUser'} if ($self->{'BindUser'});
 
-    my $bindUser = [split(/,/, $self->bindDN())]->[0];
+    my $bindUser = [split(/,/, $self->bindDN())]->[0] || '';
     $bindUser =~ s/^.+=//;
     if ($self->isAD()) {
         $bindUser =~ s/^.+\\//;
