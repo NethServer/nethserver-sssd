@@ -266,17 +266,18 @@ configuration hooks`_).
 Leave and Re-Join Active Directory
 ----------------------------------
 
-To leave a remote AD go to the :guilabel:`Accounts provider` page. For local AD
-provider, this is the **manual leave procedure** ::
+To leave a **remote AD** go to the :guilabel:`Accounts provider` page. 
 
-    config setprop sssd Realm '' Workgroup '' Provider none
-    signal-event nethserver-sssd-leave
+For **local AD** provider, this is the manual leave procedure ::
 
-If the machine password or system keytab get corrputed, joining again the DC can fix them: ::
+    realm leave
+    realm leave # two times
+
+If the machine password or system keytab get corrupted, joining again the DC can fix them: ::
     
-    realm join -U administrator $(hostname -d)
+    realm join -U admin $(config getprop sssd Realm)
 
-...at prompt, type the administrator (or admin) password, then: ::
+...at prompt, type the admin's password, then: ::
 
     signal-event nethserver-sssd-save
 
