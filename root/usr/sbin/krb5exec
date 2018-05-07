@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+
+#
+# Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+if [[ $# == 0 ]]; then
+    echo "Authenticate with Kerberos machine account credentials and run the given command" 1>&2
+    echo "Usage: $0 command [args]" 1>&2
+    exit 1
+fi
+
+perl -MNethServer::SSSD -MNethServer::LdapClient -e 'NethServer::LdapClient::_init_kerberos(NethServer::SSSD->new());'
+export KRB5CCNAME="/tmp/krb5cc_$(id -u)"
+
+exec "${@}"
+
