@@ -25,15 +25,16 @@ set -e
 workgroup=$(testparm -s -d 0 --parameter-name=workgroup 2>/dev/null)
 systemname=$(hostname -s)
 netbiosname=${systemname:0:15}\$
+export KRB5CCNAME="/tmp/krb5cc_$(id -u)"
+perl -MNethServer::SSSD -MNethServer::LdapClient -e 'NethServer::LdapClient::_init_kerberos(NethServer::SSSD->new());'
 
 echo "NetBIOS domain name: $workgroup"
 
 exec timeout --signal=HUP --kill-after=4 4 /usr/bin/bash -s <<EOF
 net ads info
 echo ""
-net ads testjoin
-echo ""
-net ads search -P "(&(sAMAccountName=${netbiosname})(objectCategory=computer))" \
+klist -s && echo -e "Join is OK\n"
+net ads search -k "(&(sAMAccountName=${netbiosname})(objectCategory=computer))" \
         name \
         sAMAccountName \
         distinguishedName \
