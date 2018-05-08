@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.7
+Version: 1.3.8
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue May 08 2018 Stephane de Labrusse <stephdl@de-labrusse.fr> - 1.3.8-1
+- Silence warning message from NethServer::SSSD - Bug NethServer/dev#5476
+
 * Thu Mar 29 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.7-1
 - Bad home directory owner after ns6 rsync-upgrade - Bug NethServer/dev#5432
 - Dashboard hangs after hotsync-restore and restore-config - Bug NethServer/dev#5434
