@@ -25,6 +25,33 @@ The implementation can work in two modes:
 * read-only: if users and groups are read from a remote source, the system will
   be able to consume them only using passwd database
 
+Configuration DB format
+-----------------------
+
+::
+
+    sssd=service
+        AdDns=192.168.1.12
+        BindDN=ldapservice@AD.EXAMPLE.COM
+        BindPassword=cjnsdkuyf8934tjhvsdkljcvsdv
+        LdapURI=
+        Provider=ad
+        Realm=AD.EXAMPLE.COM
+        Workgroup=EXAMPLE
+        DiscoverDcType=auto
+        status=enabled
+
+
+* ``AdDns``: IP address of the Active Directory DNS server 
+
+* ``LdapURI``: LDAP server URI (use ``ldap://`` or ``ldaps://`` scheme) 
+
+* ``DiscoverDcType {auto,enabled,disabled}``: ``auto`` always use the local
+  accounts provider for SSSD, Samba and LDAP clients configuration. For remote
+  accounts provider, discover the DC by querying the DNS. ``enabled`` use the
+  DNS, ``disabled`` use the server defined by ``LdapURI``.
+
+
 Realm and workgroup
 -------------------
 

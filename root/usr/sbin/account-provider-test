@@ -122,6 +122,7 @@ sub getDefaults
 
         'BindDN' => $o->bindDN(),
         'BindPassword' => $o->bindPassword(),
+        'discoverDc' => $o->discoverDc(),
     };
 
     return $dump;
