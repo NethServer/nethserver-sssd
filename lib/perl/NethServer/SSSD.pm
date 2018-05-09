@@ -152,6 +152,7 @@ returned by host() must be always used.
 =cut
 
 sub discoverDc {
+    my $self = shift;
     return $self->{'DiscoverDcType'} eq 'enabled' 
         || ($self->{'DiscoverDcType'} eq 'auto' && ! $self->isLocalProvider());
 }

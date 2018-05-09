@@ -10,7 +10,7 @@ security = { $sssd{'Provider'} eq 'ad' ? 'ADS' : 'user' }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }password server = {
     use NethServer::SSSD;
     my $sssd_object = NethServer::SSSD->new();
-    $OUT = $sssd_object->discoverDc() ? '' : $sssd->host();
+    $OUT = $sssd_object->discoverDc() ? '' : $sssd_object->host();
 }
 netbios name = { uc(substr($SystemName, 0, 15)); }
 
