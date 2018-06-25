@@ -7,6 +7,11 @@ server string = NethServer {$sysconfig{'Version'} . ' ' . $sysconfig{'Release'}}
 security = { $sssd{'Provider'} eq 'ad' ? 'ADS' : 'user' }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }realm = { $sssd{'Realm'} }
 { $sssd{'Provider'} eq 'ad' ? '' : '# ' }kerberos method = secrets and keytab
+{ $sssd{'Provider'} eq 'ad' ? '' : '# ' }password server = {
+    use NethServer::SSSD;
+    my $sssd_object = NethServer::SSSD->new();
+    $OUT = $sssd_object->{'DiscoverDcType'} eq 'ldapuri' ? $sssd_object->host() : '*';
+}
 netbios name = { uc(substr($SystemName, 0, 15)); }
 
 

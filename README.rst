@@ -25,6 +25,31 @@ The implementation can work in two modes:
 * read-only: if users and groups are read from a remote source, the system will
   be able to consume them only using passwd database
 
+Configuration DB format
+-----------------------
+
+::
+
+    sssd=service
+        AdDns=192.168.1.12
+        BindDN=ldapservice@AD.EXAMPLE.COM
+        BindPassword=cjnsdkuyf8934tjhvsdkljcvsdv
+        LdapURI=
+        Provider=ad
+        Realm=AD.EXAMPLE.COM
+        Workgroup=EXAMPLE
+        DiscoverDcType=dns
+        status=enabled
+
+
+* ``AdDns``: IP address of the Active Directory DNS server
+
+* ``LdapURI``: LDAP server URI (use ``ldap://`` or ``ldaps://`` scheme)
+
+* ``DiscoverDcType {dns,ldapuri}``: ``dns`` query SRV records in AD DNS to find
+  the DC name; ``ldapuri`` retrieve the DC name from the ``LdapURI`` prop value
+
+
 Realm and workgroup
 -------------------
 

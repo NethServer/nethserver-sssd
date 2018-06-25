@@ -363,7 +363,8 @@ sub new
     my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
     my %sssdProps = (
         'status' => 'disabled',
-        'Provider' => 'none'
+        'Provider' => 'none',
+        'DiscoverDcType' => 'dns',
     );
     my %nsdcProps = (
         'status' => 'disabled'
