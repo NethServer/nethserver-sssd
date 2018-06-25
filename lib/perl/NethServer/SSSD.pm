@@ -144,19 +144,6 @@ sub ldapURI {
     return $self->{'LdapURI'};
 }
 
-=head2 discoverDc
-
-Return true if DNS is used to look up a domain controller, false if the server
-returned by host() must be always used.
-
-=cut
-
-sub discoverDc {
-    my $self = shift;
-    return $self->{'DiscoverDcType'} eq 'enabled' 
-        || ($self->{'DiscoverDcType'} eq 'auto' && ! $self->isLocalProvider());
-}
-
 =head2 ldapUriDn
 
 Return LDAP URI, with DNS SRV records resolution. This is required for GSSAPI
@@ -377,7 +364,7 @@ sub new
     my %sssdProps = (
         'status' => 'disabled',
         'Provider' => 'none',
-        'DiscoverDcType' => 'auto',
+        'DiscoverDcType' => 'dns',
     );
     my %nsdcProps = (
         'status' => 'disabled'

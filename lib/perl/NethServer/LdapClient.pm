@@ -86,10 +86,10 @@ sub connect
     my @ldap_hosts;
     if($sssd->isAD()) {
         my $ad_domain = lc($sssd->{'Realm'}) || $sssd->{'Domain'};
-        if($sssd->discoverDc()) {
-            @ldap_hosts =  _get_ldap_hosts($ad_domain, %ldap_params);
-        } else {
+        if($sssd->{'DiscoverDcType'} eq 'ldapuri') {
             @ldap_hosts = $sssd->host();
+        } else {
+            @ldap_hosts =  _get_ldap_hosts($ad_domain, %ldap_params);
         }
         if( ! @ldap_hosts ) {
             warn("Could not resolve domain $ad_domain\n");
