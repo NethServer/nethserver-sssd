@@ -28,6 +28,7 @@ use esmith::Build::CreateLinks  qw(:all);
 #
 event_templates('nethserver-sssd-update', qw(
     /etc/sssd/sssd.conf
+    /etc/krb5.conf
     /etc/samba/smb.conf
     /etc/openldap/ldap.conf
     /etc/backup-config.d/nethserver-sssd.include
@@ -44,6 +45,7 @@ event_services('nethserver-sssd-update', qw(
 #
 event_templates('nethserver-sssd-save', qw(
     /etc/sssd/sssd.conf
+    /etc/krb5.conf
     /etc/samba/smb.conf
     /etc/openldap/ldap.conf
     /etc/backup-config.d/nethserver-sssd.include
@@ -67,6 +69,7 @@ event_actions('nethserver-sssd-leave', qw(
 ));
 event_templates('nethserver-sssd-leave', qw(
     /etc/samba/smb.conf
+    /etc/krb5.conf
 ));
 
 validator_actions('ad-dns', qw(
