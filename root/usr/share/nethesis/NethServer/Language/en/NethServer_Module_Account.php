@@ -14,4 +14,4 @@ $L['AccountProvider_Error_4'] = 'Account provider warning: size limit exceeded (
 $L['AccountProvider_Error_104'] = 'Account provider connection reset by peer: check if the server supports SSL/TLS connections';
 $L['AccountProvider_Error_110'] = 'Account provider connection timed out';
 $L['AccountProvider_Error_111'] = 'Account provider connection refused';
-
+$L['AccountProvider_Error_82'] = 'LDAP client internal error (AccountProvider_Error_82)';

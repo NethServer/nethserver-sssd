@@ -20,29 +20,14 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-set -e
+if [[ $# == 0 ]]; then
+    echo "Authenticate with Kerberos machine account credentials and run the given command" 1>&2
+    echo "Usage: $0 command [args]" 1>&2
+    exit 1
+fi
 
-workgroup=$(testparm -s -d 0 --parameter-name=workgroup 2>/dev/null)
-systemname=$(hostname -s)
-netbiosname=${systemname:0:15}\$
+perl -MNethServer::SSSD -MNethServer::LdapClient -e 'NethServer::LdapClient::_init_kerberos(NethServer::SSSD->new());'
+export KRB5CCNAME="/tmp/krb5cc_$(id -u)"
 
-echo "NetBIOS domain name: $workgroup"
+exec "${@}"
 
-exec timeout --signal=HUP --kill-after=4 4 /usr/bin/bash -s <<EOF
-net ads info
-echo ""
-krb5exec klist -s && echo -e "Join is OK\n"
-krb5exec net ads search -k "(&(sAMAccountName=${netbiosname})(objectCategory=computer))" \
-        name \
-        sAMAccountName \
-        distinguishedName \
-        servicePrincipalName \
-        objectSid \
-        dNSHostName \
-        pwdLastSet \
-        lastLogon \
-        whenCreated \
-        whenChanged \
-        accountExpires \
-    | tail -n +3
-EOF

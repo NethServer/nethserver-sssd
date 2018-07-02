@@ -220,6 +220,29 @@ The Dashboard account counters are provided by:
 All those helpers support the ``-A`` flag, to include hidden entries, 
 and the ``-s`` flag to return entries without ``@domain`` suffix.
 
+AD LDAP search
+--------------
+
+The Samba ``net ads search -k`` command can run an LDAP search against the AD
+LDAP servers. The command requires a valid Kerberos ticket and a configured
+environment variable, ``KRB5CCNAME``, pointing to it.
+
+The ``krb5exec`` command can set up the Kerberos ticket by authenticating with
+the machine credentials, providing the same environment where the UI helpers
+run, as explained in the previous section.
+
+Putting the two commands together, the following command retrieves the ``admin``
+account record from AD LDAP. ::
+    
+    krb5exec net ads search -k sAMAccountName=admin
+
+The same command with ``ldapsearch``
+
+    krb5exec ldapsearch -Y GSSAPI -b <BIND_PATH> -h <LDAP_SERVER_NAME> sAMAccountName=admin
+
+Replace ``<BIND_PATH>`` and ``<LDAP_SERVER_NAME>`` with values provided by ::
+    
+    net ads info
 
 NethServer::SSSD
 ----------------
@@ -266,17 +289,18 @@ configuration hooks`_).
 Leave and Re-Join Active Directory
 ----------------------------------
 
-To leave a remote AD go to the :guilabel:`Accounts provider` page. For local AD
-provider, this is the **manual leave procedure** ::
+To leave a **remote AD** go to the :guilabel:`Accounts provider` page. 
 
-    config setprop sssd Realm '' Workgroup '' Provider none
-    signal-event nethserver-sssd-leave
+For **local AD** provider, this is the manual leave procedure ::
 
-If the machine password or system keytab get corrputed, joining again the DC can fix them: ::
+    realm leave
+    realm leave # two times
+
+If the machine password or system keytab get corrupted, joining again the DC can fix them: ::
     
-    realm join -U administrator $(hostname -d)
+    realm join -U admin $(config getprop sssd Realm)
 
-...at prompt, type the administrator (or admin) password, then: ::
+...at prompt, type the admin's password, then: ::
 
     signal-event nethserver-sssd-save
 
