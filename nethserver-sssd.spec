@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.3.8
+Version: 1.4.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,11 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Jul 02 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.0-1
+- Send AD queries to a preferred DC - NethServer/dev#5534
+- Template of krb5.conf - NethServer/dev#5535
+- Do not use Samba machine secret in Domain accounts page - NethServer/nethserver-sssd#98
+
 * Tue May 08 2018 Stephane de Labrusse <stephdl@de-labrusse.fr> - 1.3.8-1
 - Silence warning message from NethServer::SSSD - Bug NethServer/dev#5476
 
