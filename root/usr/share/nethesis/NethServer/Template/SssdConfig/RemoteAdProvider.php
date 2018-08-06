@@ -14,7 +14,7 @@ echo $view->panel()
     ->insert($view->textInput('GroupDN'))
     ->insert($view->fieldsetSwitch('BindType', 'authenticated', $view::FIELDSETSWITCH_EXPANDABLE | $view::FIELDSETSWITCH_CHECKBOX)
         ->insert($view->textInput('BindDN'))
-        ->insert($view->textInput('BindPassword')))
+        ->insert($view->textInput('BindPassword', $view::TEXTINPUT_PASSWORD)))
 ;
 
 echo $view->buttonList($view::BUTTON_HELP)
