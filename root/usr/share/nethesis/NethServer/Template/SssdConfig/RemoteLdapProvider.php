@@ -17,7 +17,7 @@ echo $view->panel()
     ->insert($view->radioButton('BindType', 'anonymous'))
     ->insert($view->fieldsetSwitch('BindType', 'authenticated', $view::FIELDSETSWITCH_EXPANDABLE)
         ->insert($view->textInput('BindDN'))
-        ->insert($view->textInput('BindPassword')))
+        ->insert($view->textInput('BindPassword', $view::TEXTINPUT_PASSWORD)))
 ;
 
 echo $view->buttonList($view::BUTTON_HELP)
