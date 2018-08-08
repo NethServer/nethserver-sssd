@@ -13,7 +13,7 @@ echo $view->textInput('AdIpAddress', $disabledFlags);
 
 echo $view->fieldset()->setAttribute('template', $T('BindType_label'))
     ->insert($view->textInput('BindDN', $disabledFlags))
-    ->insert($view->textInput('BindPassword', $disabledFlags))
+    ->insert($view->textInput('BindPassword', $view::TEXTINPUT_PASSWORD | $disabledFlags))
 ;
 
 $buttons = $view->buttonList($view::BUTTON_HELP)
