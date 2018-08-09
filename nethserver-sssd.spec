@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.0
+Version: 1.4.1
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Aug 09 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.1-1
+- Enhancement: (un)mask password fields - NethServer/dev#5554
+
 * Mon Jul 02 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.0-1
 - Send AD queries to a preferred DC - NethServer/dev#5534
 - Template of krb5.conf - NethServer/dev#5535
