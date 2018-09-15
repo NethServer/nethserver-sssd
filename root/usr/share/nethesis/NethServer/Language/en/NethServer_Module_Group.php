@@ -14,3 +14,5 @@ $L['Update group `${0}`'] = 'Update group `${0}`';
 $L['groupname_label'] = 'Group name'; 
 $L['valid_platform,group-create,group-length,1'] = 'Name is too long: ${reason}';
 $L['group_exists'] = 'The group already exists';
+$L['CreatePseudoRecords_label'] = 'Create also a shared mailbox and an email address named after the group';
+$L['ExtraFields_label' = 'Additional actions';
