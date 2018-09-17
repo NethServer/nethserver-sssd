@@ -163,11 +163,8 @@ class Modify extends \Nethgui\Controller\Table\Modify
         $this->getPlatform()->signalEvent(sprintf('group-%s', $event), $params);
 
         // Email group alias creation
-        if ($this->getIdentifier() === 'create') {
+        if (($this->getIdentifier() === 'create') && ($this->parameters['CreatePseudoRecords'] === 'yes')) {
 
-            if ($this->parameters['CreatePseudoRecords'] !== 'yes') {
-                return;
-            }
             $members = implode(",",array_unique($this->parameters['members']));
             $accountsDb = $this->getPlatform()->getDatabase('accounts');
             $domain = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
