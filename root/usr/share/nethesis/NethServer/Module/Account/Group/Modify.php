@@ -165,10 +165,12 @@ class Modify extends \Nethgui\Controller\Table\Modify
         // Email group alias creation
         if (($this->getIdentifier() === 'create') && ($this->parameters['CreatePseudoRecords'] === 'yes')) {
 
-            $members = implode(",",array_unique($this->parameters['members']));
             $accountsDb = $this->getPlatform()->getDatabase('accounts');
             $domain = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
             $groupnameFull = $this->parameters['groupname'] . '@' . $domain;
+            $members= array_unique($this->parameters['members']);
+            $members[] = $groupnameFull;
+            $members = implode(",",$members);
 
             if( ! $accountsDb->getKey($groupnameFull)) {
                 $accountsDb->setKey($groupnameFull, 'pseudonym', array ('Description'=>'Automatic group mailbox', 'Account' => $members));
