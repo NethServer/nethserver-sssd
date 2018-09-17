@@ -171,7 +171,7 @@ class Modify extends \Nethgui\Controller\Table\Modify
             $groupnameFull = $this->parameters['groupname'] . '@' . $domain;
 
             if( ! $accountsDb->getKey($groupnameFull)) {
-                $accountsDb->setKey($groupnameFull, 'pseudonym', array ('Description'=>'Group Alias for postfix', 'Account' => $members));
+                $accountsDb->setKey($groupnameFull, 'pseudonym', array ('Description'=>'Automatic group mailbox', 'Account' => $members));
             }
 
             //pseudonyme creation
