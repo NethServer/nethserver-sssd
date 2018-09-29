@@ -1,6 +1,8 @@
 <?php
 /* @var $view \Nethgui\Renderer\Xhtml */
 
+$wantsPseudonymCreation = FALSE;
+
 if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Update group `${0}`');
     $groupname = (string) $view->textInput('groupname', $view::STATE_DISABLED | $view::STATE_READONLY);
@@ -8,7 +10,7 @@ if ($view->getModule()->getIdentifier() == 'update') {
     $headerText = $T('Create a new group');
     $groupname = (string) $view->textInput('groupname');
     $groupname = str_replace("</div>", "@".$view['domain']."</div>", $groupname);
-    $pseudonymCreation = 'yes';
+    $wantsPseudonymCreation = @file_exists('/etc/e-smith/db/configuration/defaults/dovecot/status'); // check if mail-server is installed
 }
 
 echo $view->header('groupname')->setAttribute('template', $headerText);
@@ -23,9 +25,7 @@ $groupInfo = $view->panel()
 
 echo $groupInfo;
 
-//display only on group creation
-if ($pseudonymCreation === 'yes' and
-        (file_exists ('/etc/e-smith/db/configuration/defaults/dovecot/status'))) {
+if ($wantsPseudonymCreation) {
     echo $view->fieldset()->setAttribute('template', $T('ExtraFields_label'))->insert($view->checkBox('CreatePseudoRecords', 'yes')->setAttribute('uncheckedValue', 'no'));
 }
 
