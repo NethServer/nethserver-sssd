@@ -97,6 +97,9 @@ class Modify extends \Nethgui\Controller\Table\Modify
 
         $this->setSchema($parameterSchema);
 
+        $this->declareParameter('CreatePseudoRecords', Validate::YES_NO);
+        $this->setDefaultValue('CreatePseudoRecords', 'no');
+
         parent::initialize();
     }
 
@@ -158,6 +161,23 @@ class Modify extends \Nethgui\Controller\Table\Modify
         }
 
         $this->getPlatform()->signalEvent(sprintf('group-%s', $event), $params);
+
+        // Create shared mailbox and pseudonym (mail alias)
+        if (($this->getIdentifier() === 'create') && ($this->parameters['CreatePseudoRecords'] === 'yes')) {
+            $accountsDb = $this->getPlatform()->getDatabase('accounts');
+            $domain = $this->getPlatform()->getDatabase('configuration')->getType('DomainName');
+            $groupname = $this->parameters['groupname'];
+            $groupnameFull = $this->parameters['groupname'] . '@' . $domain;
+
+            if( ! $accountsDb->getKey($groupnameFull)) {
+                $process = $this->getPlatform()->signalEvent('sharedmailbox-create', array($groupname, $groupname, 'group=' . $groupnameFull, 'OWNER'));
+                if($process->getExitCode() == 0) {
+                    $accountsDb->setKey($groupnameFull, 'pseudonym', array('Description' => 'Automatic group mailbox', 'Account' => 'vmail+' . $groupname));
+                    $this->getPlatform()->signalEvent('pseudonym-create', array($groupnameFull));
+                }
+            }
+        }
+
         $this->getParent()->getAdapter()->flush();
     }
 
