@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.1
+Version: 1.4.2
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Oct 02 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.2-1
+- Change confusing UI labels in Dashboard and MailAccount User - NethServer/dev#5596
+
 * Thu Aug 09 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.1-1
 - Enhancement: (un)mask password fields - NethServer/dev#5554
 
