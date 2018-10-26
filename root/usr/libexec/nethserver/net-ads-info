@@ -28,7 +28,7 @@ netbiosname=${systemname:0:15}\$
 
 echo "NetBIOS domain name: $workgroup"
 
-exec timeout --signal=HUP --kill-after=4 4 /usr/bin/bash -s <<EOF
+exec timeout --signal=HUP --kill-after=10 10 /usr/bin/bash -s <<EOF
 net ads info
 echo ""
 krb5exec klist -s && echo -e "Join is OK\n"
