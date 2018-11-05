@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.2
+Version: 1.4.3
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Nov 05 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.3-1
+- Integration of arm specific requirements - NethServer/dev#5610
+
 * Tue Oct 02 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.2-1
 - Change confusing UI labels in Dashboard and MailAccount User - NethServer/dev#5596
 
