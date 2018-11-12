@@ -33,7 +33,7 @@ foreach my $i ($ndb->green())
     my $proto = $i->prop('bootproto') || next;
     my $ipaddr = $i->prop('ipaddr') || next;
     my $mask = $i->prop('netmask') || next;
-    if (Net::IPv4Addr::ipv4_in_network(esmith::util::computeLocalNetworkShortSpec($ipaddr,$mask), $ip) && $proto eq 'dhcp') {
+    if ($proto eq 'dhcp' && Net::IPv4Addr::ipv4_in_network(esmith::util::computeLocalNetworkShortSpec($ipaddr,$mask), $ip)) {
         exit 1;
     }
 }
