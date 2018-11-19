@@ -1,0 +1,42 @@
+#!/usr/bin/perl -w
+
+#
+# Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+use strict;
+use esmith::NetworksDB;
+use esmith::util;
+
+my $ip = shift || die("Missing IP argument");
+
+my $ndb = esmith::NetworksDB->open_ro or die("Could not open Networks DB");
+
+foreach my $i ($ndb->green())
+{
+    my $proto = $i->prop('bootproto') || next;
+    my $ipaddr = $i->prop('ipaddr') || next;
+    my $mask = $i->prop('netmask') || next;
+    if ($proto eq 'dhcp' && Net::IPv4Addr::ipv4_in_network(esmith::util::computeLocalNetworkShortSpec($ipaddr,$mask), $ip)) {
+        exit 1;
+    }
+}
+
+# Success
+exit 0;
