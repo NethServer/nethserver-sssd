@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.3
+Version: 1.4.4
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Nov 20 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.4-1
+- DC: network unreachable if green is configured as DHCP - Bug NethServer/dev#5635
+
 * Mon Nov 05 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.3-1
 - Integration of arm specific requirements - NethServer/dev#5610
 
