@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.4
+Version: 1.4.5
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Dec 03 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.5-1
+- Sysadmin script to delete users - NethServer/dev#5657
+
 * Tue Nov 20 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.4-1
 - DC: network unreachable if green is configured as DHCP - Bug NethServer/dev#5635
 
