@@ -221,5 +221,5 @@ event_actions('user-cleanup', qw(
 #
 
 event_actions('user-delete', qw(
-     nethserver-sssd-user-delete-home-cleanup 90 
+     nethserver-sssd-data-cleanup 90 
   ));
