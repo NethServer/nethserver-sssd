@@ -207,3 +207,19 @@ event_actions('post-restore-data', qw(
 event_actions('nethserver-directory-ns6upgrade', qw(
     nethserver-sssd-ns6homes 40
 ));
+
+#
+# user-cleanup event
+#
+
+event_actions('user-cleanup', qw(
+     nethserver-sssd-user-home-cleanup 10 
+  ));
+
+#
+# user-delete calls user-cleanup event
+#
+
+event_actions('user-delete', qw(
+     nethserver-sssd-data-cleanup 90 
+  ));
