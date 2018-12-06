@@ -95,8 +95,17 @@ Note: shell option can't be changed for AD users
 user-delete
 ^^^^^^^^^^^
 
-The event deleted the user and remove it from all groups.
-Also all data inside the user's home will deleted.
+The event deletes the user and remove it from all groups.
+
+Parameters:
+
+* username
+
+user-cleanup
+^^^^^^^^^^^^
+
+This event deletes all data (home directory) and the emails of the user (given as parameter). 
+This event is bind to the event user-delete.
 
 Parameters:
 
