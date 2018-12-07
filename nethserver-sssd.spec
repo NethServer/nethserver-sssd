@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.5
+Version: 1.4.6
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Fri Dec 07 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.6-1
+- Detach user-cleanup event from user-delete - NethServer/dev#5624
+
 * Mon Dec 03 2018 Davide Principi <davide.principi@nethesis.it> - 1.4.5-1
 - Sysadmin script to delete users - NethServer/dev#5657
 
