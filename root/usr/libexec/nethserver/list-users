@@ -46,6 +46,8 @@ getopts('Ast:');
 
 my ($systemName, $domainName) = split(/\./, Sys::Hostname::hostname(), 2);
 my $now = time();
+# Convert $now to Windows FILETIME specification:
+my $now_nt = ($now * 10000000) + 116444736000000000;
 my $sssd = NethServer::SSSD->new();
 my $al = NethServer::AccountsList->new();
 my $thisEntry = shift; $thisEntry =~ s/\@$domainName$//;
@@ -153,6 +155,9 @@ sub get_user_value()
 sub get_ad_expired {
     my $e = shift;
     if(int($e->get_value('userAccountControl')) & 0x800000) { # PASSWORD_EXPIRED
+        return 1;
+    }
+    if(int($e->get_value('accountExpires')) < $now_nt) {
         return 1;
     }
     return 0;
