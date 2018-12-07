@@ -11,6 +11,7 @@
         $provider_config .= "ldap_user_search_base = " . $sssd_object->userDN() . "\n";
         $provider_config .= "ldap_group_search_base = " . $sssd_object->groupDN() . "\n";
         $provider_config .= "ldap_tls_reqcert = never\n";
+        $provider_config .= "ldap_pwd_policy = shadow\n";
     } elsif ($provider eq 'ad') {
         $provider_config .= "access_provider = ad\n";
         $provider_config .= "ad_domain = " . lc($sssd{'Realm'}) . "\n"; # force lowercase
