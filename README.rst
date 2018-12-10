@@ -104,8 +104,9 @@ Parameters:
 user-cleanup
 ^^^^^^^^^^^^
 
-This event deletes all data (home directory) and the emails of the user (given as parameter). 
+This event deletes all data (home directory) and the emails of the user (given as parameter) if the email server is installed. 
 This event is bind to the event user-delete.
+Every application which needs to remove the data of a user, must use this event to trigger a specific action, made to remove the data.
 
 Parameters:
 
