@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.6
+Version: 1.4.7
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Dec 10 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.7-1
+- Account expired cannot change password - Bug NethServer/dev#5670
+
 * Fri Dec 07 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.6-1
 - Detach user-cleanup event from user-delete - NethServer/dev#5624
 
