@@ -157,7 +157,7 @@ sub get_ad_expired {
     if(int($e->get_value('userAccountControl')) & 0x800000) { # PASSWORD_EXPIRED
         return 1;
     }
-    if(int($e->get_value('accountExpires')) < $now_nt) {
+    if(int($e->get_value('accountExpires')) > 0 && int($e->get_value('accountExpires')) < $now_nt) {
         return 1;
     }
     return 0;
