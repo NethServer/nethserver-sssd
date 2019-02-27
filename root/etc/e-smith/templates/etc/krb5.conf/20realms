@@ -1,0 +1,19 @@
+#
+# 20realms
+#
+{
+    $OUT = '# dns_lookup_kdc is enabled: query DNS to find DCs';
+    if($isFixedDc) {
+        use NethServer::SSSD;
+        my $sssd_object = NethServer::SSSD->new();
+        my $dc = $sssd_object->host();
+	$OUT = <<EOF;
+[realms]
+ $realm = {
+     kdc = $dc
+ }
+EOF
+    }
+}
+
+
