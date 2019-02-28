@@ -1,0 +1,8 @@
+{
+    #
+    # 00template_vars
+    #
+    our $realm = uc($sssd{'Realm'}) || 'EXAMPLE.LOCAL';
+    our $isFixedDc = ($sssd{'DiscoverDcType'} || '') eq 'ldapuri';
+    '';
+}
