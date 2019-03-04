@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.7
+Version: 1.4.8
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Mon Mar 04 2019 Davide Principi <davide.principi@nethesis.it> - 1.4.8-1
+- DiscoverDcType not respected by kinit - Bug NethServer/dev#5721
+
 * Mon Dec 10 2018 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.4.7-1
 - Account expired cannot change password - Bug NethServer/dev#5670
 
