@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.4.8
+Version: 1.5.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Oct 01 2019 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.5.0-1
+- Samba 4.9 setspn and keytab management upgrade - NethServer/dev#5840
+
 * Mon Mar 04 2019 Davide Principi <davide.principi@nethesis.it> - 1.4.8-1
 - DiscoverDcType not respected by kinit - Bug NethServer/dev#5721
 
