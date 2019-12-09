@@ -53,6 +53,8 @@ mkdir -p root/var/lib/nethserver/home
 %doc README.rst
 %doc scripts
 %config %attr (0440,root,root) %{_sysconfdir}/sudoers.d/20_nethserver_sssd
+%config(noreplace) %attr (0644,root,root) %{_sysconfdir}/nethserver/system-groups
+%config(noreplace) %attr (0644,root,root) %{_sysconfdir}/nethserver/system-users
 %config %ghost %attr(0644,root,root) /etc/backup-config.d/nethserver-sssd.include
 %dir %{_nseventsdir}/%{name}-update
 %dir %{_nseventsdir}/group-create
