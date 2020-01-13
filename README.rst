@@ -50,7 +50,8 @@ Configuration DB format
 * ``DiscoverDcType {dns,ldapuri}``: ``dns`` query SRV records in AD DNS to find
   the DC name; ``ldapuri`` retrieve the DC name from the ``LdapURI`` prop value
 
-* ``ShellOverrideStatus`` (default ``disabled``) force the shell of all users to ``/bin/bash``.
+* ``ShellOverrideStatus`` (default ``disabled``) If ``enabled``, the value of the passwd user's shell field 
+   is set to ``/bin/bash`` and is no more read from the accounts provider.
   This property must be ``enabled`` on each server to force the shell access.
 
 Realm and workgroup
