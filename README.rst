@@ -52,7 +52,6 @@ Configuration DB format
 
 * ``ShellOverrideStatus`` (default ``disabled``) If ``enabled``, the value of the passwd user's shell field 
    is set to ``/bin/bash`` and is no more read from the accounts provider.
-  This property must be ``enabled`` on each server to force the shell access.
 
 Realm and workgroup
 -------------------
