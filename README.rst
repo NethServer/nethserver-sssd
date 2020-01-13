@@ -39,6 +39,7 @@ Configuration DB format
         Realm=AD.EXAMPLE.COM
         Workgroup=EXAMPLE
         DiscoverDcType=dns
+        ShellOverrideStatus=disabled
         status=enabled
 
 
@@ -49,6 +50,8 @@ Configuration DB format
 * ``DiscoverDcType {dns,ldapuri}``: ``dns`` query SRV records in AD DNS to find
   the DC name; ``ldapuri`` retrieve the DC name from the ``LdapURI`` prop value
 
+* ``ShellOverrideStatus`` (default ``disabled``) force the shell of all users to ``/bin/bash``.
+  This property must be ``enabled`` on each server to force the shell access.
 
 Realm and workgroup
 -------------------
