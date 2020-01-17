@@ -51,7 +51,8 @@ Configuration DB format
   the DC name; ``ldapuri`` retrieve the DC name from the ``LdapURI`` prop value
 
 * ``ShellOverrideStatus`` (default ``disabled``) If ``enabled``, the value of the passwd user's shell field 
-   is set to ``/bin/bash`` and is no more read from the accounts provider.
+   is set to ``/bin/bash`` and is no more read from the accounts provider. The event ``nethserver-sssd-save`` 
+   will expand and restart all services which use this property
 
 Realm and workgroup
 -------------------
