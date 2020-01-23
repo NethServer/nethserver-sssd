@@ -1,0 +1,9 @@
+{
+    #
+    # 01provider_force_shell
+    #
+    if (($sssd{'ShellOverrideStatus'} || 'disabled') eq 'enabled') {
+        $provider_config .= "override_shell=/bin/bash\n";
+    }
+    '';
+}
