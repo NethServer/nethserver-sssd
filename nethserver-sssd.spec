@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.6.0
+Version: 1.7.0
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Tue Apr 28 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.7.0-1
+- Enable ShellOverrideStatus by default - NethServer/dev#6121
+
 * Wed Jan 29 2020 Davide Principi <davide.principi@nethesis.it> - 1.6.0-1
 - Group-based access restriction for Cockpit and SSH  - NethServer/dev#6029
 
