@@ -1,0 +1,19 @@
+{
+    #
+    # 01provider_ldap_pp -- read password expiration policy from LDAP shadow attributes
+    #
+    if ( ! $sssd_object->isLdap()) {
+        return '';
+    }
+
+    my $pass_expires = $passwordstrength{'PassExpires'} || 'yes';
+
+    if ($sssd_object->isLocalProvider() && $pass_expires eq 'no') {
+        # Local account provider policy depends on PassExpires prop value
+        $provider_config .= "ldap_pwd_policy = none\n";
+    } else {
+        # Remote account provider always try to honor the shadow attributes
+        $provider_config .= "ldap_pwd_policy = shadow\n";
+    }
+    '';
+}
