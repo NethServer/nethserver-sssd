@@ -117,6 +117,10 @@ event_actions($_, qw(
 # Clear SSSD before password-policy-update extra actions
 #--------------------------------------------------------
 
+event_templates('password-policy-update', qw(
+    /etc/sssd/sssd.conf
+));
+
 event_actions('password-policy-update', qw(
     nethserver-sssd-clear-cache 10
 ));
