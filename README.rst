@@ -345,22 +345,23 @@ For remote account providers the procedure is similar. Use the
 :guilabel:`Accounts provider` page to leave/join the domain.
 
 
-Service configuration hooks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Service configuration hooks for Kerberos/GSSAPI authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A service (i.e. *dovecot*) record in ``configuration`` DB can be extended with
-the following special props, that are read during the join operation, machine
-password renewal, and crojob tasks: ::
+A service (i.e. dovecot, squid) record in the ``configuration`` DB can be extended with
+the following special props, that are read by ``smbads`` to create a Kerberos keytab file
+for the service ::
 
  dovecot=service
     ...    
     KrbStatus=enabled
-    KrbCredentialsCachePath=
     KrbKeytabPath=/var/lib/dovecot/krb5.keytab
     KrbPrimaryList=smtp,imap,pop
     KrbKeytabOwner=
     KrbKeytabPerms=
 
+* ``KrbStatus {enabled,disabled}``
+  This is the main switch. If not set to ``enabled``, ``smbads`` ignores the record when the service keytab is written.
 * ``KrbKeytabPath``
   Keytab file path. If empty, ``/var/lib/misc/nsrv-<service>.keytab`` is assumed
 * ``KrbPrimaryList <comma separated words list>``
@@ -375,12 +376,16 @@ The implementation is provided by ``/usr/libexec/nethserver/smbads``.
 Individual services can link themselves to ``nethserver-sssd-initkeytabs``
 action in the respective ``-update`` event.
 
-The following props are no longer honoured since ns7:
+It is up to the KDC administrator to configure the SPN in the KDC. For instance, with Active Directory run the following commands to add the SPNs for Dovecot: ::
 
-* ``KrbStatus {enabled,disabled}``
-  This is the main switch. If set to ``enabled`` a ticket credential cache file is kept valid by the hourly cronjob
-* ``KrbCredentialsCachePath``
-  The path of the credentials cache. It defaults to ``/tmp/krb5cc*<service*uid>``, if ``service`` is also a system user.
+    kinit admin@$(config getprop sssd Realm)
+    net ads setspn list
+    net ads setspn add $(hostname -s) imap/$(hostname)
+    net ads setspn add $(hostname -s) pop/$(hostname)
+    net ads setspn add $(hostname -s) smtp/$(hostname)
+    kdestroy
+    signal-event nethserver-sssd-save
+ 
 
 
 Account import scripts
