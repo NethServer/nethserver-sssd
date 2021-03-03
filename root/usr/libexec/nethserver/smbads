@@ -76,8 +76,8 @@ sub init_keytabs()
 
     # Initialize the system keytab, by adding required
     # primaries. 'cifs' is always added:
-    my $exitCode = system(qw(/usr/bin/net ads keytab add -k),
-                          keys %{{map { (map { $_ => 1 } 'cifs', @{$_->{primary}}) } @ktConfigs}}
+    my $exitCode = system(qw(/usr/bin/net ads keytab add -k cifs),
+                          keys %{{map { (map { $_ => 1 } @{$_->{primary}}) } @ktConfigs}}
         );
 
     if($exitCode != 0) {
