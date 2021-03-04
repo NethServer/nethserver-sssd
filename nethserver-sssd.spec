@@ -11,7 +11,7 @@ BuildRequires:  nethserver-devtools
 Requires:       realmd, sssd, adcli, nethserver-lib
 # send expiring password warnings: 
 Requires: mailx, postfix, anacron
-Requires: samba-common-tools >= 4.9.1
+Requires: samba-common-tools
 Requires: krb5-workstation
 Requires: python-tdb
 Requires: tdb-tools
