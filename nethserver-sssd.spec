@@ -1,5 +1,5 @@
 Name:           nethserver-sssd
-Version: 1.7.0
+Version: 1.7.1
 Release: 1%{?dist}
 Summary:        NethServer SSSD configuration
 
@@ -69,6 +69,9 @@ mkdir -p root/var/lib/nethserver/home
 
 
 %changelog
+* Thu Mar 04 2021 Davide Principi <davide.principi@nethesis.it> - 1.7.1-1
+- Failed to add service primaries to system keytab - Bug NethServer/dev#6446
+
 * Tue Apr 28 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.7.0-1
 - Enable ShellOverrideStatus by default - NethServer/dev#6121
 
