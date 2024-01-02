@@ -419,7 +419,7 @@ It is possible to create groups from a TSV (Tab Separated Values) file with the 
 
 Sample invocation: ::
 
-  import_users groups.tsv
+  import_groups groups.tsv
 
 Alternative separator character: ::
 
